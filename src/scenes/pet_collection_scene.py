@@ -58,4 +58,4 @@ class PetCollectionScene(Scene):
         
         # UIを描画
         self.ui_manager.draw_ui(surface)
-        self.pet_collection_ui.draw(surface)
+        self.pet_collection_ui.draw([])

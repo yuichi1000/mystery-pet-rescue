@@ -85,7 +85,6 @@ class InventoryUI:
         self.container = pygame_gui.elements.UIPanel(
             relative_rect=pygame.Rect(self.panel_x, self.panel_y, 
                                     self.panel_width, self.panel_height),
-            starting_layer_height=10,
             manager=self.ui_manager
         )
         

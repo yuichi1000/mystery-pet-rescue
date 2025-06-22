@@ -107,37 +107,47 @@ class Player:
             keys_pressed: pygame.key.get_pressed()の戻り値
         """
         """
-        入力処理 - Phase 1: 基本移動のみ
+        入力処理 - デモと同じ機能を全て実装
         
         Args:
             keys_pressed: pygame.key.get_pressed()の戻り値
         """
-        # Phase 1: 基本移動のみ実装
+        # 移動入力をリセット
         self.velocity_x = 0
         self.velocity_y = 0
         self.is_moving = False
         
-        # 基本速度（走行は後のPhaseで実装）
-        speed = self.stats.speed
+        # 走行判定（デモと同じ）
+        self.is_running = keys_pressed[pygame.K_LSHIFT] and self.stats.stamina > 0
         
-        # 4方向移動（最小限の実装）
-        if keys_pressed[pygame.K_a]:
+        # 移動速度決定（デモと同じ）
+        speed = self.stats.run_speed if self.is_running else self.stats.speed
+        
+        # WASD + 矢印キー対応（デモと同じ）
+        if keys_pressed[pygame.K_a] or keys_pressed[pygame.K_LEFT]:
             self.velocity_x = -speed
             self.direction = Direction.LEFT
             self.is_moving = True
-        elif keys_pressed[pygame.K_d]:
+        
+        if keys_pressed[pygame.K_d] or keys_pressed[pygame.K_RIGHT]:
             self.velocity_x = speed
             self.direction = Direction.RIGHT
             self.is_moving = True
         
-        if keys_pressed[pygame.K_w]:
+        if keys_pressed[pygame.K_w] or keys_pressed[pygame.K_UP]:
             self.velocity_y = -speed
             self.direction = Direction.UP
             self.is_moving = True
-        elif keys_pressed[pygame.K_s]:
+        
+        if keys_pressed[pygame.K_s] or keys_pressed[pygame.K_DOWN]:
             self.velocity_y = speed
             self.direction = Direction.DOWN
             self.is_moving = True
+        
+        # 斜め移動の速度調整（デモと同じ）
+        if self.velocity_x != 0 and self.velocity_y != 0:
+            self.velocity_x *= 0.707  # 1/√2
+            self.velocity_y *= 0.707
         
         # 斜め移動の速度調整
         if self.velocity_x != 0 and self.velocity_y != 0:

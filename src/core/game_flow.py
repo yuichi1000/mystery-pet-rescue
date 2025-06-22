@@ -80,6 +80,11 @@ class GameFlowManager:
                 self.game_result = self._collect_game_result(game_scene)
             self.scenes["result"] = ResultScene(self.screen, self.game_result)
             
+        elif scene_name == "pet_collection":
+            # ペット図鑑シーン（デモで動作していた機能）
+            from src.scenes.pet_collection_scene import PetCollectionScene
+            self.scenes["pet_collection"] = PetCollectionScene(self.screen)
+            
         elif scene_name == "menu":
             # メニューシーンは既に作成済み
             pass

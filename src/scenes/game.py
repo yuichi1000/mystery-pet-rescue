@@ -11,8 +11,10 @@ from src.entities.player import Player
 from src.entities.pet import Pet, PetData, PetType
 from src.systems.puzzle_system import PuzzleSystem
 from src.systems.map_system import MapSystem
+from src.systems.pet_collection import PetCollection
 from src.ui.game_ui import GameUI, NotificationType, QuickSlotItem
 from src.ui.puzzle_ui import PuzzleUI
+from src.ui.pet_collection_ui import PetCollectionUI
 from src.utils.asset_manager import get_asset_manager
 from src.utils.font_manager import get_font_manager
 
@@ -59,6 +61,11 @@ class GameScene(Scene):
         self.puzzle_system = PuzzleSystem()
         self.puzzle_ui = PuzzleUI(self.screen, self.puzzle_system)
         self.current_puzzle = None
+        
+        # ペット図鑑システム初期化（デモで動作していた機能）
+        self.pet_collection = PetCollection()
+        self.pet_collection_ui = PetCollectionUI(self.screen)
+        self.show_pet_collection = False
         
         # UI初期化
         self.game_ui = GameUI(self.screen)
@@ -156,6 +163,15 @@ class GameScene(Scene):
                     self.game_ui.add_notification("ゲーム一時停止", NotificationType.INFO)
                 else:
                     self.game_ui.add_notification("ゲーム再開", NotificationType.INFO)
+            
+            elif event.key == pygame.K_c:
+                # ペット図鑑表示切り替え（デモと同じ）
+                if self.show_pet_collection:
+                    self.pet_collection_ui.hide()
+                    self.show_pet_collection = False
+                else:
+                    self.pet_collection_ui.show()
+                    self.show_pet_collection = True
         
         elif event.type == pygame.USEREVENT + 1:
             # ゲーム完了タイマー
@@ -247,6 +263,10 @@ class GameScene(Scene):
         }
         self.game_ui.draw(player_stats, [], (self.player.x, self.player.y))
         
+        # ペット図鑑描画（既存のUIクラスを使用）
+        if self.show_pet_collection:
+            self.pet_collection_ui.draw(self.pet_collection.get_collected_pets())
+        
         # ポーズ表示
         if self.paused:
             self._draw_pause_overlay(surface)
@@ -296,6 +316,8 @@ class GameScene(Scene):
             # ペットを救出リストに追加
             if pet.data.pet_id not in self.pets_rescued:
                 self.pets_rescued.append(pet.data.pet_id)
+                # ペット図鑑に追加（デモで動作していた機能）
+                self.pet_collection.add_pet(pet.data)
                 self.game_ui.add_notification("ペットを救出しました！", NotificationType.SUCCESS)
         self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
     
@@ -305,6 +327,11 @@ class GameScene(Scene):
             pet_id = self.current_puzzle.get('pet_id')
             if pet_id:
                 self.pets_rescued.append(pet_id)
+                # ペット図鑑に追加（デモで動作していた機能）
+                for pet in self.pets:
+                    if pet.data.pet_id == pet_id:
+                        self.pet_collection.add_pet(pet.data)
+                        break
                 self.game_ui.add_notification("ペットを救出しました！", NotificationType.SUCCESS)
                 
                 # フローマネージャーに通知

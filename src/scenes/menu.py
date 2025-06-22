@@ -80,6 +80,7 @@ class MenuScene(Scene):
         # メニューアイテムを作成
         menu_data = [
             ("ゲーム開始", "game"),
+            ("ペット図鑑", "pet_collection"),  # デモで動作していた機能
             ("設定", "settings"),
             ("ゲーム終了", "quit")
         ]

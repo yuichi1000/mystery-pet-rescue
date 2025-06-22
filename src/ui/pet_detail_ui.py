@@ -50,7 +50,6 @@ class PetDetailUI:
         
         self.container = pygame_gui.elements.UIPanel(
             relative_rect=pygame.Rect(container_x, container_y, container_width, container_height),
-            starting_layer_height=20,
             manager=self.ui_manager
         )
         
@@ -66,7 +65,6 @@ class PetDetailUI:
         # ペット画像エリア（左側）
         self.pet_image = pygame_gui.elements.UIPanel(
             relative_rect=pygame.Rect(20, 50, 150, 150),
-            starting_layer_height=1,
             manager=self.ui_manager,
             container=self.container
         )

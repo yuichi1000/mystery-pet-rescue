@@ -23,14 +23,28 @@ class PetInfo:
     id: str
     name: str
     species: str
-    breed: str
-    description: str
-    characteristics: List[str]
-    rarity: str
-    sprites: Dict[str, str]  # 方向別スプライトパス
-    found_locations: List[str]
-    rescue_difficulty: int
-    rescue_hints: List[str]
+    breed: str = ""
+    description: str = ""
+    characteristics: List[str] = None
+    rarity: str = "common"
+    sprites: Dict[str, str] = None  # 方向別スプライトパス
+    found_locations: List[str] = None
+    rescue_difficulty: int = 1
+    rescue_hints: List[str] = None
+    image_path: str = ""  # データベースの image_path に対応
+    habitat: str = ""
+    personality: str = ""
+    favorite_food: str = ""
+    
+    def __post_init__(self):
+        if self.characteristics is None:
+            self.characteristics = []
+        if self.sprites is None:
+            self.sprites = {}
+        if self.found_locations is None:
+            self.found_locations = []
+        if self.rescue_hints is None:
+            self.rescue_hints = []
 
 @dataclass
 class PetRescueRecord:

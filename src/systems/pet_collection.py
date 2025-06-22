@@ -1,466 +1,234 @@
 """
 ペット図鑑システム
-
-発見・救助したペットの記録を管理
+ペット情報の管理、救助状態の追跡、図鑑データの操作を行う
 """
 
 import json
+import os
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
-from pathlib import Path
+from enum import Enum
 
-from config.constants import PET_TYPES, PET_STATE_RESCUED, PET_STATE_RETURNED
-
+class PetRarity(Enum):
+    """ペットのレア度"""
+    COMMON = "common"
+    UNCOMMON = "uncommon"
+    RARE = "rare"
+    LEGENDARY = "legendary"
 
 @dataclass
-class PetRecord:
-    """ペット記録クラス"""
-    pet_id: str
-    pet_type: str
-    name: str = ""
-    discovery_date: str = ""
-    rescue_date: str = ""
-    return_date: str = ""
-    owner_name: str = ""
-    location_found: str = ""
-    trust_level_final: int = 0
-    personality_traits: Dict[str, int] = None
-    rescue_method: str = ""
-    rescue_time_minutes: int = 0
-    mini_games_played: List[str] = None
-    photos_taken: int = 0
-    notes: str = ""
-    rarity: int = 1  # 1-5 (1:コモン, 5:レジェンダリー)
-    
-    def __post_init__(self):
-        if self.personality_traits is None:
-            self.personality_traits = {}
-        if self.mini_games_played is None:
-            self.mini_games_played = []
+class PetInfo:
+    """ペット情報データクラス"""
+    id: str
+    name: str
+    species: str
+    breed: str
+    description: str
+    characteristics: List[str]
+    rarity: str
+    image_path: str
+    found_locations: List[str]
+    rescue_difficulty: int
+    rescue_hints: List[str]
 
+@dataclass
+class PetRescueRecord:
+    """ペット救助記録データクラス"""
+    pet_id: str
+    rescued: bool = False
+    rescue_date: Optional[str] = None
+    rescue_location: Optional[str] = None
+    rescue_time_spent: Optional[int] = None  # 秒単位
+    rescue_attempts: int = 0
 
 class PetCollection:
-    """ペット図鑑クラス"""
+    """ペット図鑑管理クラス"""
     
-    def __init__(self, data_path: Path):
-        """
-        ペット図鑑を初期化
-        
-        Args:
-            data_path: データディレクトリのパス
-        """
+    def __init__(self, data_path: str = "data/pets_database.json", 
+                 save_path: str = "saves/pet_collection.json"):
         self.data_path = data_path
-        self.collection_file = data_path / "pet_collection.json"
+        self.save_path = save_path
+        self.pets_data: Dict[str, PetInfo] = {}
+        self.rarity_info: Dict[str, Dict[str, Any]] = {}
+        self.rescue_records: Dict[str, PetRescueRecord] = {}
         
-        # ペット記録
-        self.discovered_pets: Dict[str, PetRecord] = {}
-        self.rescued_pets: Dict[str, PetRecord] = {}
-        self.returned_pets: Dict[str, PetRecord] = {}
-        
-        # 統計情報
-        self.stats = {
-            "total_discovered": 0,
-            "total_rescued": 0,
-            "total_returned": 0,
-            "discovery_rate": {},  # pet_type -> count
-            "rescue_rate": {},     # pet_type -> count
-            "average_rescue_time": 0,
-            "favorite_pet_type": "",
-            "rarest_pet_rescued": None,
-            "first_discovery_date": "",
-            "last_activity_date": ""
-        }
-        
-        # ペット種類別の情報
-        self.pet_type_info = self._initialize_pet_type_info()
-        
-        # データを読み込み
-        self.load_collection()
+        self._load_pets_database()
+        self._load_rescue_records()
     
-    def _initialize_pet_type_info(self) -> Dict[str, Dict[str, Any]]:
-        """ペット種類別の情報を初期化"""
-        return {
-            "dog": {
-                "name_ja": "犬",
-                "name_en": "Dog",
-                "description": "人懐っこく忠実なパートナー",
-                "common_traits": ["friendly", "loyal", "energetic"],
-                "preferred_items": ["dog_food", "ball"],
-                "base_rarity": 1
-            },
-            "cat": {
-                "name_ja": "猫",
-                "name_en": "Cat", 
-                "description": "独立心旺盛で気まぐれな友達",
-                "common_traits": ["independent", "curious", "aloof"],
-                "preferred_items": ["cat_food", "feather_toy"],
-                "base_rarity": 1
-            },
-            "rabbit": {
-                "name_ja": "うさぎ",
-                "name_en": "Rabbit",
-                "description": "おとなしく優しい小動物",
-                "common_traits": ["timid", "gentle", "quick"],
-                "preferred_items": ["universal_food"],
-                "base_rarity": 2
-            },
-            "hamster": {
-                "name_ja": "ハムスター", 
-                "name_en": "Hamster",
-                "description": "小さくて活発な愛らしいペット",
-                "common_traits": ["active", "small", "nocturnal"],
-                "preferred_items": ["universal_food"],
-                "base_rarity": 2
-            },
-            "bird": {
-                "name_ja": "鳥",
-                "name_en": "Bird",
-                "description": "美しい鳴き声を持つ知的な生き物",
-                "common_traits": ["vocal", "intelligent", "social"],
-                "preferred_items": ["universal_food"],
-                "base_rarity": 3
-            },
-            "fish": {
-                "name_ja": "魚",
-                "name_en": "Fish",
-                "description": "静かで優雅な水中の住人",
-                "common_traits": ["calm", "silent", "graceful"],
-                "preferred_items": ["universal_food"],
-                "base_rarity": 3
-            },
-            "turtle": {
-                "name_ja": "カメ",
-                "name_en": "Turtle",
-                "description": "ゆっくりと着実に生きる賢者",
-                "common_traits": ["slow", "patient", "wise"],
-                "preferred_items": ["universal_food"],
-                "base_rarity": 4
-            },
-            "ferret": {
-                "name_ja": "フェレット",
-                "name_en": "Ferret",
-                "description": "いたずら好きで元気いっぱい",
-                "common_traits": ["playful", "mischievous", "energetic"],
-                "preferred_items": ["universal_food"],
-                "base_rarity": 4
-            }
-        }
-    
-    def discover_pet(self, pet_info: Dict[str, Any]) -> bool:
-        """
-        ペットを発見記録
-        
-        Args:
-            pet_info: ペット情報
-            
-        Returns:
-            記録成功時True
-        """
+    def _load_pets_database(self) -> None:
+        """ペットデータベースを読み込み"""
         try:
-            pet_id = pet_info.get("id")
-            if not pet_id or pet_id in self.discovered_pets:
-                return False
+            with open(self.data_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             
-            # ペット記録を作成
-            record = PetRecord(
-                pet_id=pet_id,
-                pet_type=pet_info.get("type", "unknown"),
-                name=pet_info.get("name", f"{pet_info.get('type', 'Pet')}_{pet_id[-4:]}"),
-                discovery_date=datetime.now().isoformat(),
-                owner_name=pet_info.get("owner_name", ""),
-                location_found=pet_info.get("location", ""),
-                personality_traits=pet_info.get("personality", {}),
-                rarity=self._calculate_rarity(pet_info)
-            )
+            # ペット情報を読み込み
+            for pet_data in data.get('pets', []):
+                pet_info = PetInfo(**pet_data)
+                self.pets_data[pet_info.id] = pet_info
             
-            # 記録を追加
-            self.discovered_pets[pet_id] = record
+            # レア度情報を読み込み
+            self.rarity_info = data.get('rarity_info', {})
             
-            # 統計を更新
-            self._update_discovery_stats(record)
-            
-            print(f"新しいペットを発見: {record.name} ({record.pet_type})")
-            return True
-            
-        except Exception as e:
-            print(f"ペット発見記録エラー: {e}")
-            return False
+        except FileNotFoundError:
+            print(f"警告: ペットデータベースファイルが見つかりません: {self.data_path}")
+        except json.JSONDecodeError as e:
+            print(f"エラー: ペットデータベースの読み込みに失敗しました: {e}")
     
-    def rescue_pet(self, pet_id: str, rescue_info: Dict[str, Any]) -> bool:
-        """
-        ペット救助記録
-        
-        Args:
-            pet_id: ペットID
-            rescue_info: 救助情報
-            
-        Returns:
-            記録成功時True
-        """
+    def _load_rescue_records(self) -> None:
+        """救助記録を読み込み"""
         try:
-            if pet_id not in self.discovered_pets:
-                print(f"未発見のペット: {pet_id}")
-                return False
+            with open(self.save_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             
-            if pet_id in self.rescued_pets:
-                print(f"既に救助済み: {pet_id}")
-                return False
-            
-            # 発見記録をコピーして救助情報を追加
-            record = self.discovered_pets[pet_id]
-            record.rescue_date = datetime.now().isoformat()
-            record.trust_level_final = rescue_info.get("trust_level", 0)
-            record.rescue_method = rescue_info.get("method", "")
-            record.rescue_time_minutes = rescue_info.get("time_minutes", 0)
-            record.mini_games_played = rescue_info.get("mini_games", [])
-            record.notes = rescue_info.get("notes", "")
-            
-            # 救助記録に追加
-            self.rescued_pets[pet_id] = record
-            
-            # 統計を更新
-            self._update_rescue_stats(record)
-            
-            print(f"ペットを救助: {record.name}")
-            return True
-            
-        except Exception as e:
-            print(f"ペット救助記録エラー: {e}")
-            return False
-    
-    def return_pet(self, pet_id: str, return_info: Dict[str, Any]) -> bool:
-        """
-        ペット返却記録
-        
-        Args:
-            pet_id: ペットID
-            return_info: 返却情報
-            
-        Returns:
-            記録成功時True
-        """
-        try:
-            if pet_id not in self.rescued_pets:
-                print(f"未救助のペット: {pet_id}")
-                return False
-            
-            if pet_id in self.returned_pets:
-                print(f"既に返却済み: {pet_id}")
-                return False
-            
-            # 救助記録をコピーして返却情報を追加
-            record = self.rescued_pets[pet_id]
-            record.return_date = datetime.now().isoformat()
-            
-            # 返却記録に追加
-            self.returned_pets[pet_id] = record
-            
-            # 統計を更新
-            self._update_return_stats(record)
-            
-            print(f"ペットを返却: {record.name}")
-            return True
-            
-        except Exception as e:
-            print(f"ペット返却記録エラー: {e}")
-            return False
-    
-    def _calculate_rarity(self, pet_info: Dict[str, Any]) -> int:
-        """ペットのレアリティを計算"""
-        pet_type = pet_info.get("type", "dog")
-        base_rarity = self.pet_type_info.get(pet_type, {}).get("base_rarity", 1)
-        
-        # 個性の特殊性でレアリティを調整
-        personality = pet_info.get("personality", {})
-        special_traits = sum(1 for value in personality.values() if value > 90)
-        
-        rarity = base_rarity + (special_traits // 2)
-        return min(5, max(1, rarity))
-    
-    def _update_discovery_stats(self, record: PetRecord):
-        """発見統計を更新"""
-        self.stats["total_discovered"] += 1
-        
-        # 種類別統計
-        pet_type = record.pet_type
-        if pet_type not in self.stats["discovery_rate"]:
-            self.stats["discovery_rate"][pet_type] = 0
-        self.stats["discovery_rate"][pet_type] += 1
-        
-        # 初回発見日
-        if not self.stats["first_discovery_date"]:
-            self.stats["first_discovery_date"] = record.discovery_date
-        
-        self.stats["last_activity_date"] = record.discovery_date
-    
-    def _update_rescue_stats(self, record: PetRecord):
-        """救助統計を更新"""
-        self.stats["total_rescued"] += 1
-        
-        # 種類別統計
-        pet_type = record.pet_type
-        if pet_type not in self.stats["rescue_rate"]:
-            self.stats["rescue_rate"][pet_type] = 0
-        self.stats["rescue_rate"][pet_type] += 1
-        
-        # 平均救助時間
-        total_time = self.stats["average_rescue_time"] * (self.stats["total_rescued"] - 1)
-        total_time += record.rescue_time_minutes
-        self.stats["average_rescue_time"] = total_time / self.stats["total_rescued"]
-        
-        # 最もレアなペット
-        if (not self.stats["rarest_pet_rescued"] or 
-            record.rarity > self.stats["rarest_pet_rescued"]["rarity"]):
-            self.stats["rarest_pet_rescued"] = {
-                "pet_id": record.pet_id,
-                "name": record.name,
-                "type": record.pet_type,
-                "rarity": record.rarity
-            }
-        
-        self.stats["last_activity_date"] = record.rescue_date
-    
-    def _update_return_stats(self, record: PetRecord):
-        """返却統計を更新"""
-        self.stats["total_returned"] += 1
-        self.stats["last_activity_date"] = record.return_date
-    
-    def get_collection_summary(self) -> Dict[str, Any]:
-        """図鑑の概要を取得"""
-        # お気に入りのペット種類を計算
-        if self.stats["rescue_rate"]:
-            favorite_type = max(self.stats["rescue_rate"], 
-                              key=self.stats["rescue_rate"].get)
-            self.stats["favorite_pet_type"] = favorite_type
-        
-        return {
-            "stats": self.stats.copy(),
-            "completion_rate": {
-                "discovered": len(self.discovered_pets),
-                "rescued": len(self.rescued_pets),
-                "returned": len(self.returned_pets),
-                "total_possible": len(PET_TYPES) * 10  # 仮の総数
-            },
-            "pet_types_discovered": len(set(record.pet_type for record in self.discovered_pets.values())),
-            "pet_types_total": len(PET_TYPES)
-        }
-    
-    def get_pets_by_type(self, pet_type: str) -> List[Dict[str, Any]]:
-        """指定種類のペット記録を取得"""
-        result = []
-        
-        for record in self.discovered_pets.values():
-            if record.pet_type == pet_type:
-                result.append({
-                    "record": asdict(record),
-                    "status": self._get_pet_status(record.pet_id)
-                })
-        
-        return result
-    
-    def _get_pet_status(self, pet_id: str) -> str:
-        """ペットの状態を取得"""
-        if pet_id in self.returned_pets:
-            return "returned"
-        elif pet_id in self.rescued_pets:
-            return "rescued"
-        elif pet_id in self.discovered_pets:
-            return "discovered"
-        else:
-            return "unknown"
-    
-    def get_pet_details(self, pet_id: str) -> Optional[Dict[str, Any]]:
-        """ペットの詳細情報を取得"""
-        if pet_id not in self.discovered_pets:
-            return None
-        
-        record = self.discovered_pets[pet_id]
-        status = self._get_pet_status(pet_id)
-        
-        return {
-            "record": asdict(record),
-            "status": status,
-            "type_info": self.pet_type_info.get(record.pet_type, {}),
-            "achievements": self._get_pet_achievements(record)
-        }
-    
-    def _get_pet_achievements(self, record: PetRecord) -> List[str]:
-        """ペットの実績を取得"""
-        achievements = []
-        
-        if record.trust_level_final >= 90:
-            achievements.append("完全な信頼")
-        if record.rescue_time_minutes <= 5:
-            achievements.append("スピード救助")
-        if record.rarity >= 4:
-            achievements.append("レアペット")
-        if len(record.mini_games_played) >= 3:
-            achievements.append("ゲームマスター")
-        
-        return achievements
-    
-    def search_pets(self, query: str) -> List[Dict[str, Any]]:
-        """ペットを検索"""
-        results = []
-        query_lower = query.lower()
-        
-        for record in self.discovered_pets.values():
-            if (query_lower in record.name.lower() or
-                query_lower in record.pet_type.lower() or
-                query_lower in record.owner_name.lower()):
+            for record_data in data.get('rescue_records', []):
+                record = PetRescueRecord(**record_data)
+                self.rescue_records[record.pet_id] = record
                 
-                results.append({
-                    "record": asdict(record),
-                    "status": self._get_pet_status(record.pet_id)
-                })
+        except FileNotFoundError:
+            # 初回起動時はファイルが存在しないので、空の記録で初期化
+            self._initialize_rescue_records()
+        except json.JSONDecodeError as e:
+            print(f"エラー: 救助記録の読み込みに失敗しました: {e}")
+            self._initialize_rescue_records()
+    
+    def _initialize_rescue_records(self) -> None:
+        """救助記録を初期化"""
+        for pet_id in self.pets_data.keys():
+            self.rescue_records[pet_id] = PetRescueRecord(pet_id=pet_id)
+    
+    def save_rescue_records(self) -> bool:
+        """救助記録を保存"""
+        try:
+            # 保存ディレクトリを作成
+            os.makedirs(os.path.dirname(self.save_path), exist_ok=True)
+            
+            # 救助記録をJSON形式で保存
+            save_data = {
+                'rescue_records': [asdict(record) for record in self.rescue_records.values()],
+                'last_updated': datetime.now().isoformat()
+            }
+            
+            with open(self.save_path, 'w', encoding='utf-8') as f:
+                json.dump(save_data, f, ensure_ascii=False, indent=2)
+            
+            return True
+        except Exception as e:
+            print(f"エラー: 救助記録の保存に失敗しました: {e}")
+            return False
+    
+    def rescue_pet(self, pet_id: str, location: str, time_spent: int) -> bool:
+        """ペットを救助する"""
+        if pet_id not in self.pets_data:
+            return False
+        
+        if pet_id not in self.rescue_records:
+            self.rescue_records[pet_id] = PetRescueRecord(pet_id=pet_id)
+        
+        record = self.rescue_records[pet_id]
+        record.rescued = True
+        record.rescue_date = datetime.now().isoformat()
+        record.rescue_location = location
+        record.rescue_time_spent = time_spent
+        record.rescue_attempts += 1
+        
+        self.save_rescue_records()
+        return True
+    
+    def is_pet_rescued(self, pet_id: str) -> bool:
+        """ペットが救助済みかチェック"""
+        return self.rescue_records.get(pet_id, PetRescueRecord(pet_id)).rescued
+    
+    def get_pet_info(self, pet_id: str) -> Optional[PetInfo]:
+        """ペット情報を取得"""
+        return self.pets_data.get(pet_id)
+    
+    def get_rescue_record(self, pet_id: str) -> Optional[PetRescueRecord]:
+        """救助記録を取得"""
+        return self.rescue_records.get(pet_id)
+    
+    def get_all_pets(self) -> List[PetInfo]:
+        """全ペット情報を取得"""
+        return list(self.pets_data.values())
+    
+    def get_rescued_pets(self) -> List[PetInfo]:
+        """救助済みペット一覧を取得"""
+        rescued_pets = []
+        for pet_id, pet_info in self.pets_data.items():
+            if self.is_pet_rescued(pet_id):
+                rescued_pets.append(pet_info)
+        return rescued_pets
+    
+    def get_unrescued_pets(self) -> List[PetInfo]:
+        """未救助ペット一覧を取得"""
+        unrescued_pets = []
+        for pet_id, pet_info in self.pets_data.items():
+            if not self.is_pet_rescued(pet_id):
+                unrescued_pets.append(pet_info)
+        return unrescued_pets
+    
+    def filter_pets_by_species(self, species: str) -> List[PetInfo]:
+        """種類でペットをフィルター"""
+        return [pet for pet in self.pets_data.values() if pet.species == species]
+    
+    def filter_pets_by_rarity(self, rarity: str) -> List[PetInfo]:
+        """レア度でペットをフィルター"""
+        return [pet for pet in self.pets_data.values() if pet.rarity == rarity]
+    
+    def search_pets(self, query: str) -> List[PetInfo]:
+        """ペットを検索（名前、種類、品種で検索）"""
+        query = query.lower()
+        results = []
+        
+        for pet in self.pets_data.values():
+            if (query in pet.name.lower() or 
+                query in pet.species.lower() or 
+                query in pet.breed.lower() or
+                any(query in char.lower() for char in pet.characteristics)):
+                results.append(pet)
         
         return results
     
-    def save_collection(self) -> bool:
-        """図鑑データを保存"""
-        try:
-            data = {
-                "version": "1.0",
-                "timestamp": datetime.now().isoformat(),
-                "discovered_pets": {k: asdict(v) for k, v in self.discovered_pets.items()},
-                "rescued_pets": {k: asdict(v) for k, v in self.rescued_pets.items()},
-                "returned_pets": {k: asdict(v) for k, v in self.returned_pets.items()},
-                "stats": self.stats
+    def get_collection_stats(self) -> Dict[str, Any]:
+        """図鑑の統計情報を取得"""
+        total_pets = len(self.pets_data)
+        rescued_count = len(self.get_rescued_pets())
+        
+        # レア度別統計
+        rarity_stats = {}
+        for rarity in PetRarity:
+            rarity_pets = self.filter_pets_by_rarity(rarity.value)
+            rescued_rarity_pets = [pet for pet in rarity_pets if self.is_pet_rescued(pet.id)]
+            rarity_stats[rarity.value] = {
+                'total': len(rarity_pets),
+                'rescued': len(rescued_rarity_pets),
+                'completion_rate': len(rescued_rarity_pets) / len(rarity_pets) * 100 if rarity_pets else 0
             }
-            
-            with open(self.collection_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            
-            return True
-            
-        except Exception as e:
-            print(f"図鑑保存エラー: {e}")
-            return False
+        
+        # 種類別統計
+        species_stats = {}
+        species_list = list(set(pet.species for pet in self.pets_data.values()))
+        for species in species_list:
+            species_pets = self.filter_pets_by_species(species)
+            rescued_species_pets = [pet for pet in species_pets if self.is_pet_rescued(pet.id)]
+            species_stats[species] = {
+                'total': len(species_pets),
+                'rescued': len(rescued_species_pets),
+                'completion_rate': len(rescued_species_pets) / len(species_pets) * 100 if species_pets else 0
+            }
+        
+        return {
+            'total_pets': total_pets,
+            'rescued_pets': rescued_count,
+            'completion_rate': rescued_count / total_pets * 100 if total_pets > 0 else 0,
+            'rarity_stats': rarity_stats,
+            'species_stats': species_stats
+        }
     
-    def load_collection(self) -> bool:
-        """図鑑データを読み込み"""
-        try:
-            if not self.collection_file.exists():
-                return True  # 新規作成
-            
-            with open(self.collection_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            # データを復元
-            for pet_id, record_data in data.get("discovered_pets", {}).items():
-                self.discovered_pets[pet_id] = PetRecord(**record_data)
-            
-            for pet_id, record_data in data.get("rescued_pets", {}).items():
-                self.rescued_pets[pet_id] = PetRecord(**record_data)
-            
-            for pet_id, record_data in data.get("returned_pets", {}).items():
-                self.returned_pets[pet_id] = PetRecord(**record_data)
-            
-            self.stats.update(data.get("stats", {}))
-            
-            return True
-            
-        except Exception as e:
-            print(f"図鑑読み込みエラー: {e}")
-            return False
+    def get_rarity_info(self, rarity: str) -> Dict[str, Any]:
+        """レア度情報を取得"""
+        return self.rarity_info.get(rarity, {
+            'name': rarity.capitalize(),
+            'color': '#666666',
+            'description': '不明なレア度'
+        })

@@ -1,0 +1,164 @@
+{
+  "pets": [
+    {
+      "id": "dog_001",
+      "name": "チョコ",
+      "species": "犬",
+      "breed": "チワワ",
+      "description": "小さくて元気いっぱいの茶色いチワワ。人懐っこく、いつも尻尾を振っている。",
+      "characteristics": [
+        "人懐っこい",
+        "元気いっぱい",
+        "小さい体"
+      ],
+      "rarity": "common",
+      "image_path": "assets/images/pets/pet_dog_small.png",
+      "found_locations": [
+        "住宅街の公園",
+        "商店街"
+      ],
+      "rescue_difficulty": 1,
+      "rescue_hints": [
+        "おやつを持っていると近づいてくる",
+        "優しく声をかけてみよう"
+      ]
+    },
+    {
+      "id": "cat_001",
+      "name": "ミケ",
+      "species": "猫",
+      "breed": "三毛猫",
+      "description": "美しい三毛模様の猫。少し警戒心が強いが、慣れると甘えん坊。",
+      "characteristics": [
+        "警戒心が強い",
+        "美しい毛色",
+        "甘えん坊"
+      ],
+      "rarity": "common",
+      "image_path": "assets/images/pets/pet_cat.png",
+      "found_locations": [
+        "住宅街の屋根",
+        "路地裏"
+      ],
+      "rescue_difficulty": 2,
+      "rescue_hints": [
+        "高い場所にいることが多い",
+        "静かに近づくのがコツ"
+      ]
+    },
+    {
+      "id": "rabbit_001",
+      "name": "ふわり",
+      "species": "うさぎ",
+      "breed": "ホーランドロップ",
+      "description": "ふわふわの白い毛と垂れ耳が特徴的なうさぎ。とても臆病で隠れるのが上手。",
+      "characteristics": [
+        "ふわふわの毛",
+        "垂れ耳",
+        "臆病"
+      ],
+      "rarity": "uncommon",
+      "image_path": "assets/images/pets/pet_rabbit.png",
+      "found_locations": [
+        "住宅街の庭",
+        "茂みの中"
+      ],
+      "rescue_difficulty": 3,
+      "rescue_hints": [
+        "茂みや隠れ場所をよく探そう",
+        "急に動くと逃げてしまう"
+      ]
+    },
+    {
+      "id": "bird_001",
+      "name": "ピーちゃん",
+      "species": "鳥",
+      "breed": "セキセイインコ",
+      "description": "鮮やかな青と黄色の羽を持つセキセイインコ。おしゃべりが得意で人の言葉を真似する。",
+      "characteristics": [
+        "鮮やかな羽色",
+        "おしゃべり好き",
+        "人懐っこい"
+      ],
+      "rarity": "uncommon",
+      "image_path": "assets/images/pets/pet_bird.png",
+      "found_locations": [
+        "住宅街の電線",
+        "公園の木"
+      ],
+      "rescue_difficulty": 4,
+      "rescue_hints": [
+        "高い場所にいることが多い",
+        "話しかけると反応してくれる"
+      ]
+    },
+    {
+      "id": "dog_002",
+      "name": "ゴールディ",
+      "species": "犬",
+      "breed": "ゴールデンレトリバー",
+      "description": "大型で優しい性格のゴールデンレトリバー。家族思いで忠実な性格。",
+      "characteristics": [
+        "大型犬",
+        "優しい性格",
+        "忠実"
+      ],
+      "rarity": "rare",
+      "image_path": "assets/images/pets/pet_dog_large.png",
+      "found_locations": [
+        "住宅街の大きな公園",
+        "川沿いの散歩道"
+      ],
+      "rescue_difficulty": 2,
+      "rescue_hints": [
+        "水辺を好む",
+        "ボールなどのおもちゃに反応する"
+      ]
+    },
+    {
+      "id": "cat_002",
+      "name": "シャドウ",
+      "species": "猫",
+      "breed": "黒猫",
+      "description": "真っ黒な毛色の神秘的な猫。夜行性で、暗い場所を好む。",
+      "characteristics": [
+        "真っ黒な毛色",
+        "神秘的",
+        "夜行性"
+      ],
+      "rarity": "rare",
+      "image_path": "assets/images/pets/pet_cat_black.png",
+      "found_locations": [
+        "夜の住宅街",
+        "暗い路地"
+      ],
+      "rescue_difficulty": 5,
+      "rescue_hints": [
+        "夜の時間帯に活動する",
+        "暗い場所を好む"
+      ]
+    }
+  ],
+  "rarity_info": {
+    "common": {
+      "name": "コモン",
+      "color": "#4CAF50",
+      "description": "よく見かけるペット"
+    },
+    "uncommon": {
+      "name": "アンコモン",
+      "color": "#2196F3",
+      "description": "少し珍しいペット"
+    },
+    "rare": {
+      "name": "レア",
+      "color": "#FF9800",
+      "description": "珍しいペット"
+    },
+    "legendary": {
+      "name": "レジェンダリー",
+      "color": "#9C27B0",
+      "description": "とても珍しいペット"
+    }
+  }
+}

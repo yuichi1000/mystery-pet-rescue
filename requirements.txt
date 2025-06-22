@@ -2,6 +2,7 @@
 
 # ゲームエンジン
 pygame>=2.0.0
+pygame-gui>=0.6.0
 
 # 環境変数管理
 python-dotenv>=1.0.0

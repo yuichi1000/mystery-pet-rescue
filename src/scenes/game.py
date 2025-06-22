@@ -188,6 +188,12 @@ class GameScene(Scene):
         keys_pressed: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
         self.player.update(time_delta, keys_pressed, self.map_system)
         
+        # ペット更新（デモで動いていた処理を追加）
+        player_pos = (self.player.x, self.player.y)
+        for pet in self.pets:
+            if pet.data.pet_id not in self.pets_rescued:
+                pet.update(time_delta, player_pos)
+        
         # カメラ更新
         self._update_camera()
         

@@ -44,25 +44,12 @@ class AssetManager:
                 print(f"⚠️ 画像ファイルが見つかりません: {full_path}")
                 return self._create_placeholder_image(scale or self.default_scale)
             
-            # PNG画像を透過情報付きで読み込み
+            # 画像をそのまま読み込み、余計な処理なし
             image = pygame.image.load(str(full_path))
             
-            # 透過処理
-            if image.get_alpha() is not None:
-                # アルファチャンネル付きPNG
-                image = image.convert_alpha()
-            else:
-                # 通常のPNG - カラーキー透過
-                image = image.convert()
-                if colorkey:
-                    image.set_colorkey(colorkey)
-                else:
-                    # 左上ピクセルの色を透過色として使用
-                    image.set_colorkey(image.get_at((0, 0)))
-            
-            # スケール調整
+            # スケール調整のみ
             if scale:
-                image = pygame.transform.smoothscale(image, scale)
+                image = pygame.transform.scale(image, scale)
             
             self.images[path] = image
             return image

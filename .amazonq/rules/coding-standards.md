@@ -73,9 +73,9 @@ def apply_damage(entity: Entity, damage: int) -> None:
 ### ディレクトリ構造
 ```
 mystery-pet-rescue/
+├── main.py                  # エントリーポイント（プロジェクトルート）
 ├── src/
 │   ├── __init__.py
-│   ├── main.py              # エントリーポイント
 │   ├── core/                # コアシステム
 │   │   ├── __init__.py
 │   │   ├── game.py         # ゲームループ

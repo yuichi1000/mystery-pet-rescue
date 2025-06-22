@@ -61,11 +61,11 @@ class AssetManager:
     def _create_placeholder_image(self, size: Tuple[int, int]) -> pygame.Surface:
         """プレースホルダー画像を作成（透過対応）"""
         surface = pygame.Surface(size, pygame.SRCALPHA)
-        surface.fill((255, 0, 255, 128))  # 半透明マゼンタ
+        surface.fill((255, 0, 255))  # マゼンタ背景
+        surface.set_colorkey((255, 0, 255))  # マゼンタを透過色に設定
         
-        # X印を描画
-        pygame.draw.line(surface, (0, 0, 0), (0, 0), size, 2)
-        pygame.draw.line(surface, (0, 0, 0), (0, size[1]), (size[0], 0), 2)
+        # 枠線を描画
+        pygame.draw.rect(surface, (0, 0, 0), surface.get_rect(), 2)
         
         return surface
     

@@ -87,6 +87,26 @@ class TileSet:
                     # 草地タイル（ID: 4）として登録
                     self.individual_sprites[4] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
                     print(f"草地スプライト読み込み成功: {sprite_path}")
+                elif 'stone_wall' in filename or 'wall' in filename:
+                    # 石壁タイル（ID: 2）として登録
+                    self.individual_sprites[2] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
+                    print(f"石壁スプライト読み込み成功: {sprite_path}")
+                elif 'water' in filename:
+                    # 水面タイル（ID: 3）として登録
+                    self.individual_sprites[3] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
+                    print(f"水面スプライト読み込み成功: {sprite_path}")
+                elif 'tree' in filename:
+                    # 木タイル（ID: 5）として登録
+                    self.individual_sprites[5] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
+                    print(f"木スプライト読み込み成功: {sprite_path}")
+                elif 'rock' in filename:
+                    # 岩タイル（ID: 6）として登録
+                    self.individual_sprites[6] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
+                    print(f"岩スプライト読み込み成功: {sprite_path}")
+                elif 'ground' in filename:
+                    # 地面タイル（ID: 1）として登録
+                    self.individual_sprites[1] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
+                    print(f"地面スプライト読み込み成功: {sprite_path}")
                 elif 'tileset' in filename:
                     # タイルセットとして処理
                     self.sprite_sheet = sprite_surface
@@ -103,6 +123,25 @@ class TileSet:
         except Exception as e:
             print(f"スプライト読み込みエラー: {e}")
             return False
+    
+    def load_all_individual_sprites(self):
+        """全ての個別スプライトを読み込み"""
+        sprite_files = {
+            1: "assets/images/tiles/ground_tile.png",      # 地面
+            2: "assets/images/tiles/stone_wall_tile.png",  # 石壁
+            3: "assets/images/tiles/water_tile.png",       # 水面
+            4: "assets/images/tiles/grass_tile.png",       # 草地
+            5: "assets/images/tiles/tree_tile.png",        # 木
+            6: "assets/images/tiles/rock_tile.png",        # 岩
+        }
+        
+        loaded_count = 0
+        for tile_id, sprite_path in sprite_files.items():
+            if self.load_individual_sprite(tile_id, sprite_path):
+                loaded_count += 1
+        
+        print(f"スプライト読み込み完了: {loaded_count}/{len(sprite_files)}個")
+        return loaded_count
     
     def load_individual_sprite(self, tile_id: int, sprite_path: str):
         """個別のタイルスプライトを読み込み"""
@@ -290,10 +329,8 @@ class MapSystem:
                 self.tileset = TileSet(tileset_path, self.tile_size)
             else:
                 self.tileset = TileSet("", self.tile_size)
-                # 草地スプライトを個別に読み込み
-                grass_sprite_path = "assets/images/tiles/grass_tile.png"
-                if os.path.exists(grass_sprite_path):
-                    self.tileset.load_individual_sprite(4, grass_sprite_path)
+                # 全ての個別スプライトを読み込み
+                self.tileset.load_all_individual_sprites()
             
             # マップサイズ
             self.width = map_data.get('width', 0)
@@ -379,11 +416,9 @@ class MapSystem:
         self.height = 15
         self.tileset = TileSet("", self.tile_size)
         
-        # 草地スプライトを個別に読み込み
-        grass_sprite_path = "assets/images/tiles/grass_tile.png"
-        if os.path.exists(grass_sprite_path):
-            self.tileset.load_individual_sprite(4, grass_sprite_path)
-            print("草地スプライトを読み込みました")
+        # 全ての個別スプライトを読み込み
+        loaded_count = self.tileset.load_all_individual_sprites()
+        print(f"サンプルマップ用スプライト読み込み: {loaded_count}個")
         
         # 背景レイヤー（草地）
         background_data = [[4 for _ in range(self.width)] for _ in range(self.height)]
@@ -398,19 +433,26 @@ class MapSystem:
         # 衝突レイヤー（壁と障害物）
         collision_data = [[0 for _ in range(self.width)] for _ in range(self.height)]
         
-        # 外周に壁
+        # 外周に石壁
         for x in range(self.width):
-            collision_data[0][x] = 2  # 上の壁
-            collision_data[self.height-1][x] = 2  # 下の壁
+            collision_data[0][x] = 2  # 上の石壁
+            collision_data[self.height-1][x] = 2  # 下の石壁
         for y in range(self.height):
-            collision_data[y][0] = 2  # 左の壁
-            collision_data[y][self.width-1] = 2  # 右の壁
+            collision_data[y][0] = 2  # 左の石壁
+            collision_data[y][self.width-1] = 2  # 右の石壁
         
         # 内部に障害物
         collision_data[5][5] = 5  # 木
         collision_data[5][6] = 5  # 木
         collision_data[8][10] = 6  # 岩
-        collision_data[10][8] = 8  # 宝箱
+        collision_data[10][8] = 6  # 岩
+        collision_data[7][12] = 5  # 木
+        
+        # 水場を追加
+        collision_data[12][5] = 3  # 水面
+        collision_data[12][6] = 3  # 水面
+        collision_data[13][5] = 3  # 水面
+        collision_data[13][6] = 3  # 水面
         
         collision_layer = MapLayer(
             name="collision",
@@ -420,10 +462,14 @@ class MapSystem:
             data=collision_data
         )
         
-        # 装飾レイヤー
+        # 装飾レイヤー（地面の道）
         decoration_data = [[0 for _ in range(self.width)] for _ in range(self.height)]
-        decoration_data[3][3] = 9  # 装飾
-        decoration_data[12][15] = 9  # 装飾
+        
+        # 地面の道を作成
+        for x in range(2, 8):
+            decoration_data[3][x] = 1  # 横の道
+        for y in range(3, 8):
+            decoration_data[y][7] = 1  # 縦の道
         
         decoration_layer = MapLayer(
             name="decoration",

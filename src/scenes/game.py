@@ -48,6 +48,10 @@ class GameScene(Scene):
         # マップシステム初期化
         self.map_system = MapSystem()
         
+        # デフォルトマップを読み込み
+        if not self.map_system.load_map("residential.json"):
+            print("⚠️ マップファイルが見つからないため、デフォルトマップを使用します")
+        
         # ペット初期化
         self.pets = self._create_pets()
         
@@ -171,7 +175,7 @@ class GameScene(Scene):
         else:
             # 通常のゲームイベント処理
             self.player.handle_event(event)
-            self.game_ui.handle_event(event)
+            self.game_ui.handle_input(event)
         
         return None
     
@@ -181,7 +185,8 @@ class GameScene(Scene):
             return None
         
         # プレイヤー更新
-        self.player.update(time_delta)
+        keys_pressed = pygame.key.get_pressed()
+        self.player.update(time_delta, keys_pressed)
         
         # カメラ更新
         self._update_camera()
@@ -217,21 +222,24 @@ class GameScene(Scene):
         # ペット描画
         for pet in self.pets:
             if pet.data.pet_id not in self.pets_rescued:
-                pet_x = pet.x - self.camera_x
-                pet_y = pet.y - self.camera_y
-                pet.draw(surface, pet_x, pet_y)
+                pet.draw(surface, (self.camera_x, self.camera_y))
         
         # プレイヤー描画
-        player_screen_x = self.player.x - self.camera_x
-        player_screen_y = self.player.y - self.camera_y
-        self.player.draw(surface, player_screen_x, player_screen_y)
+        camera_offset = (self.camera_x, self.camera_y)
+        self.player.draw(surface, camera_offset)
         
         # パズルUI描画
         if self.current_puzzle:
             self.puzzle_ui.draw(surface)
         
         # ゲームUI描画
-        self.game_ui.draw(surface)
+        player_stats = {
+            'health': self.player.stats.health,
+            'max_health': self.player.stats.max_health,
+            'stamina': self.player.stats.stamina,
+            'max_stamina': self.player.stats.max_stamina
+        }
+        self.game_ui.draw(player_stats, [], (self.player.x, self.player.y))
         
         # ポーズ表示
         if self.paused:

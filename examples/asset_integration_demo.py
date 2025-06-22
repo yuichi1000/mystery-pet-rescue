@@ -233,19 +233,19 @@ class AssetIntegrationDemo:
         
         # スタミナ表示
         stamina_text = f"スタミナ: {int(player_stats.stamina)}/{player_stats.max_stamina}"
-        stamina_surface = self.font_manager.render_text(stamina_text, 18, (255, 255, 255))
+        stamina_surface = self.font_manager.render_text(stamina_text, "default", 18, (255, 255, 255))
         self.screen.blit(stamina_surface, (10, 10))
         
         # ペット情報
         y_offset = 40
         for i, pet in enumerate(self.pets):
             pet_info = f"{pet.data.name}: 信頼度 {pet.get_trust_level():.1f}% ({pet.get_state().value})"
-            pet_surface = self.font_manager.render_text(pet_info, 16, (255, 255, 255))
+            pet_surface = self.font_manager.render_text(pet_info, "default", 16, (255, 255, 255))
             self.screen.blit(pet_surface, (10, y_offset + i * 25))
         
         # 相互作用メッセージ
         if self.interaction_message:
-            message_surface = self.font_manager.render_text(self.interaction_message, 24, (255, 255, 0))
+            message_surface = self.font_manager.render_text(self.interaction_message, "default", 24, (255, 255, 0))
             message_rect = message_surface.get_rect(center=(self.screen.get_width() // 2, 100))
             
             # 背景
@@ -264,7 +264,7 @@ class AssetIntegrationDemo:
         ]
         
         for i, control in enumerate(controls):
-            control_surface = self.font_manager.render_text(control, 14, (255, 255, 255))
+            control_surface = self.font_manager.render_text(control, "default", 14, (255, 255, 255))
             self.screen.blit(control_surface, (self.screen.get_width() - 200, 10 + i * 20))
     
     def _draw_debug_info(self):
@@ -281,7 +281,7 @@ class AssetIntegrationDemo:
         pygame.draw.rect(self.screen, (0, 0, 0, 180), debug_bg)
         
         for i, info in enumerate(debug_info):
-            debug_surface = self.font_manager.render_text(info, 14, (255, 255, 255))
+            debug_surface = self.font_manager.render_text(info, "default", 14, (255, 255, 255))
             self.screen.blit(debug_surface, (15, self.screen.get_height() - 115 + i * 20))
 
 def main():

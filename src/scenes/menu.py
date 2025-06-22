@@ -51,13 +51,18 @@ class MenuScene(Scene):
     def _load_background(self):
         """背景画像を読み込み"""
         try:
+            print("🖼️ メニュー背景画像を読み込み中...")
             self.background_image = self.asset_manager.get_image("backgrounds/menu_background.png")
             if self.background_image:
+                print(f"✅ 背景画像読み込み成功: {self.background_image.get_size()}")
                 # 画面サイズに合わせてスケール
                 screen_size = (self.screen.get_width(), self.screen.get_height())
                 self.background_image = pygame.transform.scale(self.background_image, screen_size)
+                print(f"✅ 背景画像スケール完了: {screen_size}")
+            else:
+                print("❌ 背景画像の取得に失敗")
         except Exception as e:
-            print(f"背景画像の読み込みに失敗: {e}")
+            print(f"❌ 背景画像の読み込みに失敗: {e}")
             self.background_image = None
     
     def _create_menu_items(self):

@@ -184,6 +184,12 @@ class Player:
         else:
             self.animation_frame = 0
     
+    def handle_event(self, event: pygame.event.Event):
+        """イベント処理（プレイヤー固有のイベント）"""
+        # 現在は特別なイベント処理は不要
+        # 将来的にアイテム使用やスキル発動などを追加可能
+        pass
+    
     def draw(self, screen: pygame.Surface, camera_offset: Tuple[int, int] = (0, 0)):
         """プレイヤーを描画"""
         draw_x = self.rect.x - camera_offset[0]

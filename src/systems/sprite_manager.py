@@ -48,7 +48,7 @@ class SpriteManager:
             return self._create_default_sprite_variants()
         
         try:
-            # オリジナル画像読み込み（256x256想定）
+            # シンプルな画像読み込み（透過処理済み画像用）
             original_sprite = pygame.image.load(file_path).convert_alpha()
             
             # 各サイズのバリエーションを生成
@@ -57,7 +57,7 @@ class SpriteManager:
                 if size_type == SpriteSize.ORIGINAL:
                     variants[size_type.value] = original_sprite
                 else:
-                    # 高品質スケーリング
+                    # 高品質スケーリング（透過情報保持）
                     scaled_sprite = pygame.transform.smoothscale(original_sprite, dimensions)
                     variants[size_type.value] = scaled_sprite
             

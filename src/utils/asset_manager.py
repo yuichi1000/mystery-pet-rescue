@@ -33,7 +33,7 @@ class AssetManager:
     
     def load_image(self, path: str, scale: Optional[Tuple[int, int]] = None, 
                    colorkey: Optional[Tuple[int, int, int]] = None) -> Optional[pygame.Surface]:
-        """画像を読み込み"""
+        """画像を読み込み（透過処理済み画像用）"""
         full_path = self.images_path / path
         
         if path in self.images:
@@ -44,15 +44,12 @@ class AssetManager:
                 print(f"⚠️ 画像ファイルが見つかりません: {full_path}")
                 return self._create_placeholder_image(scale or self.default_scale)
             
+            # 透過処理済みPNG画像をそのまま読み込み
             image = pygame.image.load(str(full_path)).convert_alpha()
             
-            # カラーキー設定
-            if colorkey:
-                image.set_colorkey(colorkey)
-            
-            # スケール調整
+            # スケール調整（透過情報を保持）
             if scale:
-                image = pygame.transform.scale(image, scale)
+                image = pygame.transform.smoothscale(image, scale)
             
             self.images[path] = image
             return image
@@ -62,9 +59,9 @@ class AssetManager:
             return self._create_placeholder_image(scale or self.default_scale)
     
     def _create_placeholder_image(self, size: Tuple[int, int]) -> pygame.Surface:
-        """プレースホルダー画像を作成"""
-        surface = pygame.Surface(size)
-        surface.fill((255, 0, 255))  # マゼンタ色
+        """プレースホルダー画像を作成（透過対応）"""
+        surface = pygame.Surface(size, pygame.SRCALPHA)
+        surface.fill((255, 0, 255, 128))  # 半透明マゼンタ
         
         # X印を描画
         pygame.draw.line(surface, (0, 0, 0), (0, 0), size, 2)
@@ -230,7 +227,10 @@ class AssetManager:
         }
     
     def get_image(self, path: str) -> Optional[pygame.Surface]:
-        """読み込み済み画像を取得"""
+        """画像を取得（未読み込みの場合は自動読み込み）"""
+        if path not in self.images:
+            print(f"🔄 画像を自動読み込み: {path}")
+            return self.load_image(path)
         return self.images.get(path)
     
     def get_sound(self, path: str) -> Optional[pygame.mixer.Sound]:

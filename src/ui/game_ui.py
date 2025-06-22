@@ -232,7 +232,7 @@ class GameUI:
         # ヘルステキスト
         health_text = f"HP: {int(health)}/{int(max_health)}"
         health_surface = self.font_manager.render_text(
-            health_text, int(14 * self.ui_scale), self.colors['text']
+            health_text, "default", int(14 * self.ui_scale), self.colors['text']
         )
         text_x = self.health_bar_rect.centerx - health_surface.get_width() // 2
         text_y = self.health_bar_rect.centery - health_surface.get_height() // 2
@@ -258,7 +258,7 @@ class GameUI:
         # スタミナテキスト
         stamina_text = f"SP: {int(stamina)}/{int(max_stamina)}"
         stamina_surface = self.font_manager.render_text(
-            stamina_text, int(12 * self.ui_scale), self.colors['text']
+            stamina_text, "default", int(12 * self.ui_scale), self.colors['text']
         )
         text_x = self.stamina_bar_rect.centerx - stamina_surface.get_width() // 2
         text_y = self.stamina_bar_rect.centery - stamina_surface.get_height() // 2
@@ -287,7 +287,7 @@ class GameUI:
                 if slot.quantity > 1:
                     qty_text = str(slot.quantity)
                     qty_surface = self.font_manager.render_text(
-                        qty_text, int(12 * self.ui_scale), self.colors['text']
+                        qty_text, "default", int(12 * self.ui_scale), self.colors['text']
                     )
                     qty_x = rect.right - qty_surface.get_width() - 2
                     qty_y = rect.bottom - qty_surface.get_height() - 2
@@ -308,7 +308,7 @@ class GameUI:
             # スロット番号
             slot_num = str(i + 1)
             num_surface = self.font_manager.render_text(
-                slot_num, int(10 * self.ui_scale), self.colors['text']
+                slot_num, "default", int(10 * self.ui_scale), self.colors['text']
             )
             self.screen.blit(num_surface, (rect.x + 2, rect.y + 2))
     
@@ -367,7 +367,7 @@ class GameUI:
         # ミニマップタイトル
         minimap_title = "ミニマップ"
         title_surface = self.font_manager.render_text(
-            minimap_title, int(12 * self.ui_scale), self.colors['text']
+            minimap_title, "default", int(12 * self.ui_scale), self.colors['text']
         )
         title_x = self.minimap_rect.centerx - title_surface.get_width() // 2
         title_y = self.minimap_rect.bottom + 5
@@ -387,13 +387,13 @@ class GameUI:
         
         # 目標タイトル
         title_surface = self.font_manager.render_text(
-            "現在の目標", int(14 * self.ui_scale), self.colors['text']
+            "現在の目標", "default", int(14 * self.ui_scale), self.colors['text']
         )
         self.screen.blit(title_surface, (self.objective_rect.x + 10, self.objective_rect.y + 5))
         
         # 目標内容
         obj_title_surface = self.font_manager.render_text(
-            self.current_objective.title, int(16 * self.ui_scale), (255, 255, 0)
+            self.current_objective.title, "default", int(16 * self.ui_scale), (255, 255, 0)
         )
         self.screen.blit(obj_title_surface, (self.objective_rect.x + 10, self.objective_rect.y + 25))
         
@@ -419,7 +419,7 @@ class GameUI:
             # 進捗テキスト
             progress_text = f"{self.current_objective.progress}/{self.current_objective.max_progress}"
             progress_surface = self.font_manager.render_text(
-                progress_text, int(12 * self.ui_scale), self.colors['text']
+                progress_text, "default", int(12 * self.ui_scale), self.colors['text']
             )
             text_x = progress_bar_rect.centerx - progress_surface.get_width() // 2
             text_y = progress_bar_rect.centery - progress_surface.get_height() // 2
@@ -447,7 +447,7 @@ class GameUI:
             time_text = f"プレイ時間: {hours:02d}:{minutes:02d}:{seconds:02d}"
         
         time_surface = self.font_manager.render_text(
-            time_text, int(12 * self.ui_scale), self.colors['text']
+            time_text, "default", int(12 * self.ui_scale), self.colors['text']
         )
         text_x = self.time_rect.centerx - time_surface.get_width() // 2
         text_y = self.time_rect.centery - time_surface.get_height() // 2
@@ -485,7 +485,7 @@ class GameUI:
             
             # 通知テキスト
             text_surface = self.font_manager.render_text(
-                notification.message, int(14 * self.ui_scale), self.colors['text']
+                notification.message, "default", int(14 * self.ui_scale), self.colors['text']
             )
             text_surface.set_alpha(alpha)
             
@@ -543,6 +543,21 @@ class GameUI:
             max_progress=max_progress
         )
         print(f"🎯 新しい目標: {title}")
+    
+    def update_stats(self, stats: dict):
+        """統計情報を更新"""
+        # プレイヤー統計の更新
+        if 'player' in stats:
+            player_stats = stats['player']
+            # 必要に応じてプレイヤー統計を表示用に保存
+            
+        # ペット統計の更新
+        if 'pets' in stats:
+            pet_stats = stats['pets']
+            # ペット統計を表示用に保存
+            
+        # その他の統計情報の更新
+        # 実際の表示は draw メソッドで行う
     
     def update_objective_progress(self, progress: int):
         """目標の進捗を更新"""

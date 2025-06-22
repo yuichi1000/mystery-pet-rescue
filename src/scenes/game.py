@@ -287,7 +287,10 @@ class GameScene(Scene):
         else:
             # パズルが見つからない場合は簡単な相互作用
             self.game_ui.add_notification(f"{pet.data.name}と仲良くなりました！", NotificationType.SUCCESS)
-            self._rescue_pet(pet)
+            # ペットを救出リストに追加
+            if pet.data.pet_id not in self.pets_rescued:
+                self.pets_rescued.append(pet.data.pet_id)
+                self.game_ui.add_notification("ペットを救出しました！", NotificationType.SUCCESS)
         self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
     
     def _handle_puzzle_solved(self):

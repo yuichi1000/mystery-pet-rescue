@@ -96,7 +96,7 @@ class Player:
     
     def _handle_input(self, keys_pressed):
         """入力処理"""
-        # 移動入力
+        # 移動入力をリセット
         self.velocity_x = 0
         self.velocity_y = 0
         self.is_moving = False
@@ -105,26 +105,26 @@ class Player:
         self.is_running = keys_pressed[pygame.K_LSHIFT] and self.stats.stamina > 0
         
         # 移動速度決定
-        current_speed = self.stats.run_speed if self.is_running else self.stats.speed
+        speed = self.stats.run_speed if self.is_running else self.stats.speed
         
-        # 方向入力
-        if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]:
-            self.velocity_x = -current_speed
+        # WASD/矢印キーでの移動（デモと同じ処理）
+        if keys_pressed[pygame.K_a] or keys_pressed[pygame.K_LEFT]:
+            self.velocity_x = -speed
             self.direction = Direction.LEFT
             self.is_moving = True
         
-        if keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
-            self.velocity_x = current_speed
+        if keys_pressed[pygame.K_d] or keys_pressed[pygame.K_RIGHT]:
+            self.velocity_x = speed
             self.direction = Direction.RIGHT
             self.is_moving = True
         
-        if keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]:
-            self.velocity_y = -current_speed
+        if keys_pressed[pygame.K_w] or keys_pressed[pygame.K_UP]:
+            self.velocity_y = -speed
             self.direction = Direction.UP
             self.is_moving = True
         
-        if keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]:
-            self.velocity_y = current_speed
+        if keys_pressed[pygame.K_s] or keys_pressed[pygame.K_DOWN]:
+            self.velocity_y = speed
             self.direction = Direction.DOWN
             self.is_moving = True
         

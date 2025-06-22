@@ -80,7 +80,7 @@ class Player:
         
         return sprites
     
-    def update(self, time_delta: float, keys_pressed: set, map_system=None):
+    def update(self, time_delta: float, keys_pressed, map_system=None):
         """プレイヤーを更新"""
         # 入力処理
         self._handle_input(keys_pressed)
@@ -94,7 +94,7 @@ class Player:
         # アニメーション更新
         self._update_animation(time_delta)
     
-    def _handle_input(self, keys_pressed: set):
+    def _handle_input(self, keys_pressed):
         """入力処理"""
         # 移動入力
         self.velocity_x = 0
@@ -102,31 +102,35 @@ class Player:
         self.is_moving = False
         
         # 走行判定
-        self.is_running = pygame.K_LSHIFT in keys_pressed and self.stats.stamina > 0
+        self.is_running = keys_pressed[pygame.K_LSHIFT] and self.stats.stamina > 0
         
         # 移動速度決定
         current_speed = self.stats.run_speed if self.is_running else self.stats.speed
         
         # 方向入力
-        if pygame.K_LEFT in keys_pressed or pygame.K_a in keys_pressed:
+        if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]:
             self.velocity_x = -current_speed
             self.direction = Direction.LEFT
             self.is_moving = True
+            print(f"🏃 プレイヤー移動: LEFT (速度: {current_speed})")
         
-        if pygame.K_RIGHT in keys_pressed or pygame.K_d in keys_pressed:
+        if keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
             self.velocity_x = current_speed
             self.direction = Direction.RIGHT
             self.is_moving = True
+            print(f"🏃 プレイヤー移動: RIGHT (速度: {current_speed})")
         
-        if pygame.K_UP in keys_pressed or pygame.K_w in keys_pressed:
+        if keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]:
             self.velocity_y = -current_speed
             self.direction = Direction.UP
             self.is_moving = True
+            print(f"🏃 プレイヤー移動: UP (速度: {current_speed})")
         
-        if pygame.K_DOWN in keys_pressed or pygame.K_s in keys_pressed:
+        if keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]:
             self.velocity_y = current_speed
             self.direction = Direction.DOWN
             self.is_moving = True
+            print(f"🏃 プレイヤー移動: DOWN (速度: {current_speed})")
         
         # 斜め移動の速度調整
         if self.velocity_x != 0 and self.velocity_y != 0:

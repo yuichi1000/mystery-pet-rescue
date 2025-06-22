@@ -186,7 +186,7 @@ class GameScene(Scene):
         
         # プレイヤー更新
         keys_pressed = pygame.key.get_pressed()
-        self.player.update(time_delta, keys_pressed)
+        self.player.update(time_delta, keys_pressed, self.map_system)
         
         # カメラ更新
         self._update_camera()

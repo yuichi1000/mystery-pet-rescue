@@ -1,0 +1,154 @@
+{
+  "menu": {
+    "start_game": "ゲーム開始",
+    "continue_game": "ゲーム続行",
+    "pet_collection": "ペット図鑑",
+    "settings": "設定",
+    "quit": "終了",
+    "resume": "ゲーム再開",
+    "inventory": "インベントリ",
+    "return_to_main": "メインメニューに戻る",
+    "audio_settings": "音量設定",
+    "display_settings": "画面設定",
+    "language_settings": "言語設定",
+    "key_settings": "キー設定",
+    "back": "戻る"
+  },
+  "ui": {
+    "health": "体力",
+    "energy": "エネルギー",
+    "level": "レベル",
+    "exp": "経験値",
+    "found": "発見",
+    "rescued": "救助",
+    "location": "場所",
+    "time": "時間",
+    "map": "マップ",
+    "score": "スコア",
+    "remaining_time": "残り時間",
+    "progress": "進捗",
+    "yes": "はい",
+    "no": "いいえ",
+    "ok": "OK",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "next": "次へ",
+    "previous": "前へ",
+    "skip": "スキップ"
+  },
+  "game": {
+    "title": "ミステリー・ペット・レスキュー",
+    "subtitle": "迷子のペットを探し出そう！",
+    "loading": "読み込み中...",
+    "saving": "保存中...",
+    "paused": "一時停止",
+    "game_over": "ゲームオーバー",
+    "mission_complete": "ミッション完了",
+    "new_pet_discovered": "新しいペットを発見しました！",
+    "pet_rescued": "ペットを救助しました！",
+    "pet_returned": "ペットを飼い主に返しました！",
+    "trust_increased": "信頼度が上がりました",
+    "fear_decreased": "恐怖度が下がりました",
+    "item_obtained": "{item}を入手しました",
+    "level_up": "レベルアップ！",
+    "achievement_unlocked": "実績解除: {achievement}"
+  },
+  "dialog": {
+    "confirm_quit": "ゲームを終了しますか？",
+    "confirm_restart": "ゲームを最初からやり直しますか？",
+    "confirm_delete_save": "このセーブデータを削除しますか？",
+    "save_success": "ゲームを保存しました",
+    "save_failed": "保存に失敗しました",
+    "load_success": "ゲームを読み込みました",
+    "load_failed": "読み込みに失敗しました",
+    "no_save_data": "セーブデータがありません",
+    "tutorial_welcome": "ミステリー・ペット・レスキューへようこそ！",
+    "tutorial_movement": "WASDキーまたは矢印キーで移動できます",
+    "tutorial_interaction": "SPACEキーでアクションを実行できます",
+    "tutorial_menu": "TABキーでメニューを開けます"
+  },
+  "pet": {
+    "types": {
+      "dog": "犬",
+      "cat": "猫",
+      "rabbit": "うさぎ",
+      "hamster": "ハムスター",
+      "bird": "鳥",
+      "fish": "魚",
+      "turtle": "カメ",
+      "ferret": "フェレット"
+    },
+    "states": {
+      "lost": "迷子",
+      "found": "発見済み",
+      "rescued": "救助済み",
+      "returned": "返却済み"
+    },
+    "personality": {
+      "friendly": "人懐っこい",
+      "shy": "恥ずかしがり屋",
+      "energetic": "元気",
+      "calm": "おとなしい",
+      "curious": "好奇心旺盛",
+      "independent": "独立心旺盛",
+      "loyal": "忠実",
+      "playful": "遊び好き"
+    },
+    "trust_level": "信頼度",
+    "fear_level": "恐怖度",
+    "hunger_level": "空腹度",
+    "owner": "飼い主",
+    "description": "説明",
+    "discovery_date": "発見日",
+    "rescue_date": "救助日",
+    "return_date": "返却日"
+  },
+  "items": {
+    "dog_food": "ドッグフード",
+    "cat_food": "キャットフード",
+    "universal_food": "万能ペットフード",
+    "ball": "ボール",
+    "feather_toy": "羽根のおもちゃ",
+    "pet_carrier": "ペットキャリー",
+    "flashlight": "懐中電灯",
+    "pet_license": "ペット救助許可証",
+    "energy_drink": "エナジードリンク"
+  },
+  "locations": {
+    "residential": "住宅街",
+    "park": "公園",
+    "shopping": "商店街",
+    "school": "学校",
+    "station": "駅"
+  },
+  "mini_games": {
+    "catch_game": "キャッチゲーム",
+    "memory_game": "記憶ゲーム",
+    "perfect": "パーフェクト！",
+    "success": "成功！",
+    "failure": "失敗...",
+    "timeout": "時間切れ",
+    "instructions": {
+      "catch": "落ちてくるボールをキャッチしよう！",
+      "memory": "順番を覚えて再現しよう！"
+    }
+  },
+  "controls": {
+    "movement": "移動: WASD",
+    "action": "アクション: SPACE",
+    "menu": "メニュー: TAB",
+    "inventory": "インベントリ: I",
+    "cancel": "キャンセル: ESC",
+    "mouse": "マウス操作も可能"
+  },
+  "error": {
+    "file_not_found": "ファイルが見つかりません",
+    "save_failed": "保存に失敗しました",
+    "load_failed": "読み込みに失敗しました",
+    "invalid_data": "無効なデータです",
+    "permission_denied": "アクセス権限がありません",
+    "disk_full": "ディスク容量が不足しています",
+    "network_error": "ネットワークエラーが発生しました",
+    "unknown_error": "不明なエラーが発生しました"
+  }
+}

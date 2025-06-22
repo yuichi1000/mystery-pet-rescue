@@ -1,0 +1,154 @@
+{
+  "menu": {
+    "start_game": "Start Game",
+    "continue_game": "Continue Game",
+    "pet_collection": "Pet Collection",
+    "settings": "Settings",
+    "quit": "Quit",
+    "resume": "Resume Game",
+    "inventory": "Inventory",
+    "return_to_main": "Return to Main Menu",
+    "audio_settings": "Audio Settings",
+    "display_settings": "Display Settings",
+    "language_settings": "Language Settings",
+    "key_settings": "Key Settings",
+    "back": "Back"
+  },
+  "ui": {
+    "health": "Health",
+    "energy": "Energy",
+    "level": "Level",
+    "exp": "Experience",
+    "found": "Found",
+    "rescued": "Rescued",
+    "location": "Location",
+    "time": "Time",
+    "map": "Map",
+    "score": "Score",
+    "remaining_time": "Time Left",
+    "progress": "Progress",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "skip": "Skip"
+  },
+  "game": {
+    "title": "Mystery Pet Rescue",
+    "subtitle": "Find the lost pets!",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "paused": "Paused",
+    "game_over": "Game Over",
+    "mission_complete": "Mission Complete",
+    "new_pet_discovered": "New pet discovered!",
+    "pet_rescued": "Pet rescued!",
+    "pet_returned": "Pet returned to owner!",
+    "trust_increased": "Trust increased",
+    "fear_decreased": "Fear decreased",
+    "item_obtained": "Obtained {item}",
+    "level_up": "Level Up!",
+    "achievement_unlocked": "Achievement Unlocked: {achievement}"
+  },
+  "dialog": {
+    "confirm_quit": "Are you sure you want to quit?",
+    "confirm_restart": "Are you sure you want to restart the game?",
+    "confirm_delete_save": "Are you sure you want to delete this save data?",
+    "save_success": "Game saved successfully",
+    "save_failed": "Failed to save game",
+    "load_success": "Game loaded successfully",
+    "load_failed": "Failed to load game",
+    "no_save_data": "No save data found",
+    "tutorial_welcome": "Welcome to Mystery Pet Rescue!",
+    "tutorial_movement": "Use WASD or arrow keys to move",
+    "tutorial_interaction": "Press SPACE to interact",
+    "tutorial_menu": "Press TAB to open menu"
+  },
+  "pet": {
+    "types": {
+      "dog": "Dog",
+      "cat": "Cat",
+      "rabbit": "Rabbit",
+      "hamster": "Hamster",
+      "bird": "Bird",
+      "fish": "Fish",
+      "turtle": "Turtle",
+      "ferret": "Ferret"
+    },
+    "states": {
+      "lost": "Lost",
+      "found": "Found",
+      "rescued": "Rescued",
+      "returned": "Returned"
+    },
+    "personality": {
+      "friendly": "Friendly",
+      "shy": "Shy",
+      "energetic": "Energetic",
+      "calm": "Calm",
+      "curious": "Curious",
+      "independent": "Independent",
+      "loyal": "Loyal",
+      "playful": "Playful"
+    },
+    "trust_level": "Trust Level",
+    "fear_level": "Fear Level",
+    "hunger_level": "Hunger Level",
+    "owner": "Owner",
+    "description": "Description",
+    "discovery_date": "Discovery Date",
+    "rescue_date": "Rescue Date",
+    "return_date": "Return Date"
+  },
+  "items": {
+    "dog_food": "Dog Food",
+    "cat_food": "Cat Food",
+    "universal_food": "Universal Pet Food",
+    "ball": "Ball",
+    "feather_toy": "Feather Toy",
+    "pet_carrier": "Pet Carrier",
+    "flashlight": "Flashlight",
+    "pet_license": "Pet Rescue License",
+    "energy_drink": "Energy Drink"
+  },
+  "locations": {
+    "residential": "Residential Area",
+    "park": "Park",
+    "shopping": "Shopping District",
+    "school": "School",
+    "station": "Station"
+  },
+  "mini_games": {
+    "catch_game": "Catch Game",
+    "memory_game": "Memory Game",
+    "perfect": "Perfect!",
+    "success": "Success!",
+    "failure": "Failed...",
+    "timeout": "Time's Up",
+    "instructions": {
+      "catch": "Catch the falling balls!",
+      "memory": "Remember and repeat the sequence!"
+    }
+  },
+  "controls": {
+    "movement": "Move: WASD",
+    "action": "Action: SPACE",
+    "menu": "Menu: TAB",
+    "inventory": "Inventory: I",
+    "cancel": "Cancel: ESC",
+    "mouse": "Mouse controls available"
+  },
+  "error": {
+    "file_not_found": "File not found",
+    "save_failed": "Failed to save",
+    "load_failed": "Failed to load",
+    "invalid_data": "Invalid data",
+    "permission_denied": "Permission denied",
+    "disk_full": "Disk full",
+    "network_error": "Network error occurred",
+    "unknown_error": "Unknown error occurred"
+  }
+}

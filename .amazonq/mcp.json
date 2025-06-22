@@ -1,0 +1,67 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@mcp-servers/playwright"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  },
+  "description": "MCP configuration for Mystery Pet Rescue game testing",
+  "version": "1.0.0",
+  "settings": {
+    "playwright": {
+      "browser": "chromium",
+      "headless": false,
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "defaultTimeout": 30000,
+      "testIdAttribute": "data-testid",
+      "screenshot": {
+        "fullPage": true,
+        "path": "./tests/screenshots"
+      },
+      "video": {
+        "enabled": true,
+        "path": "./tests/videos"
+      },
+      "trace": {
+        "enabled": true,
+        "screenshots": true,
+        "snapshots": true
+      }
+    }
+  },
+  "testSuites": {
+    "unit": {
+      "path": "./tests/unit",
+      "pattern": "test_*.py"
+    },
+    "integration": {
+      "path": "./tests/integration",
+      "pattern": "test_*.py"
+    },
+    "e2e": {
+      "path": "./tests/e2e",
+      "pattern": "test_*.py",
+      "useMcp": true
+    }
+  },
+  "gameTestConfig": {
+    "windowSize": {
+      "width": 1280,
+      "height": 720
+    },
+    "targetFps": 60,
+    "testSaveSlot": 99,
+    "skipIntro": true,
+    "debugMode": true,
+    "language": "ja"
+  }
+}

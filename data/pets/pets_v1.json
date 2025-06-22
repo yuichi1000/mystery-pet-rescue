@@ -1,0 +1,254 @@
+{
+  "version": "1.0",
+  "description": "ペットデータベース v1.0",
+  "pet_templates": {
+    "dog": {
+      "base_stats": {
+        "trust_threshold": 70,
+        "fear_threshold": 30,
+        "hunger_rate": 1.0,
+        "energy_level": 80,
+        "detection_radius": 100,
+        "movement_speed": 3
+      },
+      "personality_ranges": {
+        "friendly": [60, 90],
+        "loyal": [70, 95],
+        "energetic": [50, 85],
+        "playful": [60, 90]
+      },
+      "preferred_items": ["dog_food", "ball"],
+      "mini_games": ["catch_game"],
+      "sounds": {
+        "happy": "dog_bark_happy.ogg",
+        "scared": "dog_whimper.ogg",
+        "neutral": "dog_pant.ogg"
+      },
+      "animations": {
+        "idle": "dog_idle.png",
+        "walking": "dog_walk.png",
+        "running": "dog_run.png",
+        "sitting": "dog_sit.png"
+      }
+    },
+    "cat": {
+      "base_stats": {
+        "trust_threshold": 60,
+        "fear_threshold": 40,
+        "hunger_rate": 0.8,
+        "energy_level": 70,
+        "detection_radius": 80,
+        "movement_speed": 4
+      },
+      "personality_ranges": {
+        "independent": [70, 95],
+        "curious": [60, 85],
+        "aloof": [40, 80],
+        "graceful": [70, 90]
+      },
+      "preferred_items": ["cat_food", "feather_toy"],
+      "mini_games": ["memory_game"],
+      "sounds": {
+        "happy": "cat_purr.ogg",
+        "scared": "cat_hiss.ogg",
+        "neutral": "cat_meow.ogg"
+      },
+      "animations": {
+        "idle": "cat_idle.png",
+        "walking": "cat_walk.png",
+        "running": "cat_run.png",
+        "sitting": "cat_sit.png"
+      }
+    },
+    "rabbit": {
+      "base_stats": {
+        "trust_threshold": 80,
+        "fear_threshold": 20,
+        "hunger_rate": 1.2,
+        "energy_level": 60,
+        "detection_radius": 120,
+        "movement_speed": 5
+      },
+      "personality_ranges": {
+        "timid": [70, 95],
+        "gentle": [80, 95],
+        "quick": [60, 85],
+        "alert": [70, 90]
+      },
+      "preferred_items": ["universal_food"],
+      "mini_games": ["catch_game"],
+      "sounds": {
+        "happy": "rabbit_happy.ogg",
+        "scared": "rabbit_scared.ogg",
+        "neutral": "rabbit_neutral.ogg"
+      },
+      "animations": {
+        "idle": "rabbit_idle.png",
+        "walking": "rabbit_walk.png",
+        "running": "rabbit_hop.png",
+        "sitting": "rabbit_sit.png"
+      }
+    }
+  },
+  "special_pets": [
+    {
+      "id": "golden_retriever_001",
+      "type": "dog",
+      "name": "ゴールデン",
+      "rarity": 3,
+      "special_traits": {
+        "friendly": 95,
+        "loyal": 100,
+        "intelligent": 90
+      },
+      "description": "とても賢くて人懐っこいゴールデンレトリバー",
+      "spawn_conditions": {
+        "weather": "sunny",
+        "time_range": [6, 18],
+        "player_level": 5
+      }
+    },
+    {
+      "id": "siamese_cat_001",
+      "type": "cat",
+      "name": "シャム",
+      "rarity": 4,
+      "special_traits": {
+        "independent": 90,
+        "intelligent": 95,
+        "vocal": 85
+      },
+      "description": "美しい青い目をしたシャム猫",
+      "spawn_conditions": {
+        "weather": "any",
+        "time_range": [20, 6],
+        "player_level": 8
+      }
+    }
+  ],
+  "pet_behaviors": {
+    "wandering": {
+      "description": "ランダムに歩き回る",
+      "movement_pattern": "random",
+      "speed_modifier": 1.0,
+      "detection_modifier": 1.0
+    },
+    "hiding": {
+      "description": "隠れて動かない",
+      "movement_pattern": "stationary",
+      "speed_modifier": 0.0,
+      "detection_modifier": 0.5,
+      "preferred_locations": ["bushes", "under_objects", "corners"]
+    },
+    "fleeing": {
+      "description": "プレイヤーから逃げる",
+      "movement_pattern": "flee",
+      "speed_modifier": 1.5,
+      "detection_modifier": 1.5,
+      "flee_distance": 150
+    },
+    "following": {
+      "description": "プレイヤーについてくる",
+      "movement_pattern": "follow",
+      "speed_modifier": 0.8,
+      "detection_modifier": 0.8,
+      "follow_distance": 50
+    }
+  },
+  "rescue_methods": [
+    {
+      "name": "food_lure",
+      "display_name": "食べ物で誘う",
+      "required_items": ["dog_food", "cat_food", "universal_food"],
+      "success_rate": 0.7,
+      "trust_bonus": 15,
+      "fear_reduction": 10
+    },
+    {
+      "name": "toy_play",
+      "display_name": "おもちゃで遊ぶ",
+      "required_items": ["ball", "feather_toy"],
+      "success_rate": 0.6,
+      "trust_bonus": 20,
+      "fear_reduction": 15
+    },
+    {
+      "name": "gentle_approach",
+      "display_name": "優しく近づく",
+      "required_items": [],
+      "success_rate": 0.4,
+      "trust_bonus": 10,
+      "fear_reduction": 5
+    },
+    {
+      "name": "mini_game",
+      "display_name": "ミニゲームで遊ぶ",
+      "required_items": [],
+      "success_rate": 0.8,
+      "trust_bonus": 25,
+      "fear_reduction": 20
+    }
+  ],
+  "achievements": [
+    {
+      "id": "first_rescue",
+      "name": "初めての救助",
+      "description": "初めてペットを救助する",
+      "condition": {
+        "pets_rescued": 1
+      },
+      "reward": {
+        "exp": 100,
+        "items": ["energy_drink"]
+      }
+    },
+    {
+      "id": "dog_lover",
+      "name": "犬好き",
+      "description": "犬を5匹救助する",
+      "condition": {
+        "dogs_rescued": 5
+      },
+      "reward": {
+        "exp": 500,
+        "items": ["dog_food", "ball"]
+      }
+    },
+    {
+      "id": "cat_whisperer",
+      "name": "猫の囁き手",
+      "description": "猫を5匹救助する",
+      "condition": {
+        "cats_rescued": 5
+      },
+      "reward": {
+        "exp": 500,
+        "items": ["cat_food", "feather_toy"]
+      }
+    },
+    {
+      "id": "speed_rescuer",
+      "name": "スピード救助者",
+      "description": "5分以内にペットを救助する",
+      "condition": {
+        "rescue_time_under": 300
+      },
+      "reward": {
+        "exp": 200,
+        "title": "スピード救助者"
+      }
+    },
+    {
+      "id": "perfect_trust",
+      "name": "完全な信頼",
+      "description": "信頼度100でペットを救助する",
+      "condition": {
+        "perfect_trust_rescue": 1
+      },
+      "reward": {
+        "exp": 300,
+        "items": ["pet_license"]
+      }
+    }
+  ]
+}

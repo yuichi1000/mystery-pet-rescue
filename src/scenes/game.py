@@ -165,13 +165,8 @@ class GameScene(Scene):
                     self.game_ui.add_notification("ゲーム再開", NotificationType.INFO)
             
             elif event.key == pygame.K_c:
-                # ペット図鑑表示切り替え（デモと同じ）
-                if self.show_pet_collection:
-                    self.pet_collection_ui.hide()
-                    self.show_pet_collection = False
-                else:
-                    self.pet_collection_ui.show()
-                    self.show_pet_collection = True
+                # デモではCキーでペット図鑑切り替えはなし
+                pass
         
         elif event.type == pygame.USEREVENT + 1:
             # ゲーム完了タイマー
@@ -263,9 +258,8 @@ class GameScene(Scene):
         }
         self.game_ui.draw(player_stats, [], (self.player.x, self.player.y))
         
-        # ペット図鑑描画（既存のUIクラスを使用）
-        if self.show_pet_collection:
-            self.pet_collection_ui.draw(self.pet_collection.get_collected_pets())
+        # ペット図鑑描画（デモと同じ - 常時表示）
+        self.pet_collection_ui.draw(self.pet_collection.get_collected_pets())
         
         # ポーズ表示
         if self.paused:

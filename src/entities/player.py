@@ -112,25 +112,21 @@ class Player:
             self.velocity_x = -current_speed
             self.direction = Direction.LEFT
             self.is_moving = True
-            print(f"🏃 プレイヤー移動: LEFT (速度: {current_speed})")
         
         if keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
             self.velocity_x = current_speed
             self.direction = Direction.RIGHT
             self.is_moving = True
-            print(f"🏃 プレイヤー移動: RIGHT (速度: {current_speed})")
         
         if keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]:
             self.velocity_y = -current_speed
             self.direction = Direction.UP
             self.is_moving = True
-            print(f"🏃 プレイヤー移動: UP (速度: {current_speed})")
         
         if keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]:
             self.velocity_y = current_speed
             self.direction = Direction.DOWN
             self.is_moving = True
-            print(f"🏃 プレイヤー移動: DOWN (速度: {current_speed})")
         
         # 斜め移動の速度調整
         if self.velocity_x != 0 and self.velocity_y != 0:

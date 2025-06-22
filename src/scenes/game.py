@@ -276,10 +276,18 @@ class GameScene(Scene):
     
     def _start_pet_puzzle(self, pet: Pet):
         """ペットパズルを開始"""
-        puzzle_data = self.puzzle_system.create_pet_puzzle(pet.data.pet_type)
-        puzzle_data['pet_id'] = pet.data.pet_id  # ペットIDを追加
-        self.current_puzzle = puzzle_data
-        self.puzzle_ui.show_puzzle(puzzle_data)
+        # ペットタイプに応じたパズルIDを決定
+        puzzle_id = f"pet_{pet.data.pet_type.value}_puzzle"
+        puzzle_data = self.puzzle_system.get_puzzle_data(puzzle_id)
+        
+        if puzzle_data:
+            puzzle_data['pet_id'] = pet.data.pet_id  # ペットIDを追加
+            self.current_puzzle = puzzle_data
+            self.puzzle_ui.show_puzzle(puzzle_data)
+        else:
+            # パズルが見つからない場合は簡単な相互作用
+            self.game_ui.add_notification(f"{pet.data.name}と仲良くなりました！", NotificationType.SUCCESS)
+            self._rescue_pet(pet)
         self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
     
     def _handle_puzzle_solved(self):

@@ -65,9 +65,59 @@ class TileSet:
         self.tiles: Dict[int, Tile] = {}
         self.sprite_sheet = None
         self.tileset_path = tileset_path
+        self.individual_sprites: Dict[int, pygame.Surface] = {}  # 個別スプライト用
         
         # デバッグ用の色付きタイル作成
         self._create_debug_tiles()
+        
+        # スプライトファイルがあれば読み込み
+        if tileset_path and os.path.exists(tileset_path):
+            self.load_sprite_sheet(tileset_path)
+    
+    def load_sprite_sheet(self, sprite_path: str):
+        """スプライトシートまたは個別スプライトを読み込み"""
+        try:
+            if os.path.exists(sprite_path):
+                sprite_surface = pygame.image.load(sprite_path).convert_alpha()
+                
+                # ファイル名から判断して適切に処理
+                filename = os.path.basename(sprite_path).lower()
+                
+                if 'grass' in filename:
+                    # 草地タイル（ID: 4）として登録
+                    self.individual_sprites[4] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
+                    print(f"草地スプライト読み込み成功: {sprite_path}")
+                elif 'tileset' in filename:
+                    # タイルセットとして処理
+                    self.sprite_sheet = sprite_surface
+                    print(f"タイルセット読み込み成功: {sprite_path}")
+                else:
+                    # 汎用的な個別スプライト
+                    self.sprite_sheet = sprite_surface
+                    print(f"スプライト読み込み成功: {sprite_path}")
+                
+                return True
+            else:
+                print(f"スプライトファイルが見つかりません: {sprite_path}")
+                return False
+        except Exception as e:
+            print(f"スプライト読み込みエラー: {e}")
+            return False
+    
+    def load_individual_sprite(self, tile_id: int, sprite_path: str):
+        """個別のタイルスプライトを読み込み"""
+        try:
+            if os.path.exists(sprite_path):
+                sprite_surface = pygame.image.load(sprite_path).convert_alpha()
+                self.individual_sprites[tile_id] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
+                print(f"タイルID {tile_id} のスプライト読み込み成功: {sprite_path}")
+                return True
+            else:
+                print(f"スプライトファイルが見つかりません: {sprite_path}")
+                return False
+        except Exception as e:
+            print(f"スプライト読み込みエラー: {e}")
+            return False
     
     def _create_debug_tiles(self):
         """デバッグ用のカラータイルを作成"""
@@ -97,9 +147,36 @@ class TileSet:
         if tile_id not in self.tiles:
             return self._create_empty_tile()
         
-        tile = self.tiles[tile_id]
+        # 個別スプライトが登録されている場合は優先使用
+        if hasattr(self, 'individual_sprites') and tile_id in self.individual_sprites:
+            return self.individual_sprites[tile_id]
         
-        # デバッグ用カラータイル作成
+        # スプライトシートがある場合
+        if self.sprite_sheet:
+            tile = self.tiles[tile_id]
+            try:
+                # スプライトシートから該当部分を切り出し
+                sprite_rect = pygame.Rect(
+                    tile.sprite_x * self.tile_size,
+                    tile.sprite_y * self.tile_size,
+                    self.tile_size,
+                    self.tile_size
+                )
+                sprite = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
+                sprite.blit(self.sprite_sheet, (0, 0), sprite_rect)
+                return sprite
+            except Exception as e:
+                print(f"スプライトシート切り出しエラー: {e}")
+        
+        # フォールバック：デバッグ用カラータイル
+        return self._create_debug_tile(tile_id)
+    
+    def _create_debug_tile(self, tile_id: int) -> pygame.Surface:
+        """デバッグ用カラータイルを作成"""
+        tile = self.tiles.get(tile_id)
+        if not tile:
+            return self._create_empty_tile()
+        
         sprite = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
         
         if tile.tile_type == TileType.EMPTY:
@@ -213,6 +290,10 @@ class MapSystem:
                 self.tileset = TileSet(tileset_path, self.tile_size)
             else:
                 self.tileset = TileSet("", self.tile_size)
+                # 草地スプライトを個別に読み込み
+                grass_sprite_path = "assets/images/tiles/grass_tile.png"
+                if os.path.exists(grass_sprite_path):
+                    self.tileset.load_individual_sprite(4, grass_sprite_path)
             
             # マップサイズ
             self.width = map_data.get('width', 0)
@@ -297,6 +378,12 @@ class MapSystem:
         self.width = 20
         self.height = 15
         self.tileset = TileSet("", self.tile_size)
+        
+        # 草地スプライトを個別に読み込み
+        grass_sprite_path = "assets/images/tiles/grass_tile.png"
+        if os.path.exists(grass_sprite_path):
+            self.tileset.load_individual_sprite(4, grass_sprite_path)
+            print("草地スプライトを読み込みました")
         
         # 背景レイヤー（草地）
         background_data = [[4 for _ in range(self.width)] for _ in range(self.height)]

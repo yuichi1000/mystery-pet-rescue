@@ -70,10 +70,10 @@ class MemoryGame(MinigameBase):
         self.matched_pairs = 0
         self.total_pairs = 0
         
-        # カード設定
-        self.card_width = 80
-        self.card_height = 100
-        self.card_margin = 10
+        # カード設定（最小64x64ベース）
+        self.card_width = 128   # 256→128に調整（記憶ゲーム用）
+        self.card_height = 160  # 256→160に調整（記憶ゲーム用）
+        self.card_margin = 15
         
         # 難易度設定
         self.difficulty_settings = {

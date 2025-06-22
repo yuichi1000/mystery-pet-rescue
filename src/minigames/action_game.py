@@ -122,7 +122,7 @@ class ActionGame(MinigameBase):
     def _initialize_game(self) -> None:
         """ゲーム初期化"""
         # プレイヤー初期化
-        player_size = 20
+        player_size = 64  # 256→64に縮小して使用
         self.player = Player(
             x=self.game_area.centerx - player_size // 2,
             y=self.game_area.bottom - player_size - 10,
@@ -133,7 +133,7 @@ class ActionGame(MinigameBase):
         )
         
         # ペット初期化
-        pet_size = 25
+        pet_size = 64  # 256→64に縮小して使用
         self.pet = Pet(
             x=self.game_area.centerx - pet_size // 2,
             y=self.game_area.top + 20,

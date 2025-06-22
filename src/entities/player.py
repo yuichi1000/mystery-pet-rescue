@@ -177,19 +177,20 @@ class Player:
         
         pygame.draw.polygon(sprite, COLOR_WHITE, points)
     
-    def update(self, dt: float, input_handler):
+    def update(self, dt: float, input_handler, map_system=None):
         """
         プレイヤーを更新
         
         Args:
             dt: デルタタイム（秒）
             input_handler: 入力ハンドラー
+            map_system: マップシステム（衝突判定用）
         """
         # 入力処理
         self._handle_input(input_handler)
         
-        # 移動処理
-        self._update_movement(dt)
+        # 移動処理（マップ衝突判定付き）
+        self._update_movement(dt, map_system)
         
         # アニメーション更新
         self._update_animation(dt)
@@ -219,8 +220,20 @@ class Player:
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             move_y += 1
         
+        # 走行状態の判定（Shiftキー）
+        running = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
+        
         # 移動ベクトルの正規化（8方向移動対応）
         if move_x != 0 or move_y != 0:
+            # 速度とアニメーション状態の更新
+            if running and self.stamina > 0:
+                self.current_speed = self.base_speed * 1.5
+                self.animation_state = AnimationState.RUNNING
+                self.stamina -= 20 * (1/60)  # スタミナ消費
+            else:
+                self.current_speed = self.base_speed
+                self.animation_state = AnimationState.WALKING
+            
             # 斜め移動の場合は速度を調整
             if move_x != 0 and move_y != 0:
                 move_x *= 0.707  # 1/√2
@@ -236,20 +249,6 @@ class Player:
             self.velocity_x = 0
             self.velocity_y = 0
             self.is_moving = False
-        
-        # 走行状態の判定（Shiftキー）
-        running = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
-        
-        # 速度とアニメーション状態の更新
-        if self.is_moving:
-            if running and self.stamina > 0:
-                self.current_speed = self.base_speed * 1.5
-                self.animation_state = AnimationState.RUNNING
-                self.stamina -= 20 * (1/60)  # スタミナ消費
-            else:
-                self.current_speed = self.base_speed
-                self.animation_state = AnimationState.WALKING
-        else:
             self.animation_state = AnimationState.IDLE
             # スタミナ回復
             self.stamina = min(self.max_stamina, self.stamina + 10 * (1/60))
@@ -278,24 +277,40 @@ class Player:
         if self.is_moving:
             self.last_direction = self.direction
     
-    def _update_movement(self, dt: float):
+    def _update_movement(self, dt: float, map_system=None):
         """移動処理"""
         if self.is_moving:
-            # 位置更新
+            # 新しい位置を計算
             new_x = self.x + self.velocity_x * dt
             new_y = self.y + self.velocity_y * dt
             
-            # 画面境界チェック
-            new_x = max(0, min(SCREEN_WIDTH - self.width, new_x))
-            new_y = max(0, min(SCREEN_HEIGHT - self.height, new_y))
-            
-            # 移動距離を記録
-            distance = math.sqrt((new_x - self.x)**2 + (new_y - self.y)**2)
-            self.distance_walked += distance
-            
-            # 位置更新
-            self.x = new_x
-            self.y = new_y
+            # マップ衝突判定
+            if map_system:
+                # X軸移動チェック
+                if not map_system.check_collision(new_x, self.y, self.width, self.height):
+                    # 移動距離を記録
+                    distance = abs(new_x - self.x)
+                    self.distance_walked += distance
+                    self.x = new_x
+                
+                # Y軸移動チェック
+                if not map_system.check_collision(self.x, new_y, self.width, self.height):
+                    # 移動距離を記録
+                    distance = abs(new_y - self.y)
+                    self.distance_walked += distance
+                    self.y = new_y
+            else:
+                # 画面境界チェック（マップシステムがない場合）
+                new_x = max(0, min(SCREEN_WIDTH - self.width, new_x))
+                new_y = max(0, min(SCREEN_HEIGHT - self.height, new_y))
+                
+                # 移動距離を記録
+                distance = math.sqrt((new_x - self.x)**2 + (new_y - self.y)**2)
+                self.distance_walked += distance
+                
+                # 位置更新
+                self.x = new_x
+                self.y = new_y
     
     def _update_animation(self, dt: float):
         """アニメーション更新"""

@@ -1,313 +1,374 @@
 """
-ペットクラス
-
-ゲーム内のペットを管理
+ペットエンティティ
+ゲーム内のペットキャラクター管理
 """
 
 import pygame
 import random
 import math
-from typing import Tuple, Optional
-from config.constants import *
+from typing import Tuple, Dict, Optional
+from dataclasses import dataclass
+from enum import Enum
 
+from src.utils.asset_manager import get_asset_manager
+
+class PetState(Enum):
+    """ペット状態"""
+    IDLE = "idle"
+    WANDERING = "wandering"
+    SCARED = "scared"
+    FOLLOWING = "following"
+    RESCUED = "rescued"
+
+class PetType(Enum):
+    """ペットタイプ"""
+    CAT = "cat"
+    DOG = "dog"
+    RABBIT = "rabbit"
+    BIRD = "bird"
+
+@dataclass
+class PetData:
+    """ペットデータ"""
+    pet_id: str
+    name: str
+    pet_type: PetType
+    personality: str
+    rarity: str
+    description: str
 
 class Pet:
     """ペットクラス"""
     
-    def __init__(self, pet_type: str, x: int, y: int, pet_id: Optional[str] = None):
-        """
-        ペットを初期化
-        
-        Args:
-            pet_type: ペットの種類
-            x: 初期X座標
-            y: 初期Y座標
-            pet_id: ペットID（省略時は自動生成）
-        """
-        self.pet_id = pet_id or f"{pet_type}_{random.randint(1000, 9999)}"
-        self.pet_type = pet_type
+    def __init__(self, pet_data: PetData, x: float, y: float):
+        # 基本情報
+        self.data = pet_data
         self.x = x
         self.y = y
-        self.width = TILE_SIZE
-        self.height = TILE_SIZE
+        self.rect = pygame.Rect(x, y, 48, 48)
         
         # 状態
-        self.state = PET_STATE_LOST
-        self.trust_level = 0  # 0-100
-        self.fear_level = 50  # 0-100
-        self.hunger_level = 70  # 0-100
+        self.state = PetState.IDLE
+        self.direction = random.choice(["front", "back", "left", "right"])
         
         # 移動
-        self.speed = PET_SPEED
-        self.direction = random.choice(["up", "down", "left", "right"])
-        self.move_timer = 0
-        self.move_interval = random.randint(60, 180)  # フレーム数
-        
-        # 当たり判定
-        self.rect = pygame.Rect(x, y, self.width, self.height)
+        self.velocity_x = 0.0
+        self.velocity_y = 0.0
+        self.speed = 50.0  # プレイヤーより遅い
+        self.wander_timer = 0.0
+        self.wander_interval = random.uniform(2.0, 5.0)
         
         # AI行動
-        self.behavior_state = "wandering"  # wandering, hiding, fleeing, following
-        self.target_x = x
-        self.target_y = y
-        self.detection_radius = 100
+        self.fear_distance = 100.0  # プレイヤーがこの距離に近づくと逃げる
+        self.trust_level = 0.0      # 信頼度（0-100）
+        self.rescue_threshold = 80.0 # この信頼度で救出可能
         
         # アニメーション
+        self.animation_timer = 0.0
         self.animation_frame = 0
-        self.animation_timer = 0
-        self.animation_speed = 15
         
-        # 個性
-        self.personality = self._generate_personality()
+        # スプライト
+        self.asset_manager = get_asset_manager()
+        self.sprites = self._load_sprites()
         
-        # 飼い主情報
-        self.owner_name = self._generate_owner_name()
-        self.owner_description = self._generate_owner_description()
+        # エフェクト
+        self.emotion_timer = 0.0
+        self.current_emotion = None
         
-        # 発見状態
-        self.is_discovered = False
-        self.discovery_time = 0
+        print(f"🐾 ペット生成: {self.data.name} ({self.data.pet_type.value})")
     
-    def _generate_personality(self) -> dict:
-        """ペットの個性を生成"""
-        personalities = {
-            "dog": {"friendly": 80, "energetic": 70, "loyal": 90},
-            "cat": {"independent": 85, "curious": 75, "aloof": 60},
-            "rabbit": {"timid": 80, "gentle": 85, "quick": 70},
-            "hamster": {"active": 90, "small": 95, "nocturnal": 80},
-            "bird": {"vocal": 85, "intelligent": 80, "social": 70},
-            "fish": {"calm": 95, "silent": 90, "graceful": 80},
-            "turtle": {"slow": 95, "patient": 90, "wise": 85},
-            "ferret": {"playful": 90, "mischievous": 85, "energetic": 80}
-        }
+    def _load_sprites(self) -> Dict[str, pygame.Surface]:
+        """ペットスプライトを読み込み"""
+        sprites = {}
+        directions = ["front", "back", "left", "right"]
         
-        base_personality = personalities.get(self.pet_type, {"neutral": 50})
+        # ペットタイプに応じたスプライトパスを決定
+        sprite_prefix = f"pet_{self.data.pet_type.value}_001"
         
-        # ランダムな変動を加える
-        result = {}
-        for trait, value in base_personality.items():
-            variation = random.randint(-20, 20)
-            result[trait] = max(0, min(100, value + variation))
+        for direction in directions:
+            sprite_path = f"pets/{sprite_prefix}_{direction}.png"
+            sprite = self.asset_manager.load_image(sprite_path, (48, 48))
+            if sprite:
+                sprites[direction] = sprite
+                print(f"✅ ペットスプライト読み込み: {sprite_prefix}_{direction}")
+            else:
+                print(f"⚠️ ペットスプライト読み込み失敗: {sprite_prefix}_{direction}")
         
-        return result
+        return sprites
     
-    def _generate_owner_name(self) -> str:
-        """飼い主の名前を生成"""
-        names = [
-            "田中さん", "佐藤さん", "鈴木さん", "高橋さん", "渡辺さん",
-            "伊藤さん", "山田さん", "中村さん", "小林さん", "加藤さん"
-        ]
-        return random.choice(names)
-    
-    def _generate_owner_description(self) -> str:
-        """飼い主の説明を生成"""
-        descriptions = [
-            "優しいおばあさん",
-            "小さな男の子",
-            "犬好きの女性",
-            "一人暮らしの学生",
-            "家族連れ",
-            "動物愛好家",
-            "近所の住人"
-        ]
-        return random.choice(descriptions)
-    
-    def update(self, player_pos: Tuple[int, int]):
+    def update(self, time_delta: float, player_pos: Tuple[float, float]):
         """ペットを更新"""
         # プレイヤーとの距離を計算
         distance_to_player = self._calculate_distance(player_pos)
         
-        # AI行動を更新
-        self._update_behavior(player_pos, distance_to_player)
+        # 状態に応じた行動
+        self._update_behavior(time_delta, player_pos, distance_to_player)
         
         # 移動処理
-        self._update_movement()
+        self._update_movement(time_delta)
         
         # アニメーション更新
-        self._update_animation()
+        self._update_animation(time_delta)
         
-        # 状態更新
-        self._update_state()
-        
-        # 当たり判定更新
-        self.rect.x = self.x
-        self.rect.y = self.y
+        # エモーション更新
+        self._update_emotion(time_delta)
     
-    def _calculate_distance(self, target_pos: Tuple[int, int]) -> float:
-        """指定位置との距離を計算"""
-        dx = self.x - target_pos[0]
-        dy = self.y - target_pos[1]
+    def _calculate_distance(self, player_pos: Tuple[float, float]) -> float:
+        """プレイヤーとの距離を計算"""
+        dx = self.x - player_pos[0]
+        dy = self.y - player_pos[1]
         return math.sqrt(dx * dx + dy * dy)
     
-    def _update_behavior(self, player_pos: Tuple[int, int], distance: float):
-        """AI行動を更新"""
-        if distance <= self.detection_radius:
-            if not self.is_discovered:
-                self.is_discovered = True
-                self.discovery_time = pygame.time.get_ticks()
-            
-            # 信頼度に基づいて行動を決定
-            if self.trust_level > 70:
-                self.behavior_state = "following"
-                self.target_x = player_pos[0]
-                self.target_y = player_pos[1]
-            elif self.fear_level > 60:
-                self.behavior_state = "fleeing"
-                # プレイヤーから逃げる方向を設定
-                dx = self.x - player_pos[0]
-                dy = self.y - player_pos[1]
-                if dx != 0 or dy != 0:
-                    length = math.sqrt(dx * dx + dy * dy)
-                    self.target_x = self.x + (dx / length) * 100
-                    self.target_y = self.y + (dy / length) * 100
-            else:
-                self.behavior_state = "hiding"
-        else:
-            self.behavior_state = "wandering"
-            self._set_random_target()
-    
-    def _set_random_target(self):
-        """ランダムな目標位置を設定"""
-        self.move_timer += 1
-        if self.move_timer >= self.move_interval:
-            self.move_timer = 0
-            self.move_interval = random.randint(60, 180)
-            
-            # 現在位置から適度な距離の目標を設定
-            angle = random.uniform(0, 2 * math.pi)
-            distance = random.uniform(50, 150)
-            self.target_x = self.x + math.cos(angle) * distance
-            self.target_y = self.y + math.sin(angle) * distance
-            
-            # 画面境界内に制限
-            self.target_x = max(0, min(SCREEN_WIDTH - self.width, self.target_x))
-            self.target_y = max(0, min(SCREEN_HEIGHT - self.height, self.target_y))
-    
-    def _update_movement(self):
-        """移動処理"""
-        # 目標位置への移動
-        dx = self.target_x - self.x
-        dy = self.target_y - self.y
-        distance = math.sqrt(dx * dx + dy * dy)
+    def _update_behavior(self, time_delta: float, player_pos: Tuple[float, float], distance: float):
+        """行動を更新"""
+        if self.state == PetState.RESCUED:
+            return
         
-        if distance > self.speed:
-            # 正規化して移動
-            self.x += (dx / distance) * self.speed
-            self.y += (dy / distance) * self.speed
+        # 恐怖状態の判定
+        if distance < self.fear_distance and self.trust_level < 50:
+            self._enter_scared_state(player_pos)
+        elif self.state == PetState.SCARED and distance > self.fear_distance * 1.5:
+            self.state = PetState.IDLE
+            self.velocity_x = 0
+            self.velocity_y = 0
+        
+        # 状態別行動
+        if self.state == PetState.IDLE:
+            self._idle_behavior(time_delta)
+        elif self.state == PetState.WANDERING:
+            self._wandering_behavior(time_delta)
+        elif self.state == PetState.SCARED:
+            self._scared_behavior(time_delta, player_pos)
+        elif self.state == PetState.FOLLOWING:
+            self._following_behavior(time_delta, player_pos)
+    
+    def _idle_behavior(self, time_delta: float):
+        """待機行動"""
+        self.wander_timer += time_delta
+        
+        if self.wander_timer >= self.wander_interval:
+            # ランダムに徘徊開始
+            if random.random() < 0.7:  # 70%の確率で徘徊
+                self.state = PetState.WANDERING
+                self._set_random_direction()
+            
+            self.wander_timer = 0.0
+            self.wander_interval = random.uniform(2.0, 5.0)
+    
+    def _wandering_behavior(self, time_delta: float):
+        """徘徊行動"""
+        self.wander_timer += time_delta
+        
+        # 一定時間後に停止
+        if self.wander_timer >= 3.0:
+            self.state = PetState.IDLE
+            self.velocity_x = 0
+            self.velocity_y = 0
+            self.wander_timer = 0.0
+    
+    def _scared_behavior(self, time_delta: float, player_pos: Tuple[float, float]):
+        """恐怖行動"""
+        # プレイヤーから逃げる方向に移動
+        dx = self.x - player_pos[0]
+        dy = self.y - player_pos[1]
+        
+        if dx != 0 or dy != 0:
+            length = math.sqrt(dx * dx + dy * dy)
+            self.velocity_x = (dx / length) * self.speed * 1.5  # 恐怖時は速く移動
+            self.velocity_y = (dy / length) * self.speed * 1.5
             
             # 方向を更新
             if abs(dx) > abs(dy):
                 self.direction = "right" if dx > 0 else "left"
             else:
-                self.direction = "down" if dy > 0 else "up"
+                self.direction = "back" if dy > 0 else "front"
+        
+        # エモーション表示
+        self.current_emotion = "scared"
+        self.emotion_timer = 1.0
     
-    def _update_animation(self):
-        """アニメーション更新"""
-        self.animation_timer += 1
-        if self.animation_timer >= self.animation_speed:
-            self.animation_timer = 0
-            self.animation_frame = (self.animation_frame + 1) % 4
+    def _following_behavior(self, time_delta: float, player_pos: Tuple[float, float]):
+        """追従行動"""
+        # プレイヤーに向かって移動（一定距離を保つ）
+        target_distance = 80.0
+        dx = player_pos[0] - self.x
+        dy = player_pos[1] - self.y
+        distance = math.sqrt(dx * dx + dy * dy)
+        
+        if distance > target_distance:
+            # プレイヤーに近づく
+            if distance > 0:
+                self.velocity_x = (dx / distance) * self.speed * 0.8
+                self.velocity_y = (dy / distance) * self.speed * 0.8
+                
+                # 方向を更新
+                if abs(dx) > abs(dy):
+                    self.direction = "right" if dx > 0 else "left"
+                else:
+                    self.direction = "front" if dy > 0 else "back"
+        else:
+            # 十分近い場合は停止
+            self.velocity_x = 0
+            self.velocity_y = 0
     
-    def _update_state(self):
-        """状態更新"""
-        # 時間経過による変化
-        if self.hunger_level > 0:
-            self.hunger_level -= 0.1
-        
-        # 恐怖レベルの自然減少
-        if self.fear_level > 0:
-            self.fear_level -= 0.05
+    def _enter_scared_state(self, player_pos: Tuple[float, float]):
+        """恐怖状態に入る"""
+        if self.state != PetState.SCARED:
+            self.state = PetState.SCARED
+            print(f"😨 {self.data.name}が怖がっています")
     
-    def render(self, screen: pygame.Surface):
-        """ペットを描画"""
-        # ペットの種類に応じた色
-        colors = {
-            "dog": COLOR_YELLOW,
-            "cat": (255, 165, 0),  # オレンジ
-            "rabbit": COLOR_WHITE,
-            "hamster": (139, 69, 19),  # 茶色
-            "bird": (0, 255, 255),  # シアン
-            "fish": COLOR_BLUE,
-            "turtle": COLOR_GREEN,
-            "ferret": (128, 0, 128)  # 紫
-        }
+    def _set_random_direction(self):
+        """ランダムな方向に移動開始"""
+        angle = random.uniform(0, 2 * math.pi)
+        self.velocity_x = math.cos(angle) * self.speed
+        self.velocity_y = math.sin(angle) * self.speed
         
-        color = colors.get(self.pet_type, COLOR_GRAY)
-        
-        # 状態に応じて色を調整
-        if self.state == PET_STATE_FOUND:
-            # 少し明るくする
-            color = tuple(min(255, c + 50) for c in color)
-        elif self.behavior_state == "fleeing":
-            # 赤みを加える
-            color = (min(255, color[0] + 50), color[1], color[2])
-        
-        # ペットを描画
-        pygame.draw.ellipse(screen, color, self.rect)
-        
-        # 状態インジケーター
-        if self.is_discovered:
-            # 信頼度バー
-            bar_width = self.width
-            bar_height = 4
-            bar_x = self.x
-            bar_y = self.y - 8
-            
-            # 背景
-            pygame.draw.rect(screen, COLOR_GRAY, (bar_x, bar_y, bar_width, bar_height))
-            # 信頼度
-            trust_width = int(bar_width * (self.trust_level / 100))
-            pygame.draw.rect(screen, COLOR_GREEN, (bar_x, bar_y, trust_width, bar_height))
+        # 方向を更新
+        if abs(self.velocity_x) > abs(self.velocity_y):
+            self.direction = "right" if self.velocity_x > 0 else "left"
+        else:
+            self.direction = "front" if self.velocity_y > 0 else "back"
     
-    def interact_with_player(self, interaction_type: str):
+    def _update_movement(self, time_delta: float):
+        """移動を更新"""
+        self.x += self.velocity_x * time_delta
+        self.y += self.velocity_y * time_delta
+        
+        # 矩形更新
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
+    
+    def _update_animation(self, time_delta: float):
+        """アニメーションを更新"""
+        if abs(self.velocity_x) > 0 or abs(self.velocity_y) > 0:
+            self.animation_timer += time_delta
+            if self.animation_timer >= 0.3:  # プレイヤーより少し遅いアニメーション
+                self.animation_frame = (self.animation_frame + 1) % 2
+                self.animation_timer = 0.0
+        else:
+            self.animation_frame = 0
+    
+    def _update_emotion(self, time_delta: float):
+        """エモーション表示を更新"""
+        if self.emotion_timer > 0:
+            self.emotion_timer -= time_delta
+            if self.emotion_timer <= 0:
+                self.current_emotion = None
+    
+    def interact(self, player_pos: Tuple[float, float]) -> bool:
         """プレイヤーとの相互作用"""
-        if interaction_type == "approach":
-            if self.fear_level > 50:
-                self.fear_level += 10
-                self.trust_level -= 5
+        distance = self._calculate_distance(player_pos)
+        
+        if distance < 60.0:  # 相互作用可能距離
+            if self.state == PetState.SCARED:
+                # 恐怖状態では信頼度が下がる
+                self.trust_level = max(0, self.trust_level - 5)
+                print(f"😰 {self.data.name}の信頼度が下がりました: {self.trust_level:.1f}")
+                return False
             else:
-                self.trust_level += 5
-                self.fear_level -= 3
+                # 信頼度を上げる
+                self.trust_level = min(100, self.trust_level + 10)
+                print(f"😊 {self.data.name}の信頼度が上がりました: {self.trust_level:.1f}")
+                
+                # エモーション表示
+                self.current_emotion = "happy"
+                self.emotion_timer = 2.0
+                
+                # 信頼度が高くなったら追従開始
+                if self.trust_level >= 60 and self.state != PetState.FOLLOWING:
+                    self.state = PetState.FOLLOWING
+                    print(f"💕 {self.data.name}があなたについてきます")
+                
+                # 救出可能判定
+                if self.trust_level >= self.rescue_threshold:
+                    return True
         
-        elif interaction_type == "feed":
-            self.hunger_level = min(100, self.hunger_level + 30)
-            self.trust_level += 15
-            self.fear_level -= 10
-        
-        elif interaction_type == "pet":
-            if self.trust_level > 30:
-                self.trust_level += 10
-                self.fear_level -= 5
-            else:
-                self.fear_level += 15
-        
-        # 値の範囲制限
-        self.trust_level = max(0, min(100, self.trust_level))
-        self.fear_level = max(0, min(100, self.fear_level))
-        self.hunger_level = max(0, min(100, self.hunger_level))
+        return False
     
-    def can_be_rescued(self) -> bool:
-        """救助可能かチェック"""
-        return self.trust_level >= 70 and self.fear_level <= 30
-    
-    def rescue(self):
-        """ペットを救助"""
-        if self.can_be_rescued():
-            self.state = PET_STATE_RESCUED
+    def rescue(self) -> bool:
+        """ペットを救出"""
+        if self.trust_level >= self.rescue_threshold:
+            self.state = PetState.RESCUED
+            print(f"🎉 {self.data.name}を救出しました！")
             return True
         return False
     
-    def get_info(self) -> dict:
-        """ペット情報を取得"""
-        return {
-            "id": self.pet_id,
-            "type": self.pet_type,
-            "state": self.state,
-            "trust_level": self.trust_level,
-            "fear_level": self.fear_level,
-            "hunger_level": self.hunger_level,
-            "owner_name": self.owner_name,
-            "owner_description": self.owner_description,
-            "personality": self.personality,
-            "is_discovered": self.is_discovered
+    def draw(self, screen: pygame.Surface, camera_offset: Tuple[int, int] = (0, 0)):
+        """ペットを描画"""
+        draw_x = self.rect.x - camera_offset[0]
+        draw_y = self.rect.y - camera_offset[1]
+        
+        # スプライト描画
+        if self.direction in self.sprites:
+            sprite = self.sprites[self.direction]
+            screen.blit(sprite, (draw_x, draw_y))
+        else:
+            # フォールバック: 色付き矩形
+            color_map = {
+                PetType.CAT: (255, 165, 0),    # オレンジ
+                PetType.DOG: (139, 69, 19),    # 茶色
+                PetType.RABBIT: (255, 255, 255), # 白
+                PetType.BIRD: (0, 191, 255)    # 青
+            }
+            color = color_map.get(self.data.pet_type, (128, 128, 128))
+            pygame.draw.rect(screen, color, (draw_x, draw_y, self.rect.width, self.rect.height))
+            
+            # ペット名表示
+            font = pygame.font.Font(None, 16)
+            name_surface = font.render(self.data.name, True, (255, 255, 255))
+            screen.blit(name_surface, (draw_x, draw_y - 20))
+        
+        # 信頼度バー
+        if self.trust_level > 0:
+            self._draw_trust_bar(screen, draw_x, draw_y)
+        
+        # エモーション表示
+        if self.current_emotion:
+            self._draw_emotion(screen, draw_x, draw_y)
+    
+    def _draw_trust_bar(self, screen: pygame.Surface, x: int, y: int):
+        """信頼度バーを描画"""
+        bar_width = self.rect.width
+        bar_height = 3
+        bar_y = y - 12
+        
+        # 背景
+        pygame.draw.rect(screen, (100, 100, 100), (x, bar_y, bar_width, bar_height))
+        
+        # 信頼度
+        trust_width = int(bar_width * (self.trust_level / 100))
+        trust_color = (0, 255, 0) if self.trust_level >= self.rescue_threshold else (255, 255, 0)
+        pygame.draw.rect(screen, trust_color, (x, bar_y, trust_width, bar_height))
+    
+    def _draw_emotion(self, screen: pygame.Surface, x: int, y: int):
+        """エモーションを描画"""
+        emotion_symbols = {
+            "happy": "♥",
+            "scared": "!",
+            "angry": "💢"
         }
+        
+        symbol = emotion_symbols.get(self.current_emotion, "?")
+        font = pygame.font.Font(None, 24)
+        emotion_surface = font.render(symbol, True, (255, 255, 255))
+        
+        # ペットの上に表示
+        emotion_x = x + self.rect.width // 2 - emotion_surface.get_width() // 2
+        emotion_y = y - 30
+        screen.blit(emotion_surface, (emotion_x, emotion_y))
+    
+    def get_position(self) -> Tuple[float, float]:
+        """位置を取得"""
+        return (self.x, self.y)
+    
+    def get_trust_level(self) -> float:
+        """信頼度を取得"""
+        return self.trust_level
+    
+    def is_rescuable(self) -> bool:
+        """救出可能かチェック"""
+        return self.trust_level >= self.rescue_threshold
+    
+    def get_state(self) -> PetState:
+        """状態を取得"""
+        return self.state

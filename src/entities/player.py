@@ -80,13 +80,13 @@ class Player:
         
         return sprites
     
-    def update(self, time_delta: float, keys_pressed: set):
+    def update(self, time_delta: float, keys_pressed: set, map_system=None):
         """プレイヤーを更新"""
         # 入力処理
         self._handle_input(keys_pressed)
         
-        # 移動処理
-        self._update_movement(time_delta)
+        # 移動処理（衝突判定付き）
+        self._update_movement(time_delta, map_system)
         
         # スタミナ処理
         self._update_stamina(time_delta)
@@ -133,11 +133,31 @@ class Player:
             self.velocity_x *= 0.707  # 1/√2
             self.velocity_y *= 0.707
     
-    def _update_movement(self, time_delta: float):
-        """移動更新"""
-        # 位置更新
-        self.x += self.velocity_x * time_delta
-        self.y += self.velocity_y * time_delta
+    def _update_movement(self, time_delta: float, map_system=None):
+        """移動更新（衝突判定付き）"""
+        # 移動前の位置を保存
+        old_x = self.x
+        old_y = self.y
+        
+        # 新しい位置を計算
+        new_x = self.x + self.velocity_x * time_delta
+        new_y = self.y + self.velocity_y * time_delta
+        
+        # 衝突判定
+        if map_system:
+            # X軸移動をチェック
+            test_rect_x = pygame.Rect(new_x, self.y, self.rect.width, self.rect.height)
+            if not map_system.check_collision(test_rect_x):
+                self.x = new_x
+            
+            # Y軸移動をチェック
+            test_rect_y = pygame.Rect(self.x, new_y, self.rect.width, self.rect.height)
+            if not map_system.check_collision(test_rect_y):
+                self.y = new_y
+        else:
+            # 衝突判定なしの場合
+            self.x = new_x
+            self.y = new_y
         
         # 矩形更新
         self.rect.x = int(self.x)

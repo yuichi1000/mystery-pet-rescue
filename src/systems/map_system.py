@@ -1,595 +1,420 @@
 """
-タイルベース2Dマップシステム
-
-JSONファイルからマップデータを読み込み、レイヤー対応の描画と衝突判定を提供
+タイルベースマップシステム
+マップデータの読み込み・描画・衝突判定
 """
 
 import pygame
 import json
-import os
 from typing import Dict, List, Tuple, Optional, Any
-from enum import Enum
 from dataclasses import dataclass
-from config.constants import *
+from enum import Enum
+from pathlib import Path
 
+from src.utils.asset_manager import get_asset_manager
 
 class TileType(Enum):
     """タイルタイプ"""
-    EMPTY = 0
-    GROUND = 1
-    WALL = 2
-    WATER = 3
-    GRASS = 4
-    TREE = 5
-    ROCK = 6
-    DOOR = 7
-    CHEST = 8
-    DECORATION = 9
-
-
-class LayerType(Enum):
-    """レイヤータイプ"""
-    BACKGROUND = "background"
-    COLLISION = "collision"
-    DECORATION = "decoration"
-    FOREGROUND = "foreground"
-
+    GRASS = "grass"
+    GROUND = "ground"
+    CONCRETE = "concrete"
+    ROCK = "rock"
+    STONE_WALL = "stone_wall"
+    TREE = "tree"
+    WATER = "water"
 
 @dataclass
-class Tile:
-    """タイル情報"""
-    tile_id: int
+class TileData:
+    """タイルデータ"""
     tile_type: TileType
-    solid: bool = False
-    sprite_x: int = 0
-    sprite_y: int = 0
-
+    walkable: bool = True
+    sprite_path: str = ""
+    collision: bool = False
 
 @dataclass
-class MapLayer:
-    """マップレイヤー"""
-    name: str
-    layer_type: LayerType
+class MapData:
+    """マップデータ"""
     width: int
     height: int
-    data: List[List[int]]
-    visible: bool = True
-    opacity: float = 1.0
-
-
-class TileSet:
-    """タイルセット管理"""
-    
-    def __init__(self, tileset_path: str, tile_size: int = 32):
-        self.tile_size = tile_size
-        self.tiles: Dict[int, Tile] = {}
-        self.sprite_sheet = None
-        self.tileset_path = tileset_path
-        self.individual_sprites: Dict[int, pygame.Surface] = {}  # 個別スプライト用
-        
-        # デバッグ用の色付きタイル作成
-        self._create_debug_tiles()
-        
-        # スプライトファイルがあれば読み込み
-        if tileset_path and os.path.exists(tileset_path):
-            self.load_sprite_sheet(tileset_path)
-    
-    def load_sprite_sheet(self, sprite_path: str):
-        """スプライトシートまたは個別スプライトを読み込み"""
-        try:
-            if os.path.exists(sprite_path):
-                sprite_surface = pygame.image.load(sprite_path).convert_alpha()
-                
-                # ファイル名から判断して適切に処理
-                filename = os.path.basename(sprite_path).lower()
-                
-                if 'grass' in filename:
-                    # 草地タイル（ID: 4）として登録
-                    self.individual_sprites[4] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
-                    print(f"草地スプライト読み込み成功: {sprite_path}")
-                elif 'stone_wall' in filename or 'wall' in filename:
-                    # 石壁タイル（ID: 2）として登録
-                    self.individual_sprites[2] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
-                    print(f"石壁スプライト読み込み成功: {sprite_path}")
-                elif 'water' in filename:
-                    # 水面タイル（ID: 3）として登録
-                    self.individual_sprites[3] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
-                    print(f"水面スプライト読み込み成功: {sprite_path}")
-                elif 'tree' in filename:
-                    # 木タイル（ID: 5）として登録
-                    self.individual_sprites[5] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
-                    print(f"木スプライト読み込み成功: {sprite_path}")
-                elif 'rock' in filename:
-                    # 岩タイル（ID: 6）として登録
-                    self.individual_sprites[6] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
-                    print(f"岩スプライト読み込み成功: {sprite_path}")
-                elif 'ground' in filename:
-                    # 地面タイル（ID: 1）として登録
-                    self.individual_sprites[1] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
-                    print(f"地面スプライト読み込み成功: {sprite_path}")
-                elif 'tileset' in filename:
-                    # タイルセットとして処理
-                    self.sprite_sheet = sprite_surface
-                    print(f"タイルセット読み込み成功: {sprite_path}")
-                else:
-                    # 汎用的な個別スプライト
-                    self.sprite_sheet = sprite_surface
-                    print(f"スプライト読み込み成功: {sprite_path}")
-                
-                return True
-            else:
-                print(f"スプライトファイルが見つかりません: {sprite_path}")
-                return False
-        except Exception as e:
-            print(f"スプライト読み込みエラー: {e}")
-            return False
-    
-    def load_all_individual_sprites(self):
-        """全ての個別スプライトを読み込み"""
-        sprite_files = {
-            1: "assets/images/tiles/ground_tile.png",      # 地面
-            2: "assets/images/tiles/stone_wall_tile.png",  # 石壁
-            3: "assets/images/tiles/water_tile.png",       # 水面
-            4: "assets/images/tiles/grass_tile.png",       # 草地
-            5: "assets/images/tiles/tree_tile.png",        # 木
-            6: "assets/images/tiles/rock_tile.png",        # 岩
-        }
-        
-        loaded_count = 0
-        for tile_id, sprite_path in sprite_files.items():
-            if self.load_individual_sprite(tile_id, sprite_path):
-                loaded_count += 1
-        
-        print(f"スプライト読み込み完了: {loaded_count}/{len(sprite_files)}個")
-        return loaded_count
-    
-    def load_individual_sprite(self, tile_id: int, sprite_path: str):
-        """個別のタイルスプライトを読み込み"""
-        try:
-            if os.path.exists(sprite_path):
-                sprite_surface = pygame.image.load(sprite_path).convert_alpha()
-                self.individual_sprites[tile_id] = pygame.transform.scale(sprite_surface, (self.tile_size, self.tile_size))
-                print(f"タイルID {tile_id} のスプライト読み込み成功: {sprite_path}")
-                return True
-            else:
-                print(f"スプライトファイルが見つかりません: {sprite_path}")
-                return False
-        except Exception as e:
-            print(f"スプライト読み込みエラー: {e}")
-            return False
-    
-    def _create_debug_tiles(self):
-        """デバッグ用のカラータイルを作成"""
-        # タイル定義
-        tile_definitions = {
-            0: (TileType.EMPTY, False, (0, 0, 0, 0)),           # 透明
-            1: (TileType.GROUND, False, (139, 69, 19)),         # 茶色（地面）
-            2: (TileType.WALL, True, (128, 128, 128)),          # 灰色（壁）
-            3: (TileType.WATER, True, (0, 100, 200)),           # 青色（水）
-            4: (TileType.GRASS, False, (34, 139, 34)),          # 緑色（草）
-            5: (TileType.TREE, True, (0, 100, 0)),              # 濃緑（木）
-            6: (TileType.ROCK, True, (105, 105, 105)),          # 暗灰色（岩）
-            7: (TileType.DOOR, False, (160, 82, 45)),           # 茶色（ドア）
-            8: (TileType.CHEST, True, (218, 165, 32)),          # 金色（宝箱）
-            9: (TileType.DECORATION, False, (255, 192, 203))    # ピンク（装飾）
-        }
-        
-        for tile_id, (tile_type, solid, color) in tile_definitions.items():
-            self.tiles[tile_id] = Tile(
-                tile_id=tile_id,
-                tile_type=tile_type,
-                solid=solid
-            )
-    
-    def get_tile_sprite(self, tile_id: int) -> pygame.Surface:
-        """タイルのスプライトを取得"""
-        if tile_id not in self.tiles:
-            return self._create_empty_tile()
-        
-        # 個別スプライトが登録されている場合は優先使用
-        if hasattr(self, 'individual_sprites') and tile_id in self.individual_sprites:
-            return self.individual_sprites[tile_id]
-        
-        # スプライトシートがある場合
-        if self.sprite_sheet:
-            tile = self.tiles[tile_id]
-            try:
-                # スプライトシートから該当部分を切り出し
-                sprite_rect = pygame.Rect(
-                    tile.sprite_x * self.tile_size,
-                    tile.sprite_y * self.tile_size,
-                    self.tile_size,
-                    self.tile_size
-                )
-                sprite = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
-                sprite.blit(self.sprite_sheet, (0, 0), sprite_rect)
-                return sprite
-            except Exception as e:
-                print(f"スプライトシート切り出しエラー: {e}")
-        
-        # フォールバック：デバッグ用カラータイル
-        return self._create_debug_tile(tile_id)
-    
-    def _create_debug_tile(self, tile_id: int) -> pygame.Surface:
-        """デバッグ用カラータイルを作成"""
-        tile = self.tiles.get(tile_id)
-        if not tile:
-            return self._create_empty_tile()
-        
-        sprite = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
-        
-        if tile.tile_type == TileType.EMPTY:
-            return sprite  # 透明
-        
-        # タイプに応じた色
-        colors = {
-            TileType.GROUND: (139, 69, 19),
-            TileType.WALL: (128, 128, 128),
-            TileType.WATER: (0, 100, 200),
-            TileType.GRASS: (34, 139, 34),
-            TileType.TREE: (0, 100, 0),
-            TileType.ROCK: (105, 105, 105),
-            TileType.DOOR: (160, 82, 45),
-            TileType.CHEST: (218, 165, 32),
-            TileType.DECORATION: (255, 192, 203)
-        }
-        
-        color = colors.get(tile.tile_type, (255, 255, 255))
-        pygame.draw.rect(sprite, color, (0, 0, self.tile_size, self.tile_size))
-        
-        # 境界線
-        pygame.draw.rect(sprite, (0, 0, 0), (0, 0, self.tile_size, self.tile_size), 1)
-        
-        # 衝突判定があるタイルにはXマーク
-        if tile.solid:
-            pygame.draw.line(sprite, (255, 0, 0), (2, 2), (self.tile_size-2, self.tile_size-2), 2)
-            pygame.draw.line(sprite, (255, 0, 0), (self.tile_size-2, 2), (2, self.tile_size-2), 2)
-        
-        return sprite
-    
-    def _create_empty_tile(self) -> pygame.Surface:
-        """空のタイルを作成"""
-        return pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA)
-    
-    def is_solid(self, tile_id: int) -> bool:
-        """タイルが衝突判定を持つかチェック"""
-        if tile_id in self.tiles:
-            return self.tiles[tile_id].solid
-        return False
-
-
-class Camera:
-    """カメラシステム"""
-    
-    def __init__(self, screen_width: int, screen_height: int):
-        self.x = 0.0
-        self.y = 0.0
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.target_x = 0.0
-        self.target_y = 0.0
-        self.follow_speed = 5.0
-        self.bounds = None  # (min_x, min_y, max_x, max_y)
-    
-    def set_target(self, x: float, y: float):
-        """カメラのターゲット位置を設定"""
-        self.target_x = x - self.screen_width // 2
-        self.target_y = y - self.screen_height // 2
-    
-    def update(self, dt: float):
-        """カメラ位置を更新"""
-        # スムーズな追従
-        dx = self.target_x - self.x
-        dy = self.target_y - self.y
-        
-        self.x += dx * self.follow_speed * dt
-        self.y += dy * self.follow_speed * dt
-        
-        # 境界制限
-        if self.bounds:
-            min_x, min_y, max_x, max_y = self.bounds
-            self.x = max(min_x, min(max_x - self.screen_width, self.x))
-            self.y = max(min_y, min(max_y - self.screen_height, self.y))
-    
-    def set_bounds(self, min_x: int, min_y: int, max_x: int, max_y: int):
-        """カメラの移動範囲を設定"""
-        self.bounds = (min_x, min_y, max_x, max_y)
-    
-    def world_to_screen(self, world_x: float, world_y: float) -> Tuple[float, float]:
-        """ワールド座標をスクリーン座標に変換"""
-        return (world_x - self.x, world_y - self.y)
-    
-    def screen_to_world(self, screen_x: float, screen_y: float) -> Tuple[float, float]:
-        """スクリーン座標をワールド座標に変換"""
-        return (screen_x + self.x, screen_y + self.y)
-
+    tile_size: int
+    tiles: List[List[TileType]]
+    spawn_points: Dict[str, Tuple[int, int]]
+    pet_locations: List[Tuple[int, int]]
 
 class MapSystem:
-    """タイルベース2Dマップシステム"""
+    """マップシステムクラス"""
     
-    def __init__(self, tile_size: int = 32):
+    def __init__(self, tile_size: int = 64):
         self.tile_size = tile_size
-        self.layers: List[MapLayer] = []
-        self.tileset: Optional[TileSet] = None
-        self.width = 0
-        self.height = 0
-        self.camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.asset_manager = get_asset_manager()
         
-        # キャッシュ
-        self._sprite_cache: Dict[int, pygame.Surface] = {}
+        # タイル定義
+        self.tile_definitions = self._setup_tile_definitions()
+        
+        # タイル画像
+        self.tile_sprites: Dict[TileType, pygame.Surface] = {}
+        
+        # 現在のマップ
+        self.current_map: Optional[MapData] = None
+        self.map_surface: Optional[pygame.Surface] = None
+        
+        # 描画最適化
+        self.visible_tiles_cache = {}
+        self.last_camera_pos = (0, 0)
+        
+        # タイル画像を読み込み
+        self._load_tile_sprites()
+        
+        print("🗺️ マップシステム初期化完了")
     
-    def load_from_json(self, map_file_path: str, tileset_path: str = None) -> bool:
-        """JSONファイルからマップデータを読み込み"""
-        try:
-            with open(map_file_path, 'r', encoding='utf-8') as f:
-                map_data = json.load(f)
-            
-            # タイルセット読み込み
-            if tileset_path:
-                self.tileset = TileSet(tileset_path, self.tile_size)
-            else:
-                self.tileset = TileSet("", self.tile_size)
-                # 全ての個別スプライトを読み込み
-                self.tileset.load_all_individual_sprites()
-            
-            # マップサイズ
-            self.width = map_data.get('width', 0)
-            self.height = map_data.get('height', 0)
-            
-            # レイヤー読み込み
-            self.layers.clear()
-            for layer_data in map_data.get('layers', []):
-                layer = self._parse_layer(layer_data)
-                if layer:
-                    self.layers.append(layer)
-            
-            # カメラ境界設定
-            self.camera.set_bounds(
-                0, 0,
-                self.width * self.tile_size,
-                self.height * self.tile_size
+    def _setup_tile_definitions(self) -> Dict[TileType, TileData]:
+        """タイル定義を設定"""
+        return {
+            TileType.GRASS: TileData(
+                tile_type=TileType.GRASS,
+                walkable=True,
+                sprite_path="tiles/grass_tile.png",
+                collision=False
+            ),
+            TileType.GROUND: TileData(
+                tile_type=TileType.GROUND,
+                walkable=True,
+                sprite_path="tiles/ground_tile.png",
+                collision=False
+            ),
+            TileType.CONCRETE: TileData(
+                tile_type=TileType.CONCRETE,
+                walkable=True,
+                sprite_path="tiles/concrete_tile.png",
+                collision=False
+            ),
+            TileType.ROCK: TileData(
+                tile_type=TileType.ROCK,
+                walkable=False,
+                sprite_path="tiles/rock_tile.png",
+                collision=True
+            ),
+            TileType.STONE_WALL: TileData(
+                tile_type=TileType.STONE_WALL,
+                walkable=False,
+                sprite_path="tiles/stone_wall_tile.png",
+                collision=True
+            ),
+            TileType.TREE: TileData(
+                tile_type=TileType.TREE,
+                walkable=False,
+                sprite_path="tiles/tree_tile.png",
+                collision=True
+            ),
+            TileType.WATER: TileData(
+                tile_type=TileType.WATER,
+                walkable=False,
+                sprite_path="tiles/water_tile.png",
+                collision=True
             )
+        }
+    
+    def _load_tile_sprites(self):
+        """タイル画像を読み込み"""
+        for tile_type, tile_data in self.tile_definitions.items():
+            sprite = self.asset_manager.load_image(
+                tile_data.sprite_path,
+                (self.tile_size, self.tile_size)
+            )
+            if sprite:
+                self.tile_sprites[tile_type] = sprite
+                print(f"✅ タイル画像読み込み: {tile_type.value}")
+            else:
+                # プレースホルダー作成
+                placeholder = self._create_placeholder_tile(tile_type)
+                self.tile_sprites[tile_type] = placeholder
+                print(f"⚠️ タイル画像未発見、プレースホルダー使用: {tile_type.value}")
+    
+    def _create_placeholder_tile(self, tile_type: TileType) -> pygame.Surface:
+        """プレースホルダータイルを作成"""
+        surface = pygame.Surface((self.tile_size, self.tile_size))
+        
+        # タイプ別の色
+        colors = {
+            TileType.GRASS: (100, 200, 100),
+            TileType.GROUND: (139, 69, 19),
+            TileType.CONCRETE: (128, 128, 128),
+            TileType.ROCK: (105, 105, 105),
+            TileType.STONE_WALL: (169, 169, 169),
+            TileType.TREE: (34, 139, 34),
+            TileType.WATER: (0, 191, 255)
+        }
+        
+        color = colors.get(tile_type, (255, 0, 255))
+        surface.fill(color)
+        
+        # 境界線
+        pygame.draw.rect(surface, (0, 0, 0), surface.get_rect(), 1)
+        
+        return surface
+    
+    def load_map(self, map_file: str) -> bool:
+        """マップファイルを読み込み"""
+        map_path = Path("data/maps") / map_file
+        
+        try:
+            if map_path.exists():
+                with open(map_path, 'r', encoding='utf-8') as f:
+                    map_json = json.load(f)
+                
+                self.current_map = self._parse_map_data(map_json)
+                self._generate_map_surface()
+                
+                print(f"✅ マップ読み込み完了: {map_file}")
+                print(f"📐 マップサイズ: {self.current_map.width}x{self.current_map.height}")
+                return True
+            else:
+                print(f"⚠️ マップファイルが見つかりません: {map_path}")
+                self._create_default_map()
+                return False
+                
+        except Exception as e:
+            print(f"❌ マップ読み込みエラー: {e}")
+            self._create_default_map()
+            return False
+    
+    def _parse_map_data(self, map_json: Dict[str, Any]) -> MapData:
+        """JSONデータをMapDataに変換"""
+        width = map_json.get("width", 20)
+        height = map_json.get("height", 15)
+        tile_size = map_json.get("tile_size", self.tile_size)
+        
+        # タイルデータの変換
+        tiles = []
+        tile_data = map_json.get("tiles", [])
+        
+        for row in tile_data:
+            tile_row = []
+            for tile_str in row:
+                try:
+                    tile_type = TileType(tile_str)
+                    tile_row.append(tile_type)
+                except ValueError:
+                    tile_row.append(TileType.GRASS)  # デフォルト
+            tiles.append(tile_row)
+        
+        # 不足分を埋める
+        while len(tiles) < height:
+            tiles.append([TileType.GRASS] * width)
+        
+        for row in tiles:
+            while len(row) < width:
+                row.append(TileType.GRASS)
+        
+        # スポーン地点
+        spawn_points = map_json.get("spawn_points", {
+            "player": [5, 5],
+            "pets": [[10, 8], [15, 12], [8, 3], [18, 10]]
+        })
+        
+        # ペット位置
+        pet_locations = map_json.get("pet_locations", [[10, 8], [15, 12], [8, 3], [18, 10]])
+        
+        return MapData(
+            width=width,
+            height=height,
+            tile_size=tile_size,
+            tiles=tiles,
+            spawn_points=spawn_points,
+            pet_locations=pet_locations
+        )
+    
+    def _create_default_map(self):
+        """デフォルトマップを作成"""
+        width, height = 25, 20
+        
+        # 基本的な地形パターンを作成
+        tiles = []
+        for y in range(height):
+            row = []
+            for x in range(width):
+                # 境界は石壁
+                if x == 0 or x == width-1 or y == 0 or y == height-1:
+                    row.append(TileType.STONE_WALL)
+                # 水域
+                elif 8 <= x <= 12 and 6 <= y <= 9:
+                    row.append(TileType.WATER)
+                # 木々
+                elif (x + y) % 7 == 0 and x > 2 and x < width-3:
+                    row.append(TileType.TREE)
+                # 岩
+                elif (x * y) % 11 == 0 and x > 1 and x < width-2:
+                    row.append(TileType.ROCK)
+                # コンクリート道
+                elif y == height // 2:
+                    row.append(TileType.CONCRETE)
+                elif x == width // 2:
+                    row.append(TileType.CONCRETE)
+                # 地面と草地
+                elif (x + y) % 3 == 0:
+                    row.append(TileType.GROUND)
+                else:
+                    row.append(TileType.GRASS)
+            tiles.append(row)
+        
+        self.current_map = MapData(
+            width=width,
+            height=height,
+            tile_size=self.tile_size,
+            tiles=tiles,
+            spawn_points={
+                "player": (5, 5),
+                "pets": [(10, 8), (15, 12), (8, 3), (18, 10)]
+            },
+            pet_locations=[(10, 8), (15, 12), (8, 3), (18, 10)]
+        )
+        
+        self._generate_map_surface()
+        print("🗺️ デフォルトマップを生成しました")
+    
+    def _generate_map_surface(self):
+        """マップ全体を事前描画"""
+        if not self.current_map:
+            return
+        
+        map_width = self.current_map.width * self.tile_size
+        map_height = self.current_map.height * self.tile_size
+        
+        self.map_surface = pygame.Surface((map_width, map_height))
+        
+        for y in range(self.current_map.height):
+            for x in range(self.current_map.width):
+                tile_type = self.current_map.tiles[y][x]
+                if tile_type in self.tile_sprites:
+                    sprite = self.tile_sprites[tile_type]
+                    pos_x = x * self.tile_size
+                    pos_y = y * self.tile_size
+                    self.map_surface.blit(sprite, (pos_x, pos_y))
+        
+        print("🎨 マップサーフェス生成完了")
+    
+    def draw(self, screen: pygame.Surface, camera_x: float, camera_y: float):
+        """マップを描画"""
+        if not self.map_surface:
+            return
+        
+        # カメラ位置に基づいて描画範囲を計算
+        screen_rect = screen.get_rect()
+        
+        # マップサーフェスから必要な部分を切り取って描画
+        source_rect = pygame.Rect(
+            int(camera_x),
+            int(camera_y),
+            screen_rect.width,
+            screen_rect.height
+        )
+        
+        # マップ境界内に制限
+        map_rect = self.map_surface.get_rect()
+        source_rect = source_rect.clip(map_rect)
+        
+        if source_rect.width > 0 and source_rect.height > 0:
+            screen.blit(self.map_surface, (0, 0), source_rect)
+    
+    def get_tile_at_position(self, world_x: float, world_y: float) -> Optional[TileType]:
+        """ワールド座標のタイルタイプを取得"""
+        if not self.current_map:
+            return None
+        
+        tile_x = int(world_x // self.tile_size)
+        tile_y = int(world_y // self.tile_size)
+        
+        if (0 <= tile_x < self.current_map.width and 
+            0 <= tile_y < self.current_map.height):
+            return self.current_map.tiles[tile_y][tile_x]
+        
+        return None
+    
+    def is_walkable(self, world_x: float, world_y: float) -> bool:
+        """指定位置が歩行可能かチェック"""
+        tile_type = self.get_tile_at_position(world_x, world_y)
+        if tile_type is None:
+            return False
+        
+        tile_data = self.tile_definitions.get(tile_type)
+        return tile_data.walkable if tile_data else True
+    
+    def check_collision(self, rect: pygame.Rect) -> bool:
+        """矩形との衝突判定"""
+        if not self.current_map:
+            return False
+        
+        # 矩形の四隅をチェック
+        corners = [
+            (rect.left, rect.top),
+            (rect.right - 1, rect.top),
+            (rect.left, rect.bottom - 1),
+            (rect.right - 1, rect.bottom - 1)
+        ]
+        
+        for x, y in corners:
+            if not self.is_walkable(x, y):
+                return True
+        
+        return False
+    
+    def get_spawn_point(self, spawn_type: str) -> Optional[Tuple[int, int]]:
+        """スポーン地点を取得"""
+        if not self.current_map:
+            return None
+        
+        spawn_point = self.current_map.spawn_points.get(spawn_type)
+        if spawn_point:
+            return (spawn_point[0] * self.tile_size, spawn_point[1] * self.tile_size)
+        
+        return None
+    
+    def get_pet_locations(self) -> List[Tuple[int, int]]:
+        """ペット配置位置を取得"""
+        if not self.current_map:
+            return []
+        
+        locations = []
+        for tile_x, tile_y in self.current_map.pet_locations:
+            world_x = tile_x * self.tile_size
+            world_y = tile_y * self.tile_size
+            locations.append((world_x, world_y))
+        
+        return locations
+    
+    def get_map_size(self) -> Tuple[int, int]:
+        """マップサイズ（ピクセル）を取得"""
+        if not self.current_map:
+            return (0, 0)
+        
+        return (
+            self.current_map.width * self.tile_size,
+            self.current_map.height * self.tile_size
+        )
+    
+    def save_map(self, filename: str) -> bool:
+        """現在のマップをファイルに保存"""
+        if not self.current_map:
+            return False
+        
+        try:
+            map_data = {
+                "width": self.current_map.width,
+                "height": self.current_map.height,
+                "tile_size": self.current_map.tile_size,
+                "tiles": [[tile.value for tile in row] for row in self.current_map.tiles],
+                "spawn_points": self.current_map.spawn_points,
+                "pet_locations": self.current_map.pet_locations
+            }
             
+            map_path = Path("data/maps") / filename
+            map_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(map_path, 'w', encoding='utf-8') as f:
+                json.dump(map_data, f, ensure_ascii=False, indent=2)
+            
+            print(f"💾 マップ保存完了: {filename}")
             return True
             
         except Exception as e:
-            print(f"マップ読み込みエラー: {e}")
+            print(f"❌ マップ保存エラー: {e}")
             return False
-    
-    def _parse_layer(self, layer_data: Dict[str, Any]) -> Optional[MapLayer]:
-        """レイヤーデータを解析"""
-        try:
-            name = layer_data.get('name', 'unknown')
-            layer_type_str = layer_data.get('type', 'background')
-            
-            # レイヤータイプの決定
-            layer_type = LayerType.BACKGROUND
-            if 'collision' in name.lower() or layer_type_str == 'collision':
-                layer_type = LayerType.COLLISION
-            elif 'decoration' in name.lower() or layer_type_str == 'decoration':
-                layer_type = LayerType.DECORATION
-            elif 'foreground' in name.lower() or layer_type_str == 'foreground':
-                layer_type = LayerType.FOREGROUND
-            
-            width = layer_data.get('width', self.width)
-            height = layer_data.get('height', self.height)
-            
-            # データ形式の処理
-            raw_data = layer_data.get('data', [])
-            if isinstance(raw_data, list) and len(raw_data) > 0:
-                if isinstance(raw_data[0], list):
-                    # 2次元配列
-                    data = raw_data
-                else:
-                    # 1次元配列を2次元に変換
-                    data = []
-                    for y in range(height):
-                        row = []
-                        for x in range(width):
-                            index = y * width + x
-                            if index < len(raw_data):
-                                row.append(raw_data[index])
-                            else:
-                                row.append(0)
-                        data.append(row)
-            else:
-                # 空のデータ
-                data = [[0 for _ in range(width)] for _ in range(height)]
-            
-            return MapLayer(
-                name=name,
-                layer_type=layer_type,
-                width=width,
-                height=height,
-                data=data,
-                visible=layer_data.get('visible', True),
-                opacity=layer_data.get('opacity', 1.0)
-            )
-            
-        except Exception as e:
-            print(f"レイヤー解析エラー: {e}")
-            return None
-    
-    def create_sample_map(self):
-        """サンプルマップを作成"""
-        self.width = 20
-        self.height = 15
-        self.tileset = TileSet("", self.tile_size)
-        
-        # 全ての個別スプライトを読み込み
-        loaded_count = self.tileset.load_all_individual_sprites()
-        print(f"サンプルマップ用スプライト読み込み: {loaded_count}個")
-        
-        # 背景レイヤー（草地）
-        background_data = [[4 for _ in range(self.width)] for _ in range(self.height)]
-        background_layer = MapLayer(
-            name="background",
-            layer_type=LayerType.BACKGROUND,
-            width=self.width,
-            height=self.height,
-            data=background_data
-        )
-        
-        # 衝突レイヤー（壁と障害物）
-        collision_data = [[0 for _ in range(self.width)] for _ in range(self.height)]
-        
-        # 外周に石壁
-        for x in range(self.width):
-            collision_data[0][x] = 2  # 上の石壁
-            collision_data[self.height-1][x] = 2  # 下の石壁
-        for y in range(self.height):
-            collision_data[y][0] = 2  # 左の石壁
-            collision_data[y][self.width-1] = 2  # 右の石壁
-        
-        # 内部に障害物
-        collision_data[5][5] = 5  # 木
-        collision_data[5][6] = 5  # 木
-        collision_data[8][10] = 6  # 岩
-        collision_data[10][8] = 6  # 岩
-        collision_data[7][12] = 5  # 木
-        
-        # 水場を追加
-        collision_data[12][5] = 3  # 水面
-        collision_data[12][6] = 3  # 水面
-        collision_data[13][5] = 3  # 水面
-        collision_data[13][6] = 3  # 水面
-        
-        collision_layer = MapLayer(
-            name="collision",
-            layer_type=LayerType.COLLISION,
-            width=self.width,
-            height=self.height,
-            data=collision_data
-        )
-        
-        # 装飾レイヤー（地面の道）
-        decoration_data = [[0 for _ in range(self.width)] for _ in range(self.height)]
-        
-        # 地面の道を作成
-        for x in range(2, 8):
-            decoration_data[3][x] = 1  # 横の道
-        for y in range(3, 8):
-            decoration_data[y][7] = 1  # 縦の道
-        
-        decoration_layer = MapLayer(
-            name="decoration",
-            layer_type=LayerType.DECORATION,
-            width=self.width,
-            height=self.height,
-            data=decoration_data
-        )
-        
-        self.layers = [background_layer, collision_layer, decoration_layer]
-        
-        # カメラ境界設定
-        self.camera.set_bounds(
-            0, 0,
-            self.width * self.tile_size,
-            self.height * self.tile_size
-        )
-    
-    def update(self, dt: float):
-        """マップシステムを更新"""
-        self.camera.update(dt)
-    
-    def render(self, screen: pygame.Surface):
-        """マップを描画"""
-        if not self.tileset:
-            return
-        
-        # 描画範囲の計算
-        start_x = max(0, int(self.camera.x // self.tile_size))
-        start_y = max(0, int(self.camera.y // self.tile_size))
-        end_x = min(self.width, int((self.camera.x + SCREEN_WIDTH) // self.tile_size) + 1)
-        end_y = min(self.height, int((self.camera.y + SCREEN_HEIGHT) // self.tile_size) + 1)
-        
-        # レイヤー順で描画
-        layer_order = [LayerType.BACKGROUND, LayerType.COLLISION, LayerType.DECORATION, LayerType.FOREGROUND]
-        
-        for layer_type in layer_order:
-            for layer in self.layers:
-                if layer.layer_type == layer_type and layer.visible:
-                    self._render_layer(screen, layer, start_x, start_y, end_x, end_y)
-    
-    def _render_layer(self, screen: pygame.Surface, layer: MapLayer, 
-                     start_x: int, start_y: int, end_x: int, end_y: int):
-        """レイヤーを描画"""
-        for y in range(start_y, end_y):
-            for x in range(start_x, end_x):
-                if y < len(layer.data) and x < len(layer.data[y]):
-                    tile_id = layer.data[y][x]
-                    if tile_id > 0:  # 空タイル以外
-                        sprite = self._get_tile_sprite(tile_id)
-                        if sprite:
-                            screen_x, screen_y = self.camera.world_to_screen(
-                                x * self.tile_size, y * self.tile_size
-                            )
-                            
-                            # 透明度適用
-                            if layer.opacity < 1.0:
-                                sprite = sprite.copy()
-                                sprite.set_alpha(int(255 * layer.opacity))
-                            
-                            screen.blit(sprite, (screen_x, screen_y))
-    
-    def _get_tile_sprite(self, tile_id: int) -> pygame.Surface:
-        """タイルスプライトを取得（キャッシュ付き）"""
-        if tile_id not in self._sprite_cache:
-            self._sprite_cache[tile_id] = self.tileset.get_tile_sprite(tile_id)
-        return self._sprite_cache[tile_id]
-    
-    def check_collision(self, x: float, y: float, width: float, height: float) -> bool:
-        """矩形との衝突判定"""
-        if not self.tileset:
-            return False
-        
-        # 矩形の角の座標をタイル座標に変換
-        left = int(x // self.tile_size)
-        right = int((x + width - 1) // self.tile_size)
-        top = int(y // self.tile_size)
-        bottom = int((y + height - 1) // self.tile_size)
-        
-        # 衝突レイヤーをチェック
-        for layer in self.layers:
-            if layer.layer_type == LayerType.COLLISION:
-                for ty in range(max(0, top), min(layer.height, bottom + 1)):
-                    for tx in range(max(0, left), min(layer.width, right + 1)):
-                        if ty < len(layer.data) and tx < len(layer.data[ty]):
-                            tile_id = layer.data[ty][tx]
-                            if tile_id > 0 and self.tileset.is_solid(tile_id):
-                                return True
-        
-        return False
-    
-    def get_tile_at(self, x: float, y: float, layer_type: LayerType = LayerType.COLLISION) -> int:
-        """指定座標のタイルIDを取得"""
-        tile_x = int(x // self.tile_size)
-        tile_y = int(y // self.tile_size)
-        
-        for layer in self.layers:
-            if layer.layer_type == layer_type:
-                if (0 <= tile_y < layer.height and 0 <= tile_x < layer.width and
-                    tile_y < len(layer.data) and tile_x < len(layer.data[tile_y])):
-                    return layer.data[tile_y][tile_x]
-        
-        return 0
-    
-    def set_camera_target(self, x: float, y: float):
-        """カメラのターゲットを設定"""
-        self.camera.set_target(x, y)
-    
-    def world_to_screen(self, world_x: float, world_y: float) -> Tuple[float, float]:
-        """ワールド座標をスクリーン座標に変換"""
-        return self.camera.world_to_screen(world_x, world_y)
-    
-    def screen_to_world(self, screen_x: float, screen_y: float) -> Tuple[float, float]:
-        """スクリーン座標をワールド座標に変換"""
-        return self.camera.screen_to_world(screen_x, screen_y)
-    
-    def get_map_size(self) -> Tuple[int, int]:
-        """マップサイズを取得（ピクセル単位）"""
-        return (self.width * self.tile_size, self.height * self.tile_size)
-    
-    def get_tile_size(self) -> int:
-        """タイルサイズを取得"""
-        return self.tile_size

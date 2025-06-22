@@ -15,6 +15,7 @@ from src.ui.game_ui import GameUI, NotificationType, QuickSlotItem
 from src.entities.player import Player
 from src.entities.pet import Pet, PetData, PetType
 from src.systems.puzzle_system import PuzzleSystem
+from src.systems.map_system import MapSystem
 from src.ui.puzzle_ui import PuzzleUI
 from src.utils.asset_manager import get_asset_manager
 from src.utils.font_manager import get_font_manager
@@ -69,6 +70,9 @@ class Game:
         self.puzzle_system = PuzzleSystem()
         self.puzzle_ui = None
         
+        # マップシステム
+        self.map_system = MapSystem()
+        
         # ゲーム進行管理
         self.game_objectives = []
         self.current_objective_index = 0
@@ -104,6 +108,17 @@ class Game:
         # 謎解きUI初期化
         self.puzzle_ui = PuzzleUI(self.screen, self.puzzle_system)
         
+        # マップ読み込み
+        self.map_system.load_map("default_map.json")
+        
+        # プレイヤー位置をスポーン地点に設定
+        spawn_point = self.map_system.get_spawn_point("player")
+        if spawn_point:
+            self.player.set_position(spawn_point[0], spawn_point[1])
+        
+        # ペット位置をマップデータに基づいて設定
+        self._position_pets_from_map()
+        
         # ゲーム目標設定
         self._setup_objectives()
         
@@ -138,6 +153,21 @@ class Game:
             self.pets.append(pet)
         
         print(f"🐾 ペット生成完了: {len(self.pets)}匹")
+    
+    def _position_pets_from_map(self):
+        """マップデータに基づいてペットを配置"""
+        pet_locations = self.map_system.get_pet_locations()
+        
+        for i, pet in enumerate(self.pets):
+            if i < len(pet_locations):
+                x, y = pet_locations[i]
+                pet.x = x
+                pet.y = y
+                pet.rect.x = int(x)
+                pet.rect.y = int(y)
+                print(f"🐾 {pet.data.name}をマップ位置に配置: ({x}, {y})")
+            else:
+                print(f"⚠️ {pet.data.name}の配置位置が不足しています")
     
     def _setup_objectives(self):
         """ゲーム目標を設定"""
@@ -302,7 +332,7 @@ class Game:
             keys_pressed.add(pygame.K_LSHIFT)
         
         # プレイヤー更新
-        self.player.update(time_delta, keys_pressed)
+        self.player.update(time_delta, keys_pressed, self.map_system)
         
         # ペット更新
         player_pos = self.player.get_position()
@@ -337,11 +367,11 @@ class Game:
         self.camera_x += (target_x - self.camera_x) * camera_speed * (1/60)
         self.camera_y += (target_y - self.camera_y) * camera_speed * (1/60)
         
-        # カメラ範囲制限（必要に応じて）
-        world_width = 2000
-        world_height = 2000
-        self.camera_x = max(0, min(world_width - self.screen_width, self.camera_x))
-        self.camera_y = max(0, min(world_height - self.screen_height, self.camera_y))
+        # カメラ範囲制限（マップサイズに基づく）
+        world_width, world_height = self.map_system.get_map_size()
+        if world_width > 0 and world_height > 0:
+            self.camera_x = max(0, min(world_width - self.screen_width, self.camera_x))
+            self.camera_y = max(0, min(world_height - self.screen_height, self.camera_y))
     
     def _check_pet_interactions(self):
         """ペットとの相互作用チェック"""
@@ -456,33 +486,8 @@ class Game:
     
     def _draw_world(self):
         """世界描画"""
-        # 簡易タイルマップ
-        tile_size = 64
-        
-        # 表示範囲のタイルを計算
-        start_x = int(self.camera_x // tile_size) - 1
-        start_y = int(self.camera_y // tile_size) - 1
-        end_x = start_x + (self.screen_width // tile_size) + 3
-        end_y = start_y + (self.screen_height // tile_size) + 3
-        
-        # タイル描画
-        for y in range(start_y, end_y):
-            for x in range(start_x, end_x):
-                tile_x = x * tile_size - self.camera_x
-                tile_y = y * tile_size - self.camera_y
-                
-                # 簡易的なタイルパターン
-                if (x + y) % 4 == 0:
-                    color = (100, 200, 100)  # 明るい緑
-                elif (x + y) % 4 == 1:
-                    color = (80, 180, 80)    # 暗い緑
-                elif (x + y) % 4 == 2:
-                    color = (120, 160, 80)   # 黄緑
-                else:
-                    color = (90, 190, 90)    # 中間緑
-                
-                pygame.draw.rect(self.screen, color, (tile_x, tile_y, tile_size, tile_size))
-                pygame.draw.rect(self.screen, (60, 160, 60), (tile_x, tile_y, tile_size, tile_size), 1)
+        # マップシステムで描画
+        self.map_system.draw(self.screen, self.camera_x, self.camera_y)
     
     def _draw_debug_info(self):
         """デバッグ情報描画"""

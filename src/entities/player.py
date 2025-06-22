@@ -80,50 +80,61 @@ class Player:
         
         return sprites
     
-    def update(self, time_delta: float, keys_pressed, map_system=None):
-        """プレイヤーを更新"""
-        # 入力処理
+    def update(self, time_delta: float, keys_pressed: pygame.key.ScancodeWrapper, map_system=None):
+        """
+        プレイヤーを更新
+        
+        Args:
+            time_delta: フレーム時間（秒）
+            keys_pressed: pygame.key.get_pressed()の戻り値
+            map_system: マップシステム（衝突判定用、オプション）
+        """
+        # Phase 1: 基本入力処理
         self._handle_input(keys_pressed)
         
-        # 移動処理（衝突判定付き）
+        # Phase 2: 移動処理
         self._update_movement(time_delta, map_system)
         
-        # スタミナ処理
+        # Phase 3: 状態更新
         self._update_stamina(time_delta)
-        
-        # アニメーション更新
         self._update_animation(time_delta)
     
-    def _handle_input(self, keys_pressed):
-        """入力処理"""
-        # 移動入力をリセット
+    def _handle_input(self, keys_pressed: pygame.key.ScancodeWrapper):
+        """
+        入力処理 - Phase 1: 基本移動のみ
+        
+        Args:
+            keys_pressed: pygame.key.get_pressed()の戻り値
+        """
+        """
+        入力処理 - Phase 1: 基本移動のみ
+        
+        Args:
+            keys_pressed: pygame.key.get_pressed()の戻り値
+        """
+        # Phase 1: 基本移動のみ実装
         self.velocity_x = 0
         self.velocity_y = 0
         self.is_moving = False
         
-        # 走行判定
-        self.is_running = keys_pressed[pygame.K_LSHIFT] and self.stats.stamina > 0
+        # 基本速度（走行は後のPhaseで実装）
+        speed = self.stats.speed
         
-        # 移動速度決定
-        speed = self.stats.run_speed if self.is_running else self.stats.speed
-        
-        # WASD/矢印キーでの移動（デモと同じ処理）
-        if keys_pressed[pygame.K_a] or keys_pressed[pygame.K_LEFT]:
+        # 4方向移動（最小限の実装）
+        if keys_pressed[pygame.K_a]:
             self.velocity_x = -speed
             self.direction = Direction.LEFT
             self.is_moving = True
-        
-        if keys_pressed[pygame.K_d] or keys_pressed[pygame.K_RIGHT]:
+        elif keys_pressed[pygame.K_d]:
             self.velocity_x = speed
             self.direction = Direction.RIGHT
             self.is_moving = True
         
-        if keys_pressed[pygame.K_w] or keys_pressed[pygame.K_UP]:
+        if keys_pressed[pygame.K_w]:
             self.velocity_y = -speed
             self.direction = Direction.UP
             self.is_moving = True
-        
-        if keys_pressed[pygame.K_s] or keys_pressed[pygame.K_DOWN]:
+        elif keys_pressed[pygame.K_s]:
             self.velocity_y = speed
             self.direction = Direction.DOWN
             self.is_moving = True

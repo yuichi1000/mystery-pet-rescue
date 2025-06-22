@@ -184,8 +184,8 @@ class GameScene(Scene):
         if self.paused or self.game_over:
             return None
         
-        # プレイヤー更新
-        keys_pressed = pygame.key.get_pressed()
+        # Phase 1: プレイヤー基本更新
+        keys_pressed: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
         self.player.update(time_delta, keys_pressed, self.map_system)
         
         # カメラ更新

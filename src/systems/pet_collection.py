@@ -27,7 +27,7 @@ class PetInfo:
     description: str
     characteristics: List[str]
     rarity: str
-    image_path: str
+    sprites: Dict[str, str]  # 方向別スプライトパス
     found_locations: List[str]
     rescue_difficulty: int
     rescue_hints: List[str]

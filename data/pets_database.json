@@ -12,7 +12,12 @@
         "小さい体"
       ],
       "rarity": "common",
-      "image_path": "assets/images/pets/pet_dog_small.png",
+      "sprites": {
+        "front": "assets/images/pets/pet_dog_001_front.png",
+        "back": "assets/images/pets/pet_dog_001_back.png",
+        "left": "assets/images/pets/pet_dog_001_left.png",
+        "right": "assets/images/pets/pet_dog_001_right.png"
+      },
       "found_locations": [
         "住宅街の公園",
         "商店街"
@@ -35,7 +40,12 @@
         "甘えん坊"
       ],
       "rarity": "common",
-      "image_path": "assets/images/pets/pet_cat.png",
+      "sprites": {
+        "front": "assets/images/pets/pet_cat_001_front.png",
+        "back": "assets/images/pets/pet_cat_001_back.png",
+        "left": "assets/images/pets/pet_cat_001_left.png",
+        "right": "assets/images/pets/pet_cat_001_right.png"
+      },
       "found_locations": [
         "住宅街の屋根",
         "路地裏"
@@ -58,7 +68,12 @@
         "臆病"
       ],
       "rarity": "uncommon",
-      "image_path": "assets/images/pets/pet_rabbit.png",
+      "sprites": {
+        "front": "assets/images/pets/pet_rabbit_001_front.png",
+        "back": "assets/images/pets/pet_rabbit_001_back.png",
+        "left": "assets/images/pets/pet_rabbit_001_left.png",
+        "right": "assets/images/pets/pet_rabbit_001_right.png"
+      },
       "found_locations": [
         "住宅街の庭",
         "茂みの中"
@@ -81,7 +96,12 @@
         "人懐っこい"
       ],
       "rarity": "uncommon",
-      "image_path": "assets/images/pets/pet_bird.png",
+      "sprites": {
+        "front": "assets/images/pets/pet_bird_001_front.png",
+        "back": "assets/images/pets/pet_bird_001_back.png",
+        "left": "assets/images/pets/pet_bird_001_left.png",
+        "right": "assets/images/pets/pet_bird_001_right.png"
+      },
       "found_locations": [
         "住宅街の電線",
         "公園の木"
@@ -104,7 +124,12 @@
         "忠実"
       ],
       "rarity": "rare",
-      "image_path": "assets/images/pets/pet_dog_large.png",
+      "sprites": {
+        "front": "assets/images/pets/pet_dog_002_front.png",
+        "back": "assets/images/pets/pet_dog_002_back.png",
+        "left": "assets/images/pets/pet_dog_002_left.png",
+        "right": "assets/images/pets/pet_dog_002_right.png"
+      },
       "found_locations": [
         "住宅街の大きな公園",
         "川沿いの散歩道"
@@ -127,7 +152,12 @@
         "夜行性"
       ],
       "rarity": "rare",
-      "image_path": "assets/images/pets/pet_cat_black.png",
+      "sprites": {
+        "front": "assets/images/pets/pet_cat_002_front.png",
+        "back": "assets/images/pets/pet_cat_002_back.png",
+        "left": "assets/images/pets/pet_cat_002_left.png",
+        "right": "assets/images/pets/pet_cat_002_right.png"
+      },
       "found_locations": [
         "夜の住宅街",
         "暗い路地"

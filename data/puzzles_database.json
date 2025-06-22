@@ -1,0 +1,223 @@
+{
+  "puzzles": {
+    "puzzle_001": {
+      "id": "puzzle_001",
+      "title": "迷子の子猫を助けよう",
+      "description": "高い木の上で鳴いている子猫を安全に降ろすには？",
+      "difficulty": "easy",
+      "category": "rescue",
+      "required_items": ["rope", "ladder", "treats"],
+      "optional_items": ["blanket", "carrier"],
+      "stages": [
+        {
+          "stage": 1,
+          "description": "子猫の位置を確認する",
+          "required_items": [],
+          "hint": "まずは子猫がどこにいるか確認しましょう",
+          "completed": false
+        },
+        {
+          "stage": 2,
+          "description": "安全な降下手段を準備する",
+          "required_items": ["rope", "ladder"],
+          "hint": "高い場所から安全に降りるには何が必要でしょうか？",
+          "completed": false
+        },
+        {
+          "stage": 3,
+          "description": "子猫を誘導する",
+          "required_items": ["treats"],
+          "hint": "怖がっている子猫を安心させるものは？",
+          "completed": false
+        }
+      ],
+      "combinations": [
+        {
+          "items": ["rope", "ladder"],
+          "result": "安全な救助装置",
+          "description": "ロープと梯子を組み合わせて安全な救助装置を作りました",
+          "success_message": "これで子猫を安全に降ろせそうです！"
+        },
+        {
+          "items": ["treats", "blanket"],
+          "result": "安心セット",
+          "description": "おやつと毛布で子猫を安心させる準備ができました",
+          "success_message": "子猫が安心して降りてきてくれるでしょう"
+        }
+      ],
+      "hints": [
+        "子猫は高い場所にいて怖がっています",
+        "安全に降ろすための道具が必要です",
+        "子猫を誘導するためのアイテムも重要です",
+        "ロープと梯子を組み合わせてみましょう",
+        "おやつで子猫の注意を引いてみましょう"
+      ],
+      "success_condition": {
+        "type": "all_stages_complete",
+        "required_combinations": ["安全な救助装置", "安心セット"]
+      },
+      "rewards": {
+        "experience": 100,
+        "items": ["rescue_certificate"],
+        "story_progress": "rescued_kitten_001"
+      }
+    },
+    "puzzle_002": {
+      "id": "puzzle_002",
+      "title": "迷子の犬の手がかり探し",
+      "description": "行方不明になった犬の手がかりを集めて居場所を特定しよう",
+      "difficulty": "normal",
+      "category": "investigation",
+      "required_items": ["magnifying_glass", "dog_photo", "collar_fragment"],
+      "optional_items": ["notebook", "flashlight"],
+      "stages": [
+        {
+          "stage": 1,
+          "description": "手がかりを収集する",
+          "required_items": ["magnifying_glass"],
+          "hint": "細かい手がかりを見つけるための道具が必要です",
+          "completed": false
+        },
+        {
+          "stage": 2,
+          "description": "犬の特徴を確認する",
+          "required_items": ["dog_photo"],
+          "hint": "犬の見た目を確認できるものが必要です",
+          "completed": false
+        },
+        {
+          "stage": 3,
+          "description": "物的証拠を分析する",
+          "required_items": ["collar_fragment"],
+          "hint": "犬が残していった物的証拠を調べましょう",
+          "completed": false
+        }
+      ],
+      "combinations": [
+        {
+          "items": ["magnifying_glass", "collar_fragment"],
+          "result": "詳細な証拠分析",
+          "description": "虫眼鏡で首輪の破片を詳しく調べました",
+          "success_message": "首輪に刻まれた文字が読めました！"
+        },
+        {
+          "items": ["dog_photo", "notebook"],
+          "result": "特徴記録",
+          "description": "犬の写真を見ながら特徴をノートに記録しました",
+          "success_message": "犬の詳細な特徴が整理できました"
+        }
+      ],
+      "hints": [
+        "手がかりを詳しく調べるための道具が必要です",
+        "犬の見た目を確認できる資料を探しましょう",
+        "現場に残された物的証拠を調べてみましょう",
+        "虫眼鏡で小さな手がかりも見逃さないようにしましょう",
+        "写真と実際の手がかりを照らし合わせてみましょう"
+      ],
+      "success_condition": {
+        "type": "all_stages_complete",
+        "required_combinations": ["詳細な証拠分析"]
+      },
+      "rewards": {
+        "experience": 150,
+        "items": ["detective_badge"],
+        "story_progress": "found_dog_clue_001"
+      }
+    },
+    "puzzle_003": {
+      "id": "puzzle_003",
+      "title": "秘密の隠し場所",
+      "description": "古い日記の暗号を解いて、隠されたペットの居場所を見つけよう",
+      "difficulty": "hard",
+      "category": "cipher",
+      "required_items": ["old_diary", "cipher_key", "map_fragment", "compass"],
+      "optional_items": ["pencil", "ruler"],
+      "stages": [
+        {
+          "stage": 1,
+          "description": "暗号を解読する",
+          "required_items": ["old_diary", "cipher_key"],
+          "hint": "日記の暗号を解くための鍵が必要です",
+          "completed": false
+        },
+        {
+          "stage": 2,
+          "description": "地図の断片を解析する",
+          "required_items": ["map_fragment"],
+          "hint": "場所を特定するための地図情報が必要です",
+          "completed": false
+        },
+        {
+          "stage": 3,
+          "description": "方角を確認する",
+          "required_items": ["compass"],
+          "hint": "正確な方向を知るための道具が必要です",
+          "completed": false
+        }
+      ],
+      "combinations": [
+        {
+          "items": ["old_diary", "cipher_key"],
+          "result": "解読された暗号",
+          "description": "暗号鍵を使って古い日記の暗号を解読しました",
+          "success_message": "隠された場所のヒントが明らかになりました！"
+        },
+        {
+          "items": ["map_fragment", "compass"],
+          "result": "正確な位置情報",
+          "description": "地図の断片とコンパスで正確な位置を特定しました",
+          "success_message": "目的地への道筋が見えてきました！"
+        },
+        {
+          "items": ["解読された暗号", "正確な位置情報"],
+          "result": "完全な手がかり",
+          "description": "すべての情報を組み合わせて完全な手がかりを得ました",
+          "success_message": "ついに隠し場所を特定できました！"
+        }
+      ],
+      "hints": [
+        "古い日記には暗号が書かれているようです",
+        "暗号を解くための鍵を探しましょう",
+        "地図の断片から場所の手がかりを得られるかもしれません",
+        "正確な方角を知るためにコンパスが必要です",
+        "すべての手がかりを組み合わせることが重要です"
+      ],
+      "success_condition": {
+        "type": "specific_combination",
+        "required_combinations": ["完全な手がかり"]
+      },
+      "rewards": {
+        "experience": 250,
+        "items": ["master_detective_badge", "secret_map"],
+        "story_progress": "discovered_secret_location"
+      }
+    }
+  },
+  "difficulty_settings": {
+    "easy": {
+      "max_hints": 5,
+      "hint_cooldown": 30,
+      "auto_hint_threshold": 3,
+      "required_accuracy": 0.7
+    },
+    "normal": {
+      "max_hints": 3,
+      "hint_cooldown": 60,
+      "auto_hint_threshold": 5,
+      "required_accuracy": 0.8
+    },
+    "hard": {
+      "max_hints": 2,
+      "hint_cooldown": 120,
+      "auto_hint_threshold": 7,
+      "required_accuracy": 0.9
+    }
+  },
+  "item_categories": {
+    "tools": ["rope", "ladder", "magnifying_glass", "compass"],
+    "evidence": ["dog_photo", "collar_fragment", "map_fragment"],
+    "consumables": ["treats", "notebook"],
+    "keys": ["cipher_key"],
+    "documents": ["old_diary"]
+  }
+}

@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 
 from src.utils.font_manager import get_font_manager
+from src.utils.asset_manager import get_asset_manager
 
 class MenuState(Enum):
     """メニュー状態"""
@@ -64,6 +65,9 @@ class MenuSystem:
         
         # フォントマネージャー
         self.font_manager = get_font_manager()
+        
+        # アセットマネージャー
+        self.asset_manager = get_asset_manager()
         
         # 状態管理
         self.current_state = MenuState.TITLE
@@ -202,13 +206,29 @@ class MenuSystem:
         """背景を設定"""
         # 各メニューの背景色
         background_colors = {
-            MenuState.TITLE: (25, 25, 112),      # ミッドナイトブルー
             MenuState.SETTINGS: (47, 79, 79),    # ダークスレートグレー
             MenuState.PAUSE: (0, 0, 0, 180),     # 半透明黒
             MenuState.PET_COLLECTION: (34, 139, 34),  # フォレストグリーン
             MenuState.SAVE_LOAD: (72, 61, 139)   # ダークスレートブルー
         }
         
+        # タイトル画面の背景画像を読み込み
+        title_background = self.asset_manager.load_image(
+            "backgrounds/menu_background.png", 
+            (self.screen_width, self.screen_height)
+        )
+        
+        if title_background:
+            self.backgrounds[MenuState.TITLE] = title_background
+            print("✅ タイトル背景画像読み込み完了: menu_background.png")
+        else:
+            # フォールバック: デフォルト色
+            title_surface = pygame.Surface((self.screen_width, self.screen_height))
+            title_surface.fill((25, 25, 112))  # ミッドナイトブルー
+            self.backgrounds[MenuState.TITLE] = title_surface
+            print("⚠️ タイトル背景画像が見つかりません。デフォルト色を使用")
+        
+        # その他のメニュー背景
         for state, color in background_colors.items():
             surface = pygame.Surface((self.screen_width, self.screen_height))
             if len(color) == 4:  # アルファ値がある場合
@@ -538,3 +558,16 @@ class MenuSystem:
         """クリーンアップ"""
         self._save_settings()
         print("🧹 メニューシステムクリーンアップ完了")
+    
+    def resize(self, new_width: int, new_height: int):
+        """画面サイズ変更に対応"""
+        self.screen_width = new_width
+        self.screen_height = new_height
+        
+        # 背景を再設定（画像のリサイズ対応）
+        self._setup_backgrounds()
+        
+        # ボタン位置を再計算
+        self._calculate_button_positions()
+        
+        print(f"🖥️ メニューシステム解像度変更: {new_width}x{new_height}")

@@ -219,8 +219,7 @@ class Game:
                 if hasattr(self, 'game_ui'):
                     self.game_ui.resize(event.w, event.h)
                 if hasattr(self, 'menu_system'):
-                    # メニューシステムの解像度更新は必要に応じて実装
-                    pass
+                    self.menu_system.resize(event.w, event.h)
             
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F1:

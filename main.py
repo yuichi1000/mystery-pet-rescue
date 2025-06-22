@@ -37,6 +37,9 @@ class GameState:
         self.clock = pygame.time.Clock()
         self.screen = None
         self.font = None
+        self.fullscreen = False
+        self.show_debug = False
+        self.frame_count = 0
     
     def initialize(self):
         """ゲームを初期化"""
@@ -66,9 +69,18 @@ class GameState:
                         self.current_scene = "game"
                     else:
                         self.current_scene = "title"
+                elif event.key == pygame.K_F1:
+                    # F1キーでデバッグ情報表示切り替え
+                    self.show_debug = not getattr(self, 'show_debug', False)
+                elif event.key == pygame.K_F11:
+                    # F11キーでフルスクリーン切り替え
+                    self.toggle_fullscreen()
     
     def update(self):
         """ゲーム状態更新"""
+        # フレームカウント更新
+        self.frame_count += 1
+        
         # 将来的にはここで各シーンの更新処理を呼び出す
         pass
     
@@ -81,6 +93,10 @@ class GameState:
         elif self.current_scene == "game":
             self.render_game_scene()
         
+        # デバッグ情報表示
+        if self.show_debug:
+            self.render_debug_info()
+        
         pygame.display.flip()
     
     def render_title_scene(self):
@@ -92,7 +108,7 @@ class GameState:
         
         # 操作説明
         font_small = pygame.font.Font(None, 36)
-        instruction_text = font_small.render("SPACE: ゲーム開始  ESC: 終了", True, COLOR_BLUE)
+        instruction_text = font_small.render("SPACE: ゲーム開始  ESC: 終了  F1: デバッグ  F11: フルスクリーン", True, COLOR_BLUE)
         instruction_rect = instruction_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
         self.screen.blit(instruction_text, instruction_rect)
     
@@ -108,7 +124,7 @@ class GameState:
         
         # 操作説明
         font_small = pygame.font.Font(None, 36)
-        instruction_text = font_small.render("SPACE: タイトルに戻る  ESC: 終了", True, COLOR_WHITE)
+        instruction_text = font_small.render("SPACE: タイトルに戻る  ESC: 終了  F1: デバッグ  F11: フルスクリーン", True, COLOR_WHITE)
         instruction_rect = instruction_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
         self.screen.blit(instruction_text, instruction_rect)
     
@@ -134,6 +150,35 @@ class GameState:
     def cleanup(self):
         """クリーンアップ処理"""
         pygame.quit()
+    
+    def toggle_fullscreen(self):
+        """フルスクリーン切り替え"""
+        self.fullscreen = not self.fullscreen
+        if self.fullscreen:
+            self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    
+    def render_debug_info(self):
+        """デバッグ情報を描画"""
+        font_small = pygame.font.Font(None, 24)
+        debug_info = [
+            f"FPS: {self.clock.get_fps():.1f}",
+            f"Frame: {self.frame_count}",
+            f"Scene: {self.current_scene}",
+            f"Fullscreen: {self.fullscreen}",
+            f"Resolution: {SCREEN_WIDTH}x{SCREEN_HEIGHT}"
+        ]
+        
+        # デバッグ情報背景
+        debug_bg = pygame.Rect(10, 10, 200, len(debug_info) * 25 + 10)
+        pygame.draw.rect(self.screen, (0, 0, 0, 180), debug_bg)
+        pygame.draw.rect(self.screen, COLOR_WHITE, debug_bg, 1)
+        
+        # デバッグテキスト
+        for i, info in enumerate(debug_info):
+            text = font_small.render(info, True, COLOR_WHITE)
+            self.screen.blit(text, (15, 20 + i * 25))
 
 
 def main():

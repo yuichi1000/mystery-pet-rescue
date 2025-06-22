@@ -49,7 +49,11 @@ def main():
                 running = False
         
         # UI更新
-        puzzle_ui.update(time_delta, events)
+        result = puzzle_ui.update(time_delta, events)
+        
+        # 終了チェック
+        if result == "quit":
+            running = False
         
         # 描画
         puzzle_ui.draw()

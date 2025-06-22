@@ -1,0 +1,26 @@
+{
+  "master_volume": 0.8,
+  "music_volume": 0.7,
+  "sfx_volume": 0.8,
+  "fullscreen": false,
+  "key_bindings": {
+    "up": 273,
+    "down": 274,
+    "left": 276,
+    "right": 275,
+    "action": 32,
+    "cancel": 27,
+    "menu": 9
+  },
+  "graphics": {
+    "resolution": "1280x720",
+    "vsync": true,
+    "anti_aliasing": true
+  },
+  "gameplay": {
+    "auto_save": true,
+    "auto_save_interval": 300,
+    "difficulty": "normal",
+    "hints_enabled": true
+  }
+}

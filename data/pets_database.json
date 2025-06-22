@@ -1,194 +1,109 @@
 {
   "pets": [
     {
-      "id": "dog_001",
-      "name": "チョコ",
-      "species": "犬",
-      "breed": "チワワ",
-      "description": "小さくて元気いっぱいの茶色いチワワ。人懐っこく、いつも尻尾を振っている。",
-      "characteristics": [
-        "人懐っこい",
-        "元気いっぱい",
-        "小さい体"
-      ],
-      "rarity": "common",
-      "sprites": {
-        "front": "assets/images/pets/pet_dog_001_front.png",
-        "back": "assets/images/pets/pet_dog_001_back.png",
-        "left": "assets/images/pets/pet_dog_001_left.png",
-        "right": "assets/images/pets/pet_dog_001_right.png"
-      },
-      "found_locations": [
-        "住宅街の公園",
-        "商店街"
-      ],
-      "rescue_difficulty": 1,
-      "rescue_hints": [
-        "おやつを持っていると近づいてくる",
-        "優しく声をかけてみよう"
-      ]
-    },
-    {
       "id": "cat_001",
       "name": "ミケ",
-      "species": "猫",
-      "breed": "三毛猫",
-      "description": "美しい三毛模様の猫。少し警戒心が強いが、慣れると甘えん坊。",
-      "characteristics": [
-        "警戒心が強い",
-        "美しい毛色",
-        "甘えん坊"
-      ],
+      "species": "三毛猫",
+      "description": "人懐っこい三毛猫。好奇心旺盛で、いつも何かを探している。鳴き声が特徴的で、飼い主を呼んでいるようだ。",
       "rarity": "common",
-      "sprites": {
-        "front": "assets/images/pets/pet_cat_001_front.png",
-        "back": "assets/images/pets/pet_cat_001_back.png",
-        "left": "assets/images/pets/pet_cat_001_left.png",
-        "right": "assets/images/pets/pet_cat_001_right.png"
-      },
-      "found_locations": [
-        "住宅街の屋根",
-        "路地裏"
-      ],
-      "rescue_difficulty": 2,
-      "rescue_hints": [
-        "高い場所にいることが多い",
-        "静かに近づくのがコツ"
-      ]
+      "image_path": "assets/images/pets/cat_001.png",
+      "habitat": "住宅街",
+      "personality": "好奇心旺盛",
+      "favorite_food": "魚"
+    },
+    {
+      "id": "dog_001",
+      "name": "ポチ",
+      "species": "柴犬",
+      "description": "忠実な柴犬。飼い主を探して街を彷徨っている。とても人懐っこく、見つけた人にすぐに懐く。",
+      "rarity": "common",
+      "image_path": "assets/images/pets/dog_001.png",
+      "habitat": "公園",
+      "personality": "忠実",
+      "favorite_food": "骨"
     },
     {
       "id": "rabbit_001",
-      "name": "ふわり",
-      "species": "うさぎ",
-      "breed": "ホーランドロップ",
-      "description": "ふわふわの白い毛と垂れ耳が特徴的なうさぎ。とても臆病で隠れるのが上手。",
-      "characteristics": [
-        "ふわふわの毛",
-        "垂れ耳",
-        "臆病"
-      ],
-      "rarity": "uncommon",
-      "sprites": {
-        "front": "assets/images/pets/pet_rabbit_001_front.png",
-        "back": "assets/images/pets/pet_rabbit_001_back.png",
-        "left": "assets/images/pets/pet_rabbit_001_left.png",
-        "right": "assets/images/pets/pet_rabbit_001_right.png"
-      },
-      "found_locations": [
-        "住宅街の庭",
-        "茂みの中"
-      ],
-      "rescue_difficulty": 3,
-      "rescue_hints": [
-        "茂みや隠れ場所をよく探そう",
-        "急に動くと逃げてしまう"
-      ]
+      "name": "ウサ吉",
+      "species": "ウサギ",
+      "description": "ふわふわの毛が特徴的なウサギ。とても臆病な性格で、人が近づくとすぐに隠れてしまう。",
+      "rarity": "rare",
+      "image_path": "assets/images/pets/rabbit_001.png",
+      "habitat": "森",
+      "personality": "臆病",
+      "favorite_food": "人参"
     },
     {
       "id": "bird_001",
       "name": "ピーちゃん",
-      "species": "鳥",
-      "breed": "セキセイインコ",
-      "description": "鮮やかな青と黄色の羽を持つセキセイインコ。おしゃべりが得意で人の言葉を真似する。",
-      "characteristics": [
-        "鮮やかな羽色",
-        "おしゃべり好き",
-        "人懐っこい"
-      ],
-      "rarity": "uncommon",
-      "sprites": {
-        "front": "assets/images/pets/pet_bird_001_front.png",
-        "back": "assets/images/pets/pet_bird_001_back.png",
-        "left": "assets/images/pets/pet_bird_001_left.png",
-        "right": "assets/images/pets/pet_bird_001_right.png"
-      },
-      "found_locations": [
-        "住宅街の電線",
-        "公園の木"
-      ],
-      "rescue_difficulty": 4,
-      "rescue_hints": [
-        "高い場所にいることが多い",
-        "話しかけると反応してくれる"
-      ]
-    },
-    {
-      "id": "dog_002",
-      "name": "ゴールディ",
-      "species": "犬",
-      "breed": "ゴールデンレトリバー",
-      "description": "大型で優しい性格のゴールデンレトリバー。家族思いで忠実な性格。",
-      "characteristics": [
-        "大型犬",
-        "優しい性格",
-        "忠実"
-      ],
+      "species": "インコ",
+      "description": "色鮮やかな羽を持つインコ。人の言葉を真似するのが得意で、時々面白いことを言う。",
       "rarity": "rare",
-      "sprites": {
-        "front": "assets/images/pets/pet_dog_002_front.png",
-        "back": "assets/images/pets/pet_dog_002_back.png",
-        "left": "assets/images/pets/pet_dog_002_left.png",
-        "right": "assets/images/pets/pet_dog_002_right.png"
-      },
-      "found_locations": [
-        "住宅街の大きな公園",
-        "川沿いの散歩道"
-      ],
-      "rescue_difficulty": 2,
-      "rescue_hints": [
-        "水辺を好む",
-        "ボールなどのおもちゃに反応する"
-      ]
+      "image_path": "assets/images/pets/bird_001.png",
+      "habitat": "森",
+      "personality": "おしゃべり",
+      "favorite_food": "種"
     },
     {
       "id": "cat_002",
-      "name": "シャドウ",
-      "species": "猫",
-      "breed": "黒猫",
-      "description": "真っ黒な毛色の神秘的な猫。夜行性で、暗い場所を好む。",
-      "characteristics": [
-        "真っ黒な毛色",
-        "神秘的",
-        "夜行性"
-      ],
+      "name": "シロ",
+      "species": "白猫",
+      "description": "真っ白な毛が美しい猫。とても神秘的な雰囲気を持ち、まるで幽霊のように静かに移動する。",
+      "rarity": "legendary",
+      "image_path": "assets/images/pets/cat_002.png",
+      "habitat": "神社",
+      "personality": "神秘的",
+      "favorite_food": "牛乳"
+    },
+    {
+      "id": "hamster_001",
+      "name": "ハム太郎",
+      "species": "ハムスター",
+      "description": "小さくて可愛いハムスター。頬袋にいつも何かを詰め込んでいる。とても素早く動き回る。",
+      "rarity": "common",
+      "image_path": "assets/images/pets/hamster_001.png",
+      "habitat": "住宅街",
+      "personality": "活発",
+      "favorite_food": "ひまわりの種"
+    },
+    {
+      "id": "turtle_001",
+      "name": "カメ吉",
+      "species": "カメ",
+      "description": "のんびりとしたカメ。いつもマイペースで、急ぐことを知らない。長生きの秘訣を知っているかも。",
       "rarity": "rare",
-      "sprites": {
-        "front": "assets/images/pets/pet_cat_002_front.png",
-        "back": "assets/images/pets/pet_cat_002_back.png",
-        "left": "assets/images/pets/pet_cat_002_left.png",
-        "right": "assets/images/pets/pet_cat_002_right.png"
-      },
-      "found_locations": [
-        "夜の住宅街",
-        "暗い路地"
-      ],
-      "rescue_difficulty": 5,
-      "rescue_hints": [
-        "夜の時間帯に活動する",
-        "暗い場所を好む"
-      ]
+      "image_path": "assets/images/pets/turtle_001.png",
+      "habitat": "池",
+      "personality": "のんびり",
+      "favorite_food": "レタス"
+    },
+    {
+      "id": "fox_001",
+      "name": "キツネ丸",
+      "species": "キツネ",
+      "description": "賢いキツネ。とても警戒心が強く、簡単には捕まらない。夜行性で、月夜に美しい姿を見せる。",
+      "rarity": "legendary",
+      "image_path": "assets/images/pets/fox_001.png",
+      "habitat": "森",
+      "personality": "賢い",
+      "favorite_food": "魚"
     }
   ],
   "rarity_info": {
     "common": {
       "name": "コモン",
-      "color": "#4CAF50",
-      "description": "よく見かけるペット"
-    },
-    "uncommon": {
-      "name": "アンコモン",
-      "color": "#2196F3",
-      "description": "少し珍しいペット"
+      "color": "#A9A9A9",
+      "description": "よく見かける一般的なペット"
     },
     "rare": {
       "name": "レア",
-      "color": "#FF9800",
-      "description": "珍しいペット"
+      "color": "#4169E1",
+      "description": "珍しいペット、発見が困難"
     },
     "legendary": {
-      "name": "レジェンダリー",
-      "color": "#9C27B0",
-      "description": "とても珍しいペット"
+      "name": "レジェンド",
+      "color": "#FFD700",
+      "description": "非常に稀な伝説のペット"
     }
   }
 }

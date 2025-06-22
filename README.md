@@ -27,14 +27,26 @@
 pip install -r requirements.txt
 ```
 
-### 2. Pygame動作確認（推奨）
+### 2. デモ実行コマンド
+
+#### 基本確認
 ```bash
 python test_pygame.py
 ```
 
-### 3. ゲーム実行
+#### シンプル版
 ```bash
 python main.py
+```
+
+#### 移動デモ
+```bash
+python run_window_demo.py
+```
+
+#### 完全デモ
+```bash
+python run_demo_game.py
 ```
 
 ## 操作方法

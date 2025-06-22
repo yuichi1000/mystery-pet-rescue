@@ -4,6 +4,7 @@
 Claude Codeは以下のファイルのみ編集可能です：
 - README.md
 - DEVELOPMENT_GUIDE.md
+- CLAUDE.md
 - .amazonq/ 以下のすべてのファイル
 
 ## 編集禁止ファイル
@@ -24,3 +25,10 @@ Claude Codeは以下のファイルのみ編集可能です：
 1. 「このファイルは Amazon Q が管理しています」と説明
 2. DEVELOPMENT_GUIDE.md に実装ガイドラインを追記
 3. .amazonq/rules/ に必要なルールを追加
+
+## Amazon Q への制約
+Amazon Q が以下のファイルを編集しないように、`.amazonq/rules/amazonq-restrictions.md` で制約を設定しています：
+- README.md
+- DEVELOPMENT_GUIDE.md
+- CLAUDE.md
+- .amazonq/ ディレクトリ以下のすべてのファイル

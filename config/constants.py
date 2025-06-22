@@ -39,9 +39,9 @@ UI_BUTTON_HOVER = (220, 220, 220)
 UI_BUTTON_PRESSED = (180, 180, 180)
 
 # ゲームプレイ定数
-PLAYER_SPEED = 5
-PET_SPEED = 3
-NPC_SPEED = 2
+PLAYER_SPEED = 300  # ピクセル/秒（適切な移動速度）
+PET_SPEED = 150     # ピクセル/秒
+NPC_SPEED = 100     # ピクセル/秒
 
 # マップ設定
 TILE_SIZE = 32

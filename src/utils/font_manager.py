@@ -48,25 +48,25 @@ class FontManager:
         
         print("⚠️ 日本語フォントが見つかりません。デフォルトフォントを使用します。")
     
-    def get_font(self, size: int, bold: bool = False) -> pygame.font.Font:
+    def get_font(self, font_name: str, size: int, bold: bool = False) -> pygame.font.Font:
         """フォントを取得"""
-        font_key = f"{size}_{bold}"
+        font_key = f"{font_name}_{size}_{bold}"
         
         if font_key not in self.fonts:
-            if self.japanese_font_path:
+            if self.japanese_font_path and font_name == "default":
                 try:
                     self.fonts[font_key] = pygame.font.Font(self.japanese_font_path, size)
-                except:
-                    print(f"⚠️ 日本語フォント読み込み失敗: {self.japanese_font_path}")
+                except Exception as e:
+                    print(f"⚠️ 日本語フォント読み込み失敗: {self.japanese_font_path} - {e}")
                     self.fonts[font_key] = pygame.font.Font(None, size)
             else:
                 self.fonts[font_key] = pygame.font.Font(None, size)
         
         return self.fonts[font_key]
     
-    def render_text(self, text: str, size: int, color: tuple, bold: bool = False) -> pygame.Surface:
+    def render_text(self, text: str, font_name: str, size: int, color: tuple, bold: bool = False) -> pygame.Surface:
         """テキストをレンダリング"""
-        font = self.get_font(size, bold)
+        font = self.get_font(font_name, size, bold)
         return font.render(text, True, color)
     
     def render_multiline_text(self, text: str, size: int, color: tuple, 

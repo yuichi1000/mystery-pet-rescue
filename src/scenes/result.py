@@ -1,0 +1,304 @@
+"""
+結果画面シーン
+ゲーム終了時の結果表示とスコア計算
+"""
+
+import pygame
+from typing import Optional, Dict, Any, List
+from src.core.scene import Scene
+from src.utils.font_manager import get_font_manager
+
+class ResultButton:
+    """結果画面のボタンクラス"""
+    def __init__(self, text: str, action: str, rect: pygame.Rect):
+        self.text = text
+        self.action = action
+        self.rect = rect
+        self.hovered = False
+        self.selected = False
+
+class ResultScene(Scene):
+    """結果画面シーン"""
+    
+    def __init__(self, screen: pygame.Surface, game_result: Dict[str, Any]):
+        super().__init__(screen)
+        self.game_result = game_result
+        self.font_manager = get_font_manager()
+        
+        # 結果データ
+        self.pets_rescued = game_result.get('pets_rescued', 0)
+        self.total_pets = game_result.get('total_pets', 4)
+        self.time_taken = game_result.get('time_taken', 0)
+        self.score = game_result.get('score', 0)
+        self.completion_rate = (self.pets_rescued / self.total_pets) * 100 if self.total_pets > 0 else 0
+        
+        # ボタン
+        self.buttons: List[ResultButton] = []
+        self.selected_index = 0
+        
+        # 背景色
+        self.background_color = (30, 50, 80)
+        
+        # 色設定
+        self.normal_color = (255, 255, 255)
+        self.hover_color = (255, 255, 0)
+        self.selected_color = (0, 255, 0)
+        
+        self._create_buttons()
+    
+    def _create_buttons(self):
+        """ボタンを作成"""
+        screen_width = self.screen.get_width()
+        screen_height = self.screen.get_height()
+        
+        # ボタン配置
+        button_y = screen_height - 150
+        button_width = 150
+        button_height = 50
+        button_spacing = 180
+        
+        # ボタンデータ
+        button_data = [
+            ("もう一度", "game"),
+            ("メニュー", "menu"),
+            ("終了", "quit")
+        ]
+        
+        for i, (text, action) in enumerate(button_data):
+            x = screen_width//2 - button_spacing + i * button_spacing - button_width//2
+            rect = pygame.Rect(x, button_y, button_width, button_height)
+            button = ResultButton(text, action, rect)
+            self.buttons.append(button)
+        
+        # 最初のボタンを選択
+        if self.buttons:
+            self.buttons[self.selected_index].selected = True
+    
+    def _calculate_score(self) -> int:
+        """スコアを計算"""
+        base_score = self.pets_rescued * 1000
+        time_bonus = max(0, 300 - int(self.time_taken)) * 10  # 5分以内でボーナス
+        completion_bonus = 2000 if self.pets_rescued == self.total_pets else 0
+        
+        return base_score + time_bonus + completion_bonus
+    
+    def _get_rank(self) -> str:
+        """ランクを取得"""
+        if self.completion_rate == 100:
+            if self.time_taken < 180:  # 3分以内
+                return "S"
+            elif self.time_taken < 300:  # 5分以内
+                return "A"
+            else:
+                return "B"
+        elif self.completion_rate >= 75:
+            return "C"
+        elif self.completion_rate >= 50:
+            return "D"
+        else:
+            return "E"
+    
+    def enter(self) -> None:
+        """シーンに入る時の処理"""
+        # スコアを再計算
+        self.score = self._calculate_score()
+    
+    def exit(self) -> None:
+        """シーンから出る時の処理"""
+        pass
+    
+    def handle_event(self, event: pygame.event.Event) -> Optional[str]:
+        """イベント処理"""
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                self._move_selection(-1)
+            elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                self._move_selection(1)
+            elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                return self._activate_selected()
+            elif event.key == pygame.K_ESCAPE:
+                return "menu"
+            elif event.key == pygame.K_r:
+                return "game"
+            elif event.key == pygame.K_q:
+                return "quit"
+        
+        elif event.type == pygame.MOUSEMOTION:
+            self._handle_mouse_hover(event.pos)
+        
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # 左クリック
+                return self._handle_mouse_click(event.pos)
+        
+        return None
+    
+    def _move_selection(self, direction: int):
+        """選択を移動"""
+        if not self.buttons:
+            return
+        
+        # 現在の選択を解除
+        self.buttons[self.selected_index].selected = False
+        
+        # 新しい選択インデックス
+        self.selected_index = (self.selected_index + direction) % len(self.buttons)
+        
+        # 新しい選択を設定
+        self.buttons[self.selected_index].selected = True
+    
+    def _activate_selected(self) -> str:
+        """選択されたボタンを実行"""
+        if self.buttons and 0 <= self.selected_index < len(self.buttons):
+            return self.buttons[self.selected_index].action
+        return "menu"
+    
+    def _handle_mouse_hover(self, pos: tuple):
+        """マウスホバー処理"""
+        for i, button in enumerate(self.buttons):
+            if button.rect.collidepoint(pos):
+                button.hovered = True
+                if i != self.selected_index:
+                    self.buttons[self.selected_index].selected = False
+                    self.selected_index = i
+                    button.selected = True
+            else:
+                button.hovered = False
+    
+    def _handle_mouse_click(self, pos: tuple) -> Optional[str]:
+        """マウスクリック処理"""
+        for button in self.buttons:
+            if button.rect.collidepoint(pos):
+                return button.action
+        return None
+    
+    def update(self, time_delta: float) -> Optional[str]:
+        """更新処理"""
+        return None
+    
+    def draw(self, surface: pygame.Surface) -> None:
+        """描画処理"""
+        # 背景を塗りつぶし
+        surface.fill(self.background_color)
+        
+        # グラデーション効果（簡易版）
+        for i in range(surface.get_height() // 4):
+            alpha = int(50 * (1 - i / (surface.get_height() // 4)))
+            color = (self.background_color[0] + alpha, 
+                    self.background_color[1] + alpha, 
+                    self.background_color[2] + alpha)
+            pygame.draw.line(surface, color, (0, i * 4), (surface.get_width(), i * 4))
+        
+        # タイトル描画
+        self._draw_title(surface)
+        
+        # 統計情報描画
+        self._draw_stats(surface)
+        
+        # ランク表示
+        self._draw_rank(surface)
+        
+        # 完全クリア時の特別メッセージ
+        if self.pets_rescued == self.total_pets:
+            self._draw_congratulations(surface)
+        
+        # ボタン描画
+        self._draw_buttons(surface)
+        
+        # 操作説明
+        self._draw_controls_help(surface)
+    
+    def _draw_title(self, surface: pygame.Surface):
+        """タイトルを描画"""
+        title_text = "ゲーム結果" if self.pets_rescued == self.total_pets else "ゲーム終了"
+        title_font = self.font_manager.get_font("default", 72)
+        title_surface = title_font.render(title_text, True, (255, 255, 255))
+        title_rect = title_surface.get_rect(center=(surface.get_width()//2, 100))
+        surface.blit(title_surface, title_rect)
+    
+    def _draw_stats(self, surface: pygame.Surface):
+        """統計情報を描画"""
+        stats_font = self.font_manager.get_font("default", 36)
+        stats_y = 180
+        stats_spacing = 50
+        
+        # 統計データ
+        stats_data = [
+            f"救出したペット: {self.pets_rescued} / {self.total_pets}",
+            f"達成率: {self.completion_rate:.1f}%",
+            f"プレイ時間: {int(self.time_taken // 60):02d}:{int(self.time_taken % 60):02d}",
+            f"スコア: {self.score:,}"
+        ]
+        
+        for i, text in enumerate(stats_data):
+            stats_surface = stats_font.render(text, True, (255, 255, 255))
+            stats_rect = stats_surface.get_rect(center=(surface.get_width()//2, stats_y + i * stats_spacing))
+            surface.blit(stats_surface, stats_rect)
+    
+    def _draw_rank(self, surface: pygame.Surface):
+        """ランクを描画"""
+        rank = self._get_rank()
+        rank_color = self._get_rank_color(rank)
+        rank_font = self.font_manager.get_font("default", 72)
+        rank_surface = rank_font.render(f"ランク: {rank}", True, rank_color)
+        rank_rect = rank_surface.get_rect(center=(surface.get_width()//2, 400))
+        surface.blit(rank_surface, rank_rect)
+    
+    def _draw_congratulations(self, surface: pygame.Surface):
+        """おめでとうメッセージを描画"""
+        congrats_text = "おめでとうございます！全てのペットを救出しました！"
+        congrats_font = self.font_manager.get_font("default", 36)
+        congrats_surface = congrats_font.render(congrats_text, True, (255, 215, 0))
+        congrats_rect = congrats_surface.get_rect(center=(surface.get_width()//2, 450))
+        surface.blit(congrats_surface, congrats_rect)
+    
+    def _draw_buttons(self, surface: pygame.Surface):
+        """ボタンを描画"""
+        button_font = self.font_manager.get_font("default", 32)
+        
+        for button in self.buttons:
+            # 背景色を決定
+            if button.selected:
+                bg_color = (100, 100, 100)
+                text_color = self.selected_color
+            elif button.hovered:
+                bg_color = (80, 80, 80)
+                text_color = self.hover_color
+            else:
+                bg_color = (60, 60, 60)
+                text_color = self.normal_color
+            
+            # 背景を描画
+            pygame.draw.rect(surface, bg_color, button.rect)
+            pygame.draw.rect(surface, text_color, button.rect, 2)
+            
+            # テキストを描画
+            text_surface = button_font.render(button.text, True, text_color)
+            text_rect = text_surface.get_rect(center=button.rect.center)
+            surface.blit(text_surface, text_rect)
+    
+    def _draw_controls_help(self, surface: pygame.Surface):
+        """操作説明を描画"""
+        help_font = self.font_manager.get_font("default", 18)
+        help_texts = [
+            "←→/AD: 選択移動",
+            "ENTER/SPACE: 決定",
+            "R: もう一度, ESC: メニュー, Q: 終了"
+        ]
+        
+        y_offset = surface.get_height() - 80
+        for i, text in enumerate(help_texts):
+            help_surface = help_font.render(text, True, (150, 150, 150))
+            help_rect = help_surface.get_rect(center=(surface.get_width()//2, y_offset + i * 25))
+            surface.blit(help_surface, help_rect)
+    
+    def _get_rank_color(self, rank: str) -> tuple:
+        """ランクに応じた色を取得"""
+        rank_colors = {
+            "S": (255, 215, 0),    # ゴールド
+            "A": (192, 192, 192),  # シルバー
+            "B": (205, 127, 50),   # ブロンズ
+            "C": (0, 255, 0),      # グリーン
+            "D": (255, 165, 0),    # オレンジ
+            "E": (255, 0, 0)       # レッド
+        }
+        return rank_colors.get(rank, (255, 255, 255))

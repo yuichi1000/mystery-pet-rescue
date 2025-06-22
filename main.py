@@ -19,7 +19,7 @@ except ImportError:
     print("ℹ️ python-dotenvが見つかりません（オプショナル）")
 
 # メインゲームのインポートと起動
-from src.core.game import Game
+from src.core.game_main import GameMain
 
 def main():
     """メイン関数"""
@@ -32,7 +32,7 @@ def main():
     
     try:
         # ゲーム起動
-        game = Game()
+        game = GameMain()
         game.run()
         
     except KeyboardInterrupt:

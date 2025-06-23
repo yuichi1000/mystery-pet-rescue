@@ -420,7 +420,7 @@ class MapSystem:
             return False
     
     def _update_from_new_map_data(self, new_map_data):
-        """新しいマップデータからMapSystemを更新"""
+        """新しいマップデータからMapSystemを更新（建物対応版）"""
         try:
             from src.systems.map_data_loader import MapData as NewMapData
             
@@ -430,22 +430,86 @@ class MapSystem:
             width = new_map_data.dimensions.width
             height = new_map_data.dimensions.height
             
-            # 新しいタイル配列を作成（とりあえず全て草タイル）
+            # 新しいタイル配列を作成（基本は草タイル）
             tiles = []
             for y in range(height):
                 row = []
                 for x in range(width):
-                    # 基本は草タイル
-                    tile_type = TileType.GRASS
-                    
-                    # 道路部分（仮の実装）
-                    if y == height // 2:  # 横道
-                        tile_type = TileType.CONCRETE
-                    elif x == width // 2:  # 縦道
-                        tile_type = TileType.CONCRETE
-                    
-                    row.append(tile_type)
+                    row.append(TileType.GRASS)
                 tiles.append(row)
+            
+            # 道路を配置
+            roads = new_map_data.terrain.get('roads', [])
+            for road in roads:
+                if road['type'] == 'main_road':
+                    # メイン道路（横）
+                    for point in road['points']:
+                        start_y = point['y']
+                        for road_y in range(start_y, min(start_y + road['width'], height)):
+                            for x in range(width):
+                                if 0 <= road_y < height:
+                                    tiles[road_y][x] = TileType.CONCRETE
+                elif road['type'] == 'side_road':
+                    # サイド道路（縦）
+                    for point in road['points']:
+                        start_x = point['x']
+                        for road_x in range(start_x, min(start_x + road['width'], width)):
+                            for y in range(height):
+                                if 0 <= road_x < width:
+                                    tiles[y][road_x] = TileType.CONCRETE
+            
+            # 建物を配置
+            buildings = new_map_data.terrain.get('buildings', [])
+            print(f"🏠 建物配置開始: {len(buildings)}個")
+            
+            for building in buildings:
+                pos = building['position']
+                size = building['size']
+                building_type = building['type']
+                
+                print(f"  配置中: {building['name']} at ({pos['x']}, {pos['y']}) size {size['width']}x{size['height']}")
+                
+                # 建物の種類に応じてタイルタイプを決定
+                if building_type == 'residential_house':
+                    building_tile = TileType.STONE_WALL
+                elif building_type == 'pet_shop':
+                    building_tile = TileType.ROCK
+                else:
+                    building_tile = TileType.GROUND
+                
+                # 建物エリアにタイルを配置
+                for dy in range(size['height']):
+                    for dx in range(size['width']):
+                        tile_x = pos['x'] + dx
+                        tile_y = pos['y'] + dy
+                        
+                        if 0 <= tile_x < width and 0 <= tile_y < height:
+                            tiles[tile_y][tile_x] = building_tile
+            
+            # 自然地形を配置
+            natural_features = new_map_data.terrain.get('natural_features', [])
+            for feature in natural_features:
+                pos = feature['position']
+                size = feature['size']
+                feature_type = feature['type']
+                
+                print(f"  自然地形: {feature['name']} at ({pos['x']}, {pos['y']})")
+                
+                if feature_type == 'small_park':
+                    feature_tile = TileType.TREE
+                elif feature_type == 'community_garden':
+                    feature_tile = TileType.GROUND
+                else:
+                    feature_tile = TileType.GRASS
+                
+                # 自然地形エリアにタイルを配置
+                for dy in range(size['height']):
+                    for dx in range(size['width']):
+                        tile_x = pos['x'] + dx
+                        tile_y = pos['y'] + dy
+                        
+                        if 0 <= tile_x < width and 0 <= tile_y < height:
+                            tiles[tile_y][tile_x] = feature_tile
             
             # 新しいMapDataを作成
             self.current_map = MapData(

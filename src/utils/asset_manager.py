@@ -9,6 +9,9 @@ from typing import Dict, Optional, Tuple, List
 from pathlib import Path
 import json
 
+from src.utils.exceptions import AssetLoadError
+from src.utils.error_handler import handle_error, safe_execute
+
 class AssetManager:
     """アセット管理クラス"""
     
@@ -33,39 +36,95 @@ class AssetManager:
     
     def load_image(self, path: str, scale: Optional[Tuple[int, int]] = None, 
                    colorkey: Optional[Tuple[int, int, int]] = None) -> Optional[pygame.Surface]:
-        """画像を読み込み（透過処理済み画像用）"""
+        """画像を読み込み（エラーハンドリング強化版）"""
         full_path = self.images_path / path
         
+        # キャッシュチェック
         if path in self.images:
             return self.images[path]
         
-        try:
+        def _load_image_safe():
+            # ファイル存在チェック
             if not full_path.exists():
-                print(f"⚠️ 画像ファイルが見つかりません: {full_path}")
-                return self._create_placeholder_image(scale or self.default_scale)
+                raise AssetLoadError(str(full_path), f"画像ファイルが見つかりません: {path}")
             
-            # 画像をそのまま読み込み、余計な処理なし
+            # ファイルサイズチェック
+            file_size = full_path.stat().st_size
+            if file_size == 0:
+                raise AssetLoadError(str(full_path), f"画像ファイルが空です: {path}")
+            
+            if file_size > 50 * 1024 * 1024:  # 50MB制限
+                raise AssetLoadError(str(full_path), f"画像ファイルが大きすぎます: {path} ({file_size} bytes)")
+            
+            # 画像読み込み
             image = pygame.image.load(str(full_path))
             
-            # スケール調整のみ
+            # 画像サイズチェック
+            width, height = image.get_size()
+            if width <= 0 or height <= 0:
+                raise AssetLoadError(str(full_path), f"無効な画像サイズ: {width}x{height}")
+            
+            # スケール調整
             if scale:
+                if scale[0] <= 0 or scale[1] <= 0:
+                    raise AssetLoadError(str(full_path), f"無効なスケール: {scale}")
                 image = pygame.transform.scale(image, scale)
             
-            self.images[path] = image
             return image
-            
-        except Exception as e:
-            print(f"❌ 画像読み込みエラー {path}: {e}")
-            return self._create_placeholder_image(scale or self.default_scale)
+        
+        # 安全な実行
+        image = safe_execute(
+            _load_image_safe,
+            context=f"load_image({path})",
+            default=None
+        )
+        
+        if image is None:
+            # プレースホルダー画像を作成
+            print(f"⚠️ プレースホルダー画像を使用: {path}")
+            image = self._create_placeholder_image(scale or self.default_scale)
+        
+        # キャッシュに保存
+        if image:
+            self.images[path] = image
+        
+        return image
     
     def _create_placeholder_image(self, size: Tuple[int, int]) -> pygame.Surface:
-        """プレースホルダー画像を作成（透過対応）"""
-        surface = pygame.Surface(size, pygame.SRCALPHA)
-        surface.fill((255, 0, 255))  # マゼンタ背景
-        surface.set_colorkey((255, 0, 255))  # マゼンタを透過色に設定
-        
-        # 枠線を描画
-        pygame.draw.rect(surface, (0, 0, 0), surface.get_rect(), 2)
+        """プレースホルダー画像を作成（エラーハンドリング付き）"""
+        try:
+            # サイズ検証
+            if not isinstance(size, (tuple, list)) or len(size) != 2:
+                size = self.default_scale
+            
+            width, height = size
+            if width <= 0 or height <= 0:
+                width, height = self.default_scale
+            
+            # 最大サイズ制限
+            width = min(width, 2048)
+            height = min(height, 2048)
+            
+            # サーフェス作成
+            surface = pygame.Surface((width, height), pygame.SRCALPHA)
+            surface.fill((255, 0, 255, 128))  # 半透明マゼンタ背景
+            
+            # 枠線を描画
+            pygame.draw.rect(surface, (0, 0, 0), surface.get_rect(), 2)
+            
+            # "NO IMAGE" テキストを描画
+            if width > 50 and height > 20:
+                font = pygame.font.Font(None, min(24, width // 8))
+                text = font.render("NO IMAGE", True, (0, 0, 0))
+                text_rect = text.get_rect(center=(width // 2, height // 2))
+                surface.blit(text, text_rect)
+            
+            return surface
+            
+        except Exception as e:
+            handle_error(e, "create_placeholder_image")
+            # 最小限のサーフェスを返す
+            return pygame.Surface((32, 32), pygame.SRCALPHA)
         
         return surface
     

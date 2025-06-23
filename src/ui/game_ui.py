@@ -1,6 +1,6 @@
 """
 ゲーム内UIシステム
-ヘルスバー、スタミナバー、ミニマップ、通知システムなど
+ヘルスバー、スタミナバー、ミニマップ、通知システムなど（エラーハンドリング強化版）
 """
 
 import pygame
@@ -12,6 +12,8 @@ from enum import Enum
 
 from src.utils.font_manager import get_font_manager
 from src.utils.asset_manager import get_asset_manager
+from src.utils.exceptions import UIError
+from src.utils.error_handler import handle_error, safe_execute
 
 class NotificationType(Enum):
     """通知タイプ"""

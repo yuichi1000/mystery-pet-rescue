@@ -344,15 +344,16 @@ class GameScene(Scene):
         return None
     
     def draw(self, surface: pygame.Surface) -> None:
-        """描画処理"""
-        # 背景画像または背景色
-        if self.background_image:
-            surface.blit(self.background_image, (0, 0))
-        else:
-            surface.fill((50, 100, 50))  # 緑っぽい背景（フォールバック）
+        """描画処理（マップ優先版）"""
+        # まず背景色でクリア
+        surface.fill((50, 100, 50))  # 緑っぽい背景
         
-        # マップ描画
+        # マップ描画（最優先）
         self.map_system.draw(surface, self.camera_x, self.camera_y)
+        
+        # 背景画像は使用しない（マップが背景の役割）
+        # if self.background_image:
+        #     surface.blit(self.background_image, (0, 0))
         
         # ペット描画
         for pet in self.pets:

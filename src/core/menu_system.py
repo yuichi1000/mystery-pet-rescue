@@ -12,6 +12,7 @@ from pathlib import Path
 
 from src.utils.font_manager import get_font_manager
 from src.utils.asset_manager import get_asset_manager
+from src.systems.save_load_system import SaveLoadSystem
 
 class MenuState(Enum):
     """メニュー状態"""
@@ -68,6 +69,9 @@ class MenuSystem:
         
         # アセットマネージャー
         self.asset_manager = get_asset_manager()
+        
+        # セーブ/ロードシステム
+        self.save_load_system = SaveLoadSystem()
         
         # 状態管理
         self.current_state = MenuState.TITLE
@@ -405,20 +409,75 @@ class MenuSystem:
     
     def _quick_save(self) -> MenuState:
         """クイックセーブ"""
-        print("💾 クイックセーブ")
-        # TODO: 実際のセーブ処理
+        print("⚡ クイックセーブ実行中...")
+        
+        # 現在のゲームデータを取得（デモ用）
+        game_data = self._get_current_game_data()
+        
+        # クイックセーブ実行
+        if self.save_load_system.quick_save(game_data):
+            print("✅ クイックセーブ完了")
+        else:
+            print("❌ クイックセーブ失敗")
+            
         return None
     
     def _save_game(self) -> MenuState:
         """ゲームセーブ"""
-        print("💾 ゲームセーブ")
-        # TODO: セーブ画面の実装
+        print("💾 セーブ画面を表示")
+        
+        # セーブスロット情報を取得
+        save_slots = self.save_load_system.get_save_slots()
+        
+        print("📋 セーブスロット状況:")
+        for i, slot in enumerate(save_slots):
+            if slot:
+                print(f"  スロット{i}: {slot.save_name} ({slot.save_date})")
+            else:
+                print(f"  スロット{i}: 空き")
+        
+        # デモ: 最初の空きスロットにセーブ
+        game_data = self._get_current_game_data()
+        for i, slot in enumerate(save_slots):
+            if slot is None:
+                if self.save_load_system.save_game(i, game_data, f"セーブデータ {i+1}"):
+                    print(f"✅ スロット{i}にセーブ完了")
+                    break
+        else:
+            print("⚠️ 空きスロットがありません")
+            
         return None
     
     def _load_game(self) -> MenuState:
         """ゲームロード"""
-        print("📂 ゲームロード")
-        # TODO: ロード画面の実装
+        print("📂 ロード画面を表示")
+        
+        # セーブスロット情報を取得
+        save_slots = self.save_load_system.get_save_slots()
+        
+        print("📋 ロード可能なセーブデータ:")
+        available_saves = []
+        for i, slot in enumerate(save_slots):
+            if slot:
+                print(f"  スロット{i}: {slot.save_name}")
+                print(f"    日時: {slot.save_date}")
+                print(f"    プレイ時間: {slot.play_time:.1f}秒")
+                available_saves.append(i)
+            else:
+                print(f"  スロット{i}: 空き")
+        
+        # デモ: 最初のセーブデータをロード
+        if available_saves:
+            slot_id = available_saves[0]
+            save_data = self.save_load_system.load_game(slot_id)
+            if save_data:
+                print(f"✅ {save_data.save_name} をロード完了")
+                # ここで実際のゲーム状態を復元（今後実装）
+            else:
+                print("❌ ロードに失敗しました")
+        else:
+            print("⚠️ ロード可能なセーブデータがありません")
+            
         return None
     
     def _view_collection(self) -> MenuState:
@@ -594,6 +653,34 @@ class MenuSystem:
         """設定を更新"""
         self.settings[key] = value
         self._save_settings()
+    
+    def _get_current_game_data(self) -> Dict[str, Any]:
+        """現在のゲームデータを取得（デモ用）"""
+        import time
+        return {
+            'play_time': time.time() % 3600,  # デモ用の適当な時間
+            'player_data': {
+                'position': {'x': 100, 'y': 100},
+                'health': 100,
+                'stamina': 100,
+                'level': 1
+            },
+            'game_progress': {
+                'current_scene': 'residential',
+                'pets_rescued': 0,
+                'puzzles_solved': 0
+            },
+            'pet_collection': {
+                'discovered_pets': [],
+                'total_pets': 4
+            },
+            'game_stats': {
+                'total_play_time': time.time() % 3600,
+                'pets_rescued': 0,
+                'areas_explored': 1,
+                'items_collected': 0
+            }
+        }
     
     def cleanup(self):
         """クリーンアップ"""

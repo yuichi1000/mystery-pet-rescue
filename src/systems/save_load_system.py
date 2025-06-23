@@ -1,0 +1,150 @@
+"""
+セーブ/ロードシステム
+ゲームデータの保存と読み込み
+"""
+
+import json
+import os
+import time
+from pathlib import Path
+from typing import Dict, Any, Optional, List
+from dataclasses import dataclass, asdict
+from datetime import datetime
+
+@dataclass
+class SaveData:
+    """セーブデータ構造"""
+    slot_id: int
+    save_name: str
+    save_date: str
+    play_time: float
+    player_data: Dict[str, Any]
+    game_progress: Dict[str, Any]
+    pet_collection: Dict[str, Any]
+    game_stats: Dict[str, Any]
+    version: str = "1.0.0"
+
+class SaveLoadSystem:
+    """セーブ/ロードシステム"""
+    
+    def __init__(self):
+        self.save_dir = Path("saves")
+        self.save_dir.mkdir(exist_ok=True)
+        self.max_slots = 3
+        
+    def get_save_slots(self) -> List[Optional[SaveData]]:
+        """全セーブスロットの情報を取得"""
+        slots = [None] * self.max_slots
+        
+        for slot_id in range(self.max_slots):
+            save_file = self.save_dir / f"save_slot_{slot_id}.json"
+            if save_file.exists():
+                try:
+                    with open(save_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        slots[slot_id] = SaveData(**data)
+                except Exception as e:
+                    print(f"❌ セーブスロット{slot_id}読み込みエラー: {e}")
+                    
+        return slots
+    
+    def save_game(self, slot_id: int, game_data: Dict[str, Any], 
+                  save_name: str = None) -> bool:
+        """ゲームをセーブ"""
+        if slot_id < 0 or slot_id >= self.max_slots:
+            print(f"❌ 無効なスロットID: {slot_id}")
+            return False
+            
+        try:
+            # セーブデータ作成
+            if save_name is None:
+                save_name = f"セーブデータ {slot_id + 1}"
+                
+            save_data = SaveData(
+                slot_id=slot_id,
+                save_name=save_name,
+                save_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                play_time=game_data.get('play_time', 0),
+                player_data=game_data.get('player_data', {}),
+                game_progress=game_data.get('game_progress', {}),
+                pet_collection=game_data.get('pet_collection', {}),
+                game_stats=game_data.get('game_stats', {})
+            )
+            
+            # ファイルに保存
+            save_file = self.save_dir / f"save_slot_{slot_id}.json"
+            with open(save_file, 'w', encoding='utf-8') as f:
+                json.dump(asdict(save_data), f, ensure_ascii=False, indent=2)
+                
+            print(f"✅ セーブ完了: スロット{slot_id} - {save_name}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ セーブエラー: {e}")
+            return False
+    
+    def load_game(self, slot_id: int) -> Optional[SaveData]:
+        """ゲームをロード"""
+        if slot_id < 0 or slot_id >= self.max_slots:
+            print(f"❌ 無効なスロットID: {slot_id}")
+            return None
+            
+        save_file = self.save_dir / f"save_slot_{slot_id}.json"
+        if not save_file.exists():
+            print(f"❌ セーブファイルが存在しません: スロット{slot_id}")
+            return None
+            
+        try:
+            with open(save_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                save_data = SaveData(**data)
+                print(f"✅ ロード完了: {save_data.save_name}")
+                return save_data
+                
+        except Exception as e:
+            print(f"❌ ロードエラー: {e}")
+            return None
+    
+    def delete_save(self, slot_id: int) -> bool:
+        """セーブデータを削除"""
+        if slot_id < 0 or slot_id >= self.max_slots:
+            return False
+            
+        save_file = self.save_dir / f"save_slot_{slot_id}.json"
+        if save_file.exists():
+            try:
+                save_file.unlink()
+                print(f"✅ セーブデータ削除: スロット{slot_id}")
+                return True
+            except Exception as e:
+                print(f"❌ 削除エラー: {e}")
+                return False
+        return False
+    
+    def quick_save(self, game_data: Dict[str, Any]) -> bool:
+        """クイックセーブ（スロット0に自動保存）"""
+        return self.save_game(0, game_data, "クイックセーブ")
+    
+    def auto_save(self, game_data: Dict[str, Any]) -> bool:
+        """オートセーブ（専用ファイル）"""
+        try:
+            auto_save_file = self.save_dir / "auto_save.json"
+            save_data = {
+                'save_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'play_time': game_data.get('play_time', 0),
+                'player_data': game_data.get('player_data', {}),
+                'game_progress': game_data.get('game_progress', {}),
+                'pet_collection': game_data.get('pet_collection', {}),
+                'game_stats': game_data.get('game_stats', {}),
+                'version': "1.0.0"
+            }
+            
+            with open(auto_save_file, 'w', encoding='utf-8') as f:
+                json.dump(save_data, f, ensure_ascii=False, indent=2)
+                
+            print("✅ オートセーブ完了")
+            return True
+            
+        except Exception as e:
+            print(f"❌ オートセーブエラー: {e}")
+            return False

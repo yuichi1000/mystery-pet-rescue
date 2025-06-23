@@ -16,6 +16,16 @@ class PetCollectionUI:
         self.small_font = self.font_manager.get_font("default", 24)
         self.visible = False
         
+        # 追加の状態変数
+        self.selected_index = 0
+        self.key_pressed = False
+        self.show_pet_details = False
+        self.animation_time = 0.0
+        self.discovered_pets = []
+        
+        # ペット図鑑システムの参照（後で設定）
+        self.pet_collection = None
+        
     def draw(self, collected_pets: List):
         """デモと全く同じ表示 - 画面左上に常時表示"""
         # デモでは専用画面ではなく、ゲーム画面の左上に常時表示
@@ -38,15 +48,41 @@ class PetCollectionUI:
         """イベント処理"""
         if not self.visible:
             return False
-        # 今後実装
+        
+        # キーボード操作
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP] and not self.key_pressed:
+            self.selected_index = max(0, self.selected_index - 1)
+            self.key_pressed = True
+        elif keys[pygame.K_DOWN] and not self.key_pressed:
+            max_index = len(self.pet_collection.get_discovered_pets()) - 1
+            self.selected_index = min(max_index, self.selected_index + 1)
+            self.key_pressed = True
+        elif keys[pygame.K_RETURN] and not self.key_pressed:
+            # 選択されたペットの詳細表示
+            self.show_pet_details = not self.show_pet_details
+            self.key_pressed = True
+        elif not any([keys[pygame.K_UP], keys[pygame.K_DOWN], keys[pygame.K_RETURN]]):
+            self.key_pressed = False
+            
         return False
         
     def update(self, time_delta: float):
         """更新処理"""
         if not self.visible:
             return
-        # 今後実装
-        pass
+            
+        # アニメーション更新
+        self.animation_time += time_delta
+        
+        # ペット図鑑データの更新
+        self.discovered_pets = self.pet_collection.get_discovered_pets()
+        
+        # 選択インデックスの範囲チェック
+        if self.discovered_pets:
+            self.selected_index = min(self.selected_index, len(self.discovered_pets) - 1)
+        else:
+            self.selected_index = 0
         self.visible = True
         
     def hide(self):

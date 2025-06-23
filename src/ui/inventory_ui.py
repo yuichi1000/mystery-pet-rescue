@@ -158,23 +158,95 @@ class InventoryUI:
         """選択アイテムを使用"""
         if 0 <= self.selected_item_index < len(self.inventory.items):
             item = self.inventory.items[self.selected_item_index]
-            # アイテム使用ロジック（今後実装）
-            self.info_text = f"{item.name}を使用しました"
+            
+            # アイテム使用ロジック
+            if item.item_type == "consumable":
+                # 消費アイテムの使用
+                if item.name == "体力回復薬":
+                    self.info_text = f"{item.name}を使用しました（体力+50）"
+                elif item.name == "スタミナ回復薬":
+                    self.info_text = f"{item.name}を使用しました（スタミナ+30）"
+                else:
+                    self.info_text = f"{item.name}を使用しました"
+                
+                # アイテムを消費
+                self.inventory.remove_item(item.item_id)
+                if self.selected_item_index >= len(self.inventory.items):
+                    self.selected_item_index = max(0, len(self.inventory.items) - 1)
+                    
+            elif item.item_type == "tool":
+                # ツールアイテムの使用
+                self.info_text = f"{item.name}を装備しました"
+                
+            else:
+                self.info_text = f"{item.name}は使用できません"
     
     def _combine_selected_item(self):
         """選択アイテムを組み合わせ"""
         if 0 <= self.selected_item_index < len(self.inventory.items):
             item = self.inventory.items[self.selected_item_index]
-            # アイテム組み合わせロジック（今後実装）
-            self.info_text = f"{item.name}を組み合わせモードにしました"
+            
+            # アイテム組み合わせロジック
+            if not hasattr(self, 'combine_mode'):
+                self.combine_mode = False
+                self.combine_item = None
+                
+            if not self.combine_mode:
+                # 組み合わせモード開始
+                self.combine_mode = True
+                self.combine_item = item
+                self.info_text = f"{item.name}を選択。組み合わせるアイテムを選んでください"
+            else:
+                # 組み合わせ実行
+                if item != self.combine_item:
+                    result = self._try_combine_items(self.combine_item, item)
+                    if result:
+                        self.info_text = f"{result}を作成しました！"
+                    else:
+                        self.info_text = "この組み合わせはできません"
+                else:
+                    self.info_text = "同じアイテムは組み合わせできません"
+                
+                # 組み合わせモード終了
+                self.combine_mode = False
+                self.combine_item = None
+    
+    def _try_combine_items(self, item1, item2):
+        """アイテム組み合わせを試行"""
+        # 組み合わせレシピ
+        recipes = {
+            ("木の枝", "石"): "簡易ツール",
+            ("体力回復薬", "スタミナ回復薬"): "万能薬",
+            ("鍵", "古い箱"): "宝箱の中身"
+        }
+        
+        # 順序を考慮して検索
+        combo1 = (item1.name, item2.name)
+        combo2 = (item2.name, item1.name)
+        
+        if combo1 in recipes:
+            return recipes[combo1]
+        elif combo2 in recipes:
+            return recipes[combo2]
+        
+        return None
     
     def update(self, time_delta: float):
         """更新処理"""
         if not self.is_visible():
             return
         
-        # 必要に応じて更新処理を追加
-        pass
+        # アニメーション更新
+        if hasattr(self, 'animation_time'):
+            self.animation_time += time_delta
+        else:
+            self.animation_time = 0.0
+        
+        # 組み合わせモードの表示更新
+        if hasattr(self, 'combine_mode') and self.combine_mode:
+            # 点滅効果
+            if int(self.animation_time * 2) % 2:
+                self.info_text = f"組み合わせモード: {self.combine_item.name} + ?"
     
     def draw(self, surface: pygame.Surface):
         """描画処理"""

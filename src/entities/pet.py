@@ -80,19 +80,36 @@ class Pet:
     def _load_sprites(self) -> Dict[str, pygame.Surface]:
         """ペットスプライトを読み込み"""
         sprites = {}
-        directions = ["front", "back", "left", "right"]
+        
+        # スプライトファイル名と実際の方向のマッピング
+        # 犬のスプライトは前後が逆になっているため修正
+        if self.data.pet_type == PetType.DOG:
+            sprite_mapping = {
+                "front": "back",   # frontスプライトを使いたい時はbackファイルを読み込む
+                "back": "front",   # backスプライトを使いたい時はfrontファイルを読み込む
+                "left": "left",
+                "right": "right"
+            }
+        else:
+            # 他のペットは正常
+            sprite_mapping = {
+                "front": "front",
+                "back": "back", 
+                "left": "left",
+                "right": "right"
+            }
         
         # ペットタイプに応じたスプライトパスを決定
         sprite_prefix = f"pet_{self.data.pet_type.value}_001"
         
-        for direction in directions:
-            sprite_path = f"pets/{sprite_prefix}_{direction}.png"
+        for direction, file_direction in sprite_mapping.items():
+            sprite_path = f"pets/{sprite_prefix}_{file_direction}.png"
             sprite = self.asset_manager.load_image(sprite_path, (48, 48))
             if sprite:
                 sprites[direction] = sprite
-                print(f"✅ ペットスプライト読み込み: {sprite_prefix}_{direction}")
+                print(f"✅ ペットスプライト読み込み: {sprite_prefix}_{file_direction} → {direction}")
             else:
-                print(f"⚠️ ペットスプライト読み込み失敗: {sprite_prefix}_{direction}")
+                print(f"⚠️ ペットスプライト読み込み失敗: {sprite_prefix}_{file_direction}")
         
         return sprites
     
@@ -201,11 +218,11 @@ class Pet:
                 self.velocity_x = (dx / distance) * self.speed * 0.8
                 self.velocity_y = (dy / distance) * self.speed * 0.8
                 
-                # 方向を更新（画面座標系に合わせて修正）
+                # 方向を更新（正しい方向判定）
                 if abs(dx) > abs(dy):
                     self.direction = "right" if dx > 0 else "left"
                 else:
-                    self.direction = "back" if dy > 0 else "front"  # Y軸方向を修正
+                    self.direction = "front" if dy > 0 else "back"  # 元に戻す
         else:
             # 十分近い場合は停止
             self.velocity_x = 0
@@ -223,11 +240,11 @@ class Pet:
         self.velocity_x = math.cos(angle) * self.speed
         self.velocity_y = math.sin(angle) * self.speed
         
-        # 方向を更新（画面座標系に合わせて修正）
+        # 方向を更新（正しい方向判定）
         if abs(self.velocity_x) > abs(self.velocity_y):
             self.direction = "right" if self.velocity_x > 0 else "left"
         else:
-            self.direction = "back" if self.velocity_y > 0 else "front"  # Y軸方向を修正
+            self.direction = "front" if self.velocity_y > 0 else "back"  # 元に戻す
     
     def _update_movement(self, time_delta: float):
         """移動を更新"""

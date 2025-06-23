@@ -1,254 +1,367 @@
 {
   "version": "1.0",
-  "description": "ペットデータベース v1.0",
-  "pet_templates": {
-    "dog": {
-      "base_stats": {
-        "trust_threshold": 70,
-        "fear_threshold": 30,
-        "hunger_rate": 1.0,
-        "energy_level": 80,
-        "detection_radius": 100,
-        "movement_speed": 3
-      },
-      "personality_ranges": {
-        "friendly": [60, 90],
-        "loyal": [70, 95],
-        "energetic": [50, 85],
-        "playful": [60, 90]
-      },
-      "preferred_items": ["dog_food", "ball"],
-      "mini_games": ["catch_game"],
-      "sounds": {
-        "happy": "dog_bark_happy.ogg",
-        "scared": "dog_whimper.ogg",
-        "neutral": "dog_pant.ogg"
-      },
-      "animations": {
-        "idle": "dog_idle.png",
-        "walking": "dog_walk.png",
-        "running": "dog_run.png",
-        "sitting": "dog_sit.png"
-      }
-    },
-    "cat": {
-      "base_stats": {
-        "trust_threshold": 60,
-        "fear_threshold": 40,
-        "hunger_rate": 0.8,
-        "energy_level": 70,
-        "detection_radius": 80,
-        "movement_speed": 4
-      },
-      "personality_ranges": {
-        "independent": [70, 95],
-        "curious": [60, 85],
-        "aloof": [40, 80],
-        "graceful": [70, 90]
-      },
-      "preferred_items": ["cat_food", "feather_toy"],
-      "mini_games": ["memory_game"],
-      "sounds": {
-        "happy": "cat_purr.ogg",
-        "scared": "cat_hiss.ogg",
-        "neutral": "cat_meow.ogg"
-      },
-      "animations": {
-        "idle": "cat_idle.png",
-        "walking": "cat_walk.png",
-        "running": "cat_run.png",
-        "sitting": "cat_sit.png"
-      }
-    },
-    "rabbit": {
-      "base_stats": {
-        "trust_threshold": 80,
-        "fear_threshold": 20,
-        "hunger_rate": 1.2,
-        "energy_level": 60,
-        "detection_radius": 120,
-        "movement_speed": 5
-      },
-      "personality_ranges": {
-        "timid": [70, 95],
-        "gentle": [80, 95],
-        "quick": [60, 85],
-        "alert": [70, 90]
-      },
-      "preferred_items": ["universal_food"],
-      "mini_games": ["catch_game"],
-      "sounds": {
-        "happy": "rabbit_happy.ogg",
-        "scared": "rabbit_scared.ogg",
-        "neutral": "rabbit_neutral.ogg"
-      },
-      "animations": {
-        "idle": "rabbit_idle.png",
-        "walking": "rabbit_walk.png",
-        "running": "rabbit_hop.png",
-        "sitting": "rabbit_sit.png"
-      }
-    }
-  },
-  "special_pets": [
+  "area": "residential",
+  "description": "住宅街エリアに登場するペット一覧",
+  "pets": [
     {
-      "id": "golden_retriever_001",
-      "type": "dog",
-      "name": "ゴールデン",
-      "rarity": 3,
-      "special_traits": {
-        "friendly": 95,
-        "loyal": 100,
-        "intelligent": 90
+      "id": "pet_cat_001",
+      "name": "ミケ",
+      "name_en": "Mike",
+      "species": "cat",
+      "rarity": "common",
+      "description_ja": "人懐っこい三毛猫。好奇心旺盛で、高い場所に登るのが大好き。魚の匂いに敏感で、キャットフードの音を聞くとすぐに寄ってくる。",
+      "description_en": "A friendly calico cat who loves to climb high places. Very curious and sensitive to fish smells, always comes running when hearing cat food.",
+      "sprite_path": "sprites/pets/pet_cat_001",
+      "color_variants": [
+        {
+          "name": "三毛",
+          "name_en": "Calico",
+          "colors": ["#8B4513", "#FFFFFF", "#000000"]
+        },
+        {
+          "name": "茶トラ",
+          "name_en": "Orange Tabby",
+          "colors": ["#CD853F", "#FFFFFF", "#8B4513"]
+        }
+      ],
+      "personality": {
+        "traits": ["curious", "playful", "independent"],
+        "friendliness": 7,
+        "energy_level": 8,
+        "intelligence": 9
       },
-      "description": "とても賢くて人懐っこいゴールデンレトリバー",
-      "spawn_conditions": {
-        "weather": "sunny",
-        "time_range": [6, 18],
-        "player_level": 5
+      "favorite_food": "fish",
+      "habits": [
+        "高い場所に登る",
+        "日向ぼっこをする",
+        "毛づくろいを頻繁にする"
+      ],
+      "rescue_difficulty": 3,
+      "required_items": [
+        "cat_food",
+        "toy_mouse"
+      ],
+      "spawn_locations": [
+        {"x": 15, "y": 8, "probability": 0.3},
+        {"x": 22, "y": 12, "probability": 0.4},
+        {"x": 8, "y": 18, "probability": 0.3}
+      ],
+      "behavior_patterns": {
+        "movement_speed": 2.5,
+        "detection_range": 4,
+        "escape_probability": 0.6,
+        "hiding_spots": ["under_car", "in_bushes", "on_roof"]
       }
     },
     {
-      "id": "siamese_cat_001",
-      "type": "cat",
-      "name": "シャム",
-      "rarity": 4,
-      "special_traits": {
-        "independent": 90,
-        "intelligent": 95,
-        "vocal": 85
+      "id": "pet_dog_001",
+      "name": "ポチ",
+      "name_en": "Pochi",
+      "species": "dog",
+      "rarity": "common",
+      "description_ja": "元気いっぱいの柴犬。飼い主に忠実で、散歩が大好き。ボール遊びが得意で、人を見ると尻尾を振って近づいてくる。",
+      "description_en": "An energetic Shiba Inu who is loyal to their owner and loves walks. Great at playing fetch and wags tail when seeing people.",
+      "sprite_path": "sprites/pets/pet_dog_001",
+      "color_variants": [
+        {
+          "name": "茶色",
+          "name_en": "Brown",
+          "colors": ["#D2691E", "#FFFFFF", "#8B4513"]
+        },
+        {
+          "name": "黒",
+          "name_en": "Black",
+          "colors": ["#2F4F4F", "#FFFFFF", "#000000"]
+        }
+      ],
+      "personality": {
+        "traits": ["loyal", "energetic", "friendly"],
+        "friendliness": 9,
+        "energy_level": 9,
+        "intelligence": 7
       },
-      "description": "美しい青い目をしたシャム猫",
-      "spawn_conditions": {
-        "weather": "any",
-        "time_range": [20, 6],
-        "player_level": 8
+      "favorite_food": "meat",
+      "habits": [
+        "尻尾を振る",
+        "ボールを追いかける",
+        "散歩コースを覚えている"
+      ],
+      "rescue_difficulty": 2,
+      "required_items": [
+        "dog_treat",
+        "tennis_ball"
+      ],
+      "spawn_locations": [
+        {"x": 10, "y": 15, "probability": 0.4},
+        {"x": 25, "y": 6, "probability": 0.3},
+        {"x": 18, "y": 20, "probability": 0.3}
+      ],
+      "behavior_patterns": {
+        "movement_speed": 3.0,
+        "detection_range": 6,
+        "escape_probability": 0.3,
+        "hiding_spots": ["behind_fence", "in_park", "near_owner"]
+      }
+    },
+    {
+      "id": "pet_rabbit_001",
+      "name": "ミミ",
+      "name_en": "Mimi",
+      "species": "rabbit",
+      "rarity": "uncommon",
+      "description_ja": "ふわふわの白いうさぎ。とても臆病で警戒心が強いが、慣れると甘えん坊。ニンジンが大好きで、静かな場所を好む。",
+      "description_en": "A fluffy white rabbit who is very timid and cautious, but becomes affectionate once familiar. Loves carrots and prefers quiet places.",
+      "sprite_path": "sprites/pets/pet_rabbit_001",
+      "color_variants": [
+        {
+          "name": "白",
+          "name_en": "White",
+          "colors": ["#FFFFFF", "#FFB6C1", "#000000"]
+        },
+        {
+          "name": "茶色",
+          "name_en": "Brown",
+          "colors": ["#D2B48C", "#FFFFFF", "#8B4513"]
+        }
+      ],
+      "personality": {
+        "traits": ["timid", "gentle", "cautious"],
+        "friendliness": 5,
+        "energy_level": 6,
+        "intelligence": 8
+      },
+      "favorite_food": "carrot",
+      "habits": [
+        "鼻をひくひくさせる",
+        "後ろ足で地面を叩く",
+        "隠れ場所を探す"
+      ],
+      "rescue_difficulty": 4,
+      "required_items": [
+        "carrot",
+        "soft_blanket"
+      ],
+      "spawn_locations": [
+        {"x": 5, "y": 10, "probability": 0.2},
+        {"x": 28, "y": 16, "probability": 0.5},
+        {"x": 12, "y": 22, "probability": 0.3}
+      ],
+      "behavior_patterns": {
+        "movement_speed": 4.0,
+        "detection_range": 8,
+        "escape_probability": 0.8,
+        "hiding_spots": ["under_bushes", "in_garden", "behind_shed"]
+      }
+    },
+    {
+      "id": "pet_bird_001",
+      "name": "ピーちゃん",
+      "name_en": "Pii-chan",
+      "species": "bird",
+      "rarity": "rare",
+      "description_ja": "美しい青い羽根のインコ。とても賢く、人の言葉を真似することができる。高い場所を飛び回るのが好きで、捕まえるのは困難。",
+      "description_en": "A beautiful blue-feathered parakeet who is very intelligent and can mimic human speech. Loves flying around high places and is difficult to catch.",
+      "sprite_path": "sprites/pets/pet_bird_001",
+      "color_variants": [
+        {
+          "name": "青",
+          "name_en": "Blue",
+          "colors": ["#4169E1", "#FFFFFF", "#FFD700"]
+        },
+        {
+          "name": "緑",
+          "name_en": "Green",
+          "colors": ["#32CD32", "#FFFF00", "#FF6347"]
+        }
+      ],
+      "personality": {
+        "traits": ["intelligent", "vocal", "agile"],
+        "friendliness": 6,
+        "energy_level": 10,
+        "intelligence": 10
+      },
+      "favorite_food": "seeds",
+      "habits": [
+        "言葉を真似する",
+        "高い場所に止まる",
+        "羽根を整える"
+      ],
+      "rescue_difficulty": 5,
+      "required_items": [
+        "bird_seeds",
+        "bird_cage",
+        "whistle"
+      ],
+      "spawn_locations": [
+        {"x": 20, "y": 5, "probability": 0.1},
+        {"x": 30, "y": 10, "probability": 0.4},
+        {"x": 15, "y": 25, "probability": 0.5}
+      ],
+      "behavior_patterns": {
+        "movement_speed": 5.0,
+        "detection_range": 10,
+        "escape_probability": 0.9,
+        "hiding_spots": ["on_tree", "on_roof", "in_sky"],
+        "flight_enabled": true,
+        "flight_height": 3
       }
     }
   ],
-  "pet_behaviors": {
-    "wandering": {
-      "description": "ランダムに歩き回る",
-      "movement_pattern": "random",
-      "speed_modifier": 1.0,
-      "detection_modifier": 1.0
+  "rescue_items": {
+    "cat_food": {
+      "name": "キャットフード",
+      "name_en": "Cat Food",
+      "description_ja": "猫用の美味しいフード",
+      "description_en": "Delicious food for cats",
+      "effectiveness": {
+        "cat": 0.8,
+        "dog": 0.1,
+        "rabbit": 0.0,
+        "bird": 0.0
+      }
     },
-    "hiding": {
-      "description": "隠れて動かない",
-      "movement_pattern": "stationary",
-      "speed_modifier": 0.0,
-      "detection_modifier": 0.5,
-      "preferred_locations": ["bushes", "under_objects", "corners"]
+    "toy_mouse": {
+      "name": "ネズミのおもちゃ",
+      "name_en": "Toy Mouse",
+      "description_ja": "猫が大好きなネズミのおもちゃ",
+      "description_en": "A mouse toy that cats love",
+      "effectiveness": {
+        "cat": 0.7,
+        "dog": 0.2,
+        "rabbit": 0.0,
+        "bird": 0.0
+      }
     },
-    "fleeing": {
-      "description": "プレイヤーから逃げる",
-      "movement_pattern": "flee",
-      "speed_modifier": 1.5,
-      "detection_modifier": 1.5,
-      "flee_distance": 150
+    "dog_treat": {
+      "name": "犬用おやつ",
+      "name_en": "Dog Treat",
+      "description_ja": "犬が喜ぶ美味しいおやつ",
+      "description_en": "Delicious treats that dogs love",
+      "effectiveness": {
+        "cat": 0.1,
+        "dog": 0.9,
+        "rabbit": 0.0,
+        "bird": 0.0
+      }
     },
-    "following": {
-      "description": "プレイヤーについてくる",
-      "movement_pattern": "follow",
-      "speed_modifier": 0.8,
-      "detection_modifier": 0.8,
-      "follow_distance": 50
+    "tennis_ball": {
+      "name": "テニスボール",
+      "name_en": "Tennis Ball",
+      "description_ja": "犬が大好きなボール",
+      "description_en": "A ball that dogs love to play with",
+      "effectiveness": {
+        "cat": 0.3,
+        "dog": 0.8,
+        "rabbit": 0.1,
+        "bird": 0.0
+      }
+    },
+    "carrot": {
+      "name": "ニンジン",
+      "name_en": "Carrot",
+      "description_ja": "うさぎの大好物",
+      "description_en": "A rabbit's favorite food",
+      "effectiveness": {
+        "cat": 0.0,
+        "dog": 0.1,
+        "rabbit": 0.9,
+        "bird": 0.0
+      }
+    },
+    "soft_blanket": {
+      "name": "やわらかい毛布",
+      "name_en": "Soft Blanket",
+      "description_ja": "うさぎが安心できる毛布",
+      "description_en": "A soft blanket that makes rabbits feel safe",
+      "effectiveness": {
+        "cat": 0.4,
+        "dog": 0.2,
+        "rabbit": 0.7,
+        "bird": 0.0
+      }
+    },
+    "bird_seeds": {
+      "name": "鳥の餌",
+      "name_en": "Bird Seeds",
+      "description_ja": "鳥が大好きな種子",
+      "description_en": "Seeds that birds love to eat",
+      "effectiveness": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "rabbit": 0.2,
+        "bird": 0.9
+      }
+    },
+    "bird_cage": {
+      "name": "鳥かご",
+      "name_en": "Bird Cage",
+      "description_ja": "鳥を安全に捕まえるためのかご",
+      "description_en": "A cage to safely catch birds",
+      "effectiveness": {
+        "cat": 0.0,
+        "dog": 0.0,
+        "rabbit": 0.0,
+        "bird": 0.6
+      }
+    },
+    "whistle": {
+      "name": "笛",
+      "name_en": "Whistle",
+      "description_ja": "鳥を呼び寄せる笛",
+      "description_en": "A whistle to call birds",
+      "effectiveness": {
+        "cat": 0.1,
+        "dog": 0.3,
+        "rabbit": 0.0,
+        "bird": 0.7
+      }
     }
   },
-  "rescue_methods": [
-    {
-      "name": "food_lure",
-      "display_name": "食べ物で誘う",
-      "required_items": ["dog_food", "cat_food", "universal_food"],
-      "success_rate": 0.7,
-      "trust_bonus": 15,
-      "fear_reduction": 10
+  "difficulty_levels": {
+    "1": {
+      "name": "とても簡単",
+      "name_en": "Very Easy",
+      "description": "すぐに近づいてくる"
     },
-    {
-      "name": "toy_play",
-      "display_name": "おもちゃで遊ぶ",
-      "required_items": ["ball", "feather_toy"],
-      "success_rate": 0.6,
-      "trust_bonus": 20,
-      "fear_reduction": 15
+    "2": {
+      "name": "簡単",
+      "name_en": "Easy", 
+      "description": "少し警戒するが捕まえやすい"
     },
-    {
-      "name": "gentle_approach",
-      "display_name": "優しく近づく",
-      "required_items": [],
-      "success_rate": 0.4,
-      "trust_bonus": 10,
-      "fear_reduction": 5
+    "3": {
+      "name": "普通",
+      "name_en": "Normal",
+      "description": "適度に警戒し、工夫が必要"
     },
-    {
-      "name": "mini_game",
-      "display_name": "ミニゲームで遊ぶ",
-      "required_items": [],
-      "success_rate": 0.8,
-      "trust_bonus": 25,
-      "fear_reduction": 20
+    "4": {
+      "name": "難しい",
+      "name_en": "Hard",
+      "description": "とても警戒深く、戦略が必要"
+    },
+    "5": {
+      "name": "とても難しい",
+      "name_en": "Very Hard",
+      "description": "非常に捕まえにくい"
     }
-  ],
-  "achievements": [
-    {
-      "id": "first_rescue",
-      "name": "初めての救助",
-      "description": "初めてペットを救助する",
-      "condition": {
-        "pets_rescued": 1
-      },
-      "reward": {
-        "exp": 100,
-        "items": ["energy_drink"]
-      }
+  },
+  "rarity_info": {
+    "common": {
+      "name": "よくいる",
+      "name_en": "Common",
+      "spawn_rate": 0.7,
+      "color": "#808080"
     },
-    {
-      "id": "dog_lover",
-      "name": "犬好き",
-      "description": "犬を5匹救助する",
-      "condition": {
-        "dogs_rescued": 5
-      },
-      "reward": {
-        "exp": 500,
-        "items": ["dog_food", "ball"]
-      }
+    "uncommon": {
+      "name": "時々いる",
+      "name_en": "Uncommon",
+      "spawn_rate": 0.2,
+      "color": "#32CD32"
     },
-    {
-      "id": "cat_whisperer",
-      "name": "猫の囁き手",
-      "description": "猫を5匹救助する",
-      "condition": {
-        "cats_rescued": 5
-      },
-      "reward": {
-        "exp": 500,
-        "items": ["cat_food", "feather_toy"]
-      }
-    },
-    {
-      "id": "speed_rescuer",
-      "name": "スピード救助者",
-      "description": "5分以内にペットを救助する",
-      "condition": {
-        "rescue_time_under": 300
-      },
-      "reward": {
-        "exp": 200,
-        "title": "スピード救助者"
-      }
-    },
-    {
-      "id": "perfect_trust",
-      "name": "完全な信頼",
-      "description": "信頼度100でペットを救助する",
-      "condition": {
-        "perfect_trust_rescue": 1
-      },
-      "reward": {
-        "exp": 300,
-        "items": ["pet_license"]
-      }
+    "rare": {
+      "name": "めったにいない",
+      "name_en": "Rare",
+      "spawn_rate": 0.1,
+      "color": "#4169E1"
     }
-  ]
+  }
 }

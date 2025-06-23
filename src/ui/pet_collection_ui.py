@@ -31,6 +31,25 @@ class PetCollectionUI:
         self.visible = True
         
     def hide(self):
+        """図鑑を非表示"""
+        self.visible = False
+        
+    def handle_event(self, event: pygame.event.Event) -> bool:
+        """イベント処理"""
+        if not self.visible:
+            return False
+        # 今後実装
+        return False
+        
+    def update(self, time_delta: float):
+        """更新処理"""
+        if not self.visible:
+            return
+        # 今後実装
+        pass
+        self.visible = True
+        
+    def hide(self):
         """図鑑を非表示（デモでは常時表示なので何もしない）"""
         self.visible = False
         

@@ -4,7 +4,6 @@
 """
 
 import pygame
-import pygame_gui
 from typing import Optional
 
 from src.core.scene import Scene
@@ -12,11 +11,10 @@ from src.ui.inventory_ui import InventoryUI
 from src.systems.item_system import Inventory, ItemSystem
 
 class InventoryScene(Scene):
-    """インベントリシーンクラス"""
+    """インベントリシーンクラス（純粋なPygame実装）"""
     
     def __init__(self, screen: pygame.Surface, inventory: Inventory = None):
         super().__init__(screen)
-        self.ui_manager = pygame_gui.UIManager((screen.get_width(), screen.get_height()))
         
         # インベントリシステム
         self.item_system = ItemSystem()
@@ -65,9 +63,6 @@ class InventoryScene(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return "menu"  # メニューシーンに戻る
-            elif event.key == pygame.K_i:
-                # Iキーでインベントリ切り替え
-                self.inventory_ui.toggle()
         
         return None
     
@@ -86,23 +81,6 @@ class InventoryScene(Scene):
         title_text = font.render("インベントリシステム", True, (255, 255, 255))
         title_rect = title_text.get_rect(center=(surface.get_width() // 2, 50))
         surface.blit(title_text, title_rect)
-        
-        # 操作説明
-        font_small = pygame.font.Font(None, 24)
-        instructions = [
-            "左クリック: アイテム選択",
-            "Ctrl+左クリック: 複数選択",
-            "ドラッグ: アイテム移動",
-            "使用ボタン: アイテム使用",
-            "組み合わせボタン: アイテム組み合わせ",
-            "ESC: メニューに戻る"
-        ]
-        
-        y = 100
-        for instruction in instructions:
-            text = font_small.render(instruction, True, (200, 200, 200))
-            surface.blit(text, (20, y))
-            y += 25
         
         # インベントリUIを描画
         self.inventory_ui.draw(surface)

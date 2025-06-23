@@ -1,6 +1,6 @@
 """
 ゲームシーン
-メインゲームプレイを管理
+メインゲームプレイを管理（新マップローダー統合版）
 """
 
 import pygame
@@ -12,6 +12,8 @@ from src.entities.pet import Pet, PetData, PetType
 from src.systems.puzzle_system import PuzzleSystem
 from src.systems.map_system import MapSystem
 from src.systems.pet_collection import PetCollection
+from src.systems.map_data_loader import get_map_data_loader
+from src.systems.pet_data_loader import get_pet_data_loader
 from src.ui.game_ui import GameUI, NotificationType, QuickSlotItem
 from src.ui.puzzle_ui import PuzzleUI
 from src.ui.pet_collection_ui import PetCollectionUI
@@ -24,6 +26,16 @@ class GameScene(Scene):
     def __init__(self, screen: pygame.Surface, flow_manager=None):
         super().__init__(screen)
         self.flow_manager = flow_manager
+        
+        # 新しいデータローダーの初期化
+        self.map_loader = get_map_data_loader()
+        self.pet_data_loader = get_pet_data_loader()
+        
+        # Version 1.0マップを読み込み
+        if not self.map_loader.load_map('residential_v1'):
+            print("⚠️ 新マップ読み込み失敗、従来マップを使用")
+        else:
+            print("✅ Version 1.0マップ読み込み成功")
         
         # ゲーム要素の初期化
         self._initialize_game_elements()
@@ -100,56 +112,94 @@ class GameScene(Scene):
             self.background_image = None
     
     def _create_pets(self) -> List[Pet]:
-        """ペットを作成"""
+        """ペットを作成（新データローダー使用）"""
         pets = []
         
-        # 犬
-        dog_data = PetData(
-            pet_id="dog_001",
-            name="ポチ",
-            pet_type=PetType.DOG,
-            personality="friendly",
-            rarity="common",
-            description="人懐っこい茶色の犬"
-        )
-        dog = Pet(dog_data, x=300, y=200)
-        pets.append(dog)
-        
-        # 猫
-        cat_data = PetData(
-            pet_id="cat_001", 
-            name="ミケ",
-            pet_type=PetType.CAT,
-            personality="shy",
-            rarity="common",
-            description="三毛猫の女の子"
-        )
-        cat = Pet(cat_data, x=500, y=300)
-        pets.append(cat)
-        
-        # うさぎ
-        rabbit_data = PetData(
-            pet_id="rabbit_001",
-            name="ミミ",
-            pet_type=PetType.RABBIT,
-            personality="gentle",
-            rarity="uncommon",
-            description="白いうさぎ"
-        )
-        rabbit = Pet(rabbit_data, x=200, y=400)
-        pets.append(rabbit)
-        
-        # 鳥
-        bird_data = PetData(
-            pet_id="bird_001",
-            name="ピーちゃん",
-            pet_type=PetType.BIRD,
-            personality="energetic",
-            rarity="rare",
-            description="カラフルなインコ"
-        )
-        bird = Pet(bird_data, x=400, y=150)
-        pets.append(bird)
+        # 新しいマップデータからペット隠れ場所を取得
+        current_map = self.map_loader.get_current_map()
+        if current_map:
+            print("🐾 新マップデータからペット生成中...")
+            
+            for hiding_spot in current_map.pet_hiding_spots:
+                # ペットデータローダーからペット情報を取得
+                pet_data_info = self.pet_data_loader.get_pet(hiding_spot.pet_id)
+                
+                if pet_data_info:
+                    # 新しいペットデータ形式に変換
+                    pet_type_map = {
+                        'cat': PetType.CAT,
+                        'dog': PetType.DOG,
+                        'rabbit': PetType.RABBIT,
+                        'bird': PetType.BIRD
+                    }
+                    
+                    pet_data = PetData(
+                        pet_id=pet_data_info.id,
+                        name=pet_data_info.name,
+                        pet_type=pet_type_map.get(pet_data_info.species, PetType.CAT),
+                        personality=pet_data_info.personality.traits[0] if pet_data_info.personality.traits else "friendly",
+                        rarity=pet_data_info.rarity,
+                        description=pet_data_info.description_ja
+                    )
+                    
+                    # 隠れ場所の位置にペットを配置
+                    pet = Pet(pet_data, x=hiding_spot.position.x * 32, y=hiding_spot.position.y * 32)
+                    pets.append(pet)
+                    
+                    print(f"🐾 ペット生成: {pet_data_info.name} ({pet_data_info.species}) at ({hiding_spot.position.x}, {hiding_spot.position.y})")
+                else:
+                    print(f"⚠️ ペットデータが見つかりません: {hiding_spot.pet_id}")
+        else:
+            # フォールバック: 従来の方法
+            print("⚠️ 従来の方法でペット生成")
+            
+            # 犬
+            dog_data = PetData(
+                pet_id="dog_001",
+                name="ポチ",
+                pet_type=PetType.DOG,
+                personality="friendly",
+                rarity="common",
+                description="人懐っこい茶色の犬"
+            )
+            dog = Pet(dog_data, x=300, y=200)
+            pets.append(dog)
+            
+            # 猫
+            cat_data = PetData(
+                pet_id="cat_001", 
+                name="ミケ",
+                pet_type=PetType.CAT,
+                personality="shy",
+                rarity="common",
+                description="三毛猫の女の子"
+            )
+            cat = Pet(cat_data, x=500, y=300)
+            pets.append(cat)
+            
+            # うさぎ
+            rabbit_data = PetData(
+                pet_id="rabbit_001",
+                name="ミミ",
+                pet_type=PetType.RABBIT,
+                personality="gentle",
+                rarity="uncommon",
+                description="白いうさぎ"
+            )
+            rabbit = Pet(rabbit_data, x=200, y=400)
+            pets.append(rabbit)
+            
+            # 鳥
+            bird_data = PetData(
+                pet_id="bird_001",
+                name="ピーちゃん",
+                pet_type=PetType.BIRD,
+                personality="energetic",
+                rarity="rare",
+                description="カラフルなインコ"
+            )
+            bird = Pet(bird_data, x=400, y=150)
+            pets.append(bird)
         
         return pets
     

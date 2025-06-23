@@ -78,7 +78,8 @@
         "position": {"x": 8, "y": 8},
         "size": {"width": 4, "height": 3},
         "name": "田中さんの家",
-        "name_en": "Tanaka's House"
+        "name_en": "Tanaka's House",
+        "image_path": "buildings/house_residential.png"
       },
       {
         "id": "house_002", 
@@ -86,7 +87,8 @@
         "position": {"x": 25, "y": 8},
         "size": {"width": 4, "height": 3},
         "name": "佐藤さんの家",
-        "name_en": "Sato's House"
+        "name_en": "Sato's House",
+        "image_path": "buildings/house_residential.png"
       },
       {
         "id": "house_003",
@@ -94,7 +96,8 @@
         "position": {"x": 8, "y": 18},
         "size": {"width": 4, "height": 3},
         "name": "鈴木さんの家",
-        "name_en": "Suzuki's House"
+        "name_en": "Suzuki's House",
+        "image_path": "buildings/house_residential.png"
       },
       {
         "id": "house_004",
@@ -102,7 +105,8 @@
         "position": {"x": 25, "y": 18},
         "size": {"width": 4, "height": 3},
         "name": "山田さんの家", 
-        "name_en": "Yamada's House"
+        "name_en": "Yamada's House",
+        "image_path": "buildings/house_residential.png"
       },
       {
         "id": "pet_shop",
@@ -110,7 +114,8 @@
         "position": {"x": 32, "y": 12},
         "size": {"width": 5, "height": 4},
         "name": "ペットショップ「わんにゃん」",
-        "name_en": "Pet Shop 'Wan-Nyan'"
+        "name_en": "Pet Shop 'Wan-Nyan'",
+        "image_path": "buildings/house_petshop.png"
       }
     ],
     "natural_features": [
@@ -121,7 +126,8 @@
         "size": {"width": 6, "height": 6},
         "name": "ちびっこ公園",
         "name_en": "Little Park",
-        "features": ["playground", "bench", "trees", "flower_bed"]
+        "features": ["playground", "bench", "trees", "flower_bed"],
+        "image_path": "buildings/park_facility.png"
       },
       {
         "id": "garden_001",
@@ -130,7 +136,8 @@
         "size": {"width": 8, "height": 4},
         "name": "みんなの花壇",
         "name_en": "Community Garden",
-        "features": ["flowers", "vegetables", "tool_shed"]
+        "features": ["flowers", "vegetables", "tool_shed"],
+        "image_path": "buildings/park_facility.png"
       }
     ]
   },

@@ -304,19 +304,26 @@ class MapSystem:
         print("🎨 マップサーフェス生成完了（画像使用版）")
     
     def _draw_building_image(self, building):
-        """建物画像を描画"""
+        """建物画像を描画（マップデータ使用版）"""
         try:
-            building_type = building['type']
             pos = building['position']
             size = building['size']
             
-            # 建物タイプに応じた画像パスを決定（実際のファイル名）
-            if building_type == 'residential_house':
-                image_path = "buildings/house_residential.png"
-            elif building_type == 'pet_shop':
-                image_path = "buildings/house_petshop.png"
+            # マップデータから直接画像パスを取得
+            if 'image_path' in building:
+                image_path = building['image_path']
+            elif 'sprite_path' in building:
+                image_path = building['sprite_path']
             else:
-                image_path = "buildings/house_residential.png"  # デフォルト
+                # フォールバック: 建物IDから推測
+                building_id = building.get('id', '')
+                if 'house' in building_id:
+                    image_path = "buildings/house_residential.png"
+                elif 'pet_shop' in building_id:
+                    image_path = "buildings/house_petshop.png"
+                else:
+                    print(f"⚠️ 建物画像パス不明: {building}")
+                    return
             
             # 画像を読み込み
             building_image = self.asset_manager.load_image(
@@ -336,19 +343,24 @@ class MapSystem:
             print(f"❌ 建物画像描画エラー: {e}")
     
     def _draw_natural_feature_image(self, feature):
-        """自然地形画像を描画"""
+        """自然地形画像を描画（マップデータ使用版）"""
         try:
-            feature_type = feature['type']
             pos = feature['position']
             size = feature['size']
             
-            # 自然地形タイプに応じた画像パスを決定（実際のファイル名）
-            if feature_type == 'small_park':
-                image_path = "buildings/park_facility.png"
-            elif feature_type == 'community_garden':
-                image_path = "buildings/park_facility.png"  # 公園画像を流用
+            # マップデータから直接画像パスを取得
+            if 'image_path' in feature:
+                image_path = feature['image_path']
+            elif 'sprite_path' in feature:
+                image_path = feature['sprite_path']
             else:
-                image_path = "buildings/park_facility.png"  # デフォルト
+                # フォールバック: 地形IDから推測
+                feature_id = feature.get('id', '')
+                if 'park' in feature_id:
+                    image_path = "buildings/park_facility.png"
+                else:
+                    print(f"⚠️ 自然地形画像パス不明: {feature}")
+                    return
             
             # 画像を読み込み
             feature_image = self.asset_manager.load_image(

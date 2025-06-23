@@ -418,3 +418,55 @@ class MapSystem:
         except Exception as e:
             print(f"❌ マップ保存エラー: {e}")
             return False
+    
+    def _update_from_new_map_data(self, new_map_data):
+        """新しいマップデータからMapSystemを更新"""
+        try:
+            from src.systems.map_data_loader import MapData as NewMapData
+            
+            print(f"🔄 MapSystemを新データで更新中...")
+            
+            # 新しいサイズでマップデータを作成
+            width = new_map_data.dimensions.width
+            height = new_map_data.dimensions.height
+            
+            # 新しいタイル配列を作成（とりあえず全て草タイル）
+            tiles = []
+            for y in range(height):
+                row = []
+                for x in range(width):
+                    # 基本は草タイル
+                    tile_type = TileType.GRASS
+                    
+                    # 道路部分（仮の実装）
+                    if y == height // 2:  # 横道
+                        tile_type = TileType.CONCRETE
+                    elif x == width // 2:  # 縦道
+                        tile_type = TileType.CONCRETE
+                    
+                    row.append(tile_type)
+                tiles.append(row)
+            
+            # 新しいMapDataを作成
+            self.current_map = MapData(
+                width=width,
+                height=height,
+                tile_size=32,  # 新しいタイルサイズ
+                tiles=tiles,
+                spawn_points={
+                    'player': {'x': width//2, 'y': height-2},
+                    'pets': [],
+                    'npcs': []
+                },
+                pet_locations=[]
+            )
+            
+            # マップサーフェスを再生成
+            self._generate_map_surface()
+            
+            print(f"✅ MapSystem更新完了: {width}x{height}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ MapSystem更新エラー: {e}")
+            return False

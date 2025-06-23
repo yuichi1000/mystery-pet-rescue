@@ -71,9 +71,16 @@ class GameScene(Scene):
         # マップシステム初期化
         self.map_system = MapSystem()
         
-        # デフォルトマップを読み込み
-        if not self.map_system.load_map("residential.json"):
-            print("⚠️ マップファイルが見つからないため、デフォルトマップを使用します")
+        # 新しいマップデータを使用してMapSystemを更新
+        current_map = self.map_loader.get_current_map()
+        if current_map:
+            print(f"🗺️ MapSystemを新データで更新: {current_map.dimensions.width}x{current_map.dimensions.height}")
+            # MapSystemに新しいサイズを設定
+            self.map_system._update_from_new_map_data(current_map)
+        else:
+            # フォールバック: 従来のマップを読み込み
+            if not self.map_system.load_map("residential.json"):
+                print("⚠️ マップファイルが見つからないため、デフォルトマップを使用します")
         
         # ペット初期化
         self.pets = self._create_pets()

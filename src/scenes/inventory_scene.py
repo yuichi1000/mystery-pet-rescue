@@ -22,8 +22,8 @@ class InventoryScene(Scene):
         self.item_system = ItemSystem()
         self.inventory = inventory or Inventory(item_system=self.item_system)
         
-        # インベントリUI
-        self.inventory_ui = InventoryUI(screen, self.ui_manager, self.inventory)
+        # インベントリUI（pygame_gui依存を削除）
+        self.inventory_ui = InventoryUI(screen, self.inventory)
         
         # 背景色
         self.background_color = (50, 50, 50)

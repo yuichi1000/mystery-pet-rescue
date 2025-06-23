@@ -213,7 +213,7 @@ class GameScene(Scene):
         
         # パズル更新
         if self.current_puzzle:
-            self.puzzle_ui.update(time_delta)
+            self.puzzle_ui.update(time_delta, [])
         
         # UI更新
         self.game_ui.update(time_delta)
@@ -247,7 +247,7 @@ class GameScene(Scene):
         
         # パズルUI描画
         if self.current_puzzle:
-            self.puzzle_ui.draw(surface)
+            self.puzzle_ui.draw()
         
         # ゲームUI描画
         player_stats = {
@@ -259,7 +259,7 @@ class GameScene(Scene):
         self.game_ui.draw(player_stats, [], (self.player.x, self.player.y))
         
         # ペット図鑑描画（デモと同じ - 常時表示）
-        self.pet_collection_ui.draw(self.pet_collection.get_collected_pets())
+        self.pet_collection_ui.draw(self.pet_collection.get_rescued_pets())
         
         # ポーズ表示
         if self.paused:
@@ -296,14 +296,21 @@ class GameScene(Scene):
     
     def _start_pet_puzzle(self, pet: Pet):
         """ペットパズルを開始"""
-        # ペットタイプに応じたパズルIDを決定
-        puzzle_id = f"pet_{pet.data.pet_type.value}_puzzle"
+        # 既存の謎解きIDを使用（ペットタイプに関係なく順番に割り当て）
+        pet_type_to_puzzle = {
+            "dog": "puzzle_001",
+            "cat": "puzzle_002", 
+            "rabbit": "puzzle_003",
+            "bird": "puzzle_001"  # 鳥は最初の謎解きを再利用
+        }
+        
+        puzzle_id = pet_type_to_puzzle.get(pet.data.pet_type.value, "puzzle_001")
         puzzle_data = self.puzzle_system.get_puzzle_data(puzzle_id)
         
         if puzzle_data:
             puzzle_data['pet_id'] = pet.data.pet_id  # ペットIDを追加
             self.current_puzzle = puzzle_data
-            self.puzzle_ui.show_puzzle(puzzle_data)
+            self.puzzle_ui.start_puzzle(puzzle_id)  # 正しいメソッド名を使用
         else:
             # パズルが見つからない場合は簡単な相互作用
             self.game_ui.add_notification(f"{pet.data.name}と仲良くなりました！", NotificationType.SUCCESS)

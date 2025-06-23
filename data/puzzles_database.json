@@ -5,7 +5,8 @@
       "title": "迷子の子猫を助けよう",
       "description": "高い木の上で鳴いている子猫を安全に降ろすには？",
       "difficulty": "easy",
-      "category": "rescue",
+      "category": "pet_rescue",
+      "pet_type": "cat",
       "required_items": ["rope", "ladder", "treats"],
       "optional_items": ["blanket", "carrier"],
       "stages": [
@@ -67,7 +68,8 @@
       "title": "迷子の犬の手がかり探し",
       "description": "行方不明になった犬の手がかりを集めて居場所を特定しよう",
       "difficulty": "normal",
-      "category": "investigation",
+      "category": "pet_rescue",
+      "pet_type": "dog",
       "required_items": ["magnifying_glass", "dog_photo", "collar_fragment"],
       "optional_items": ["notebook", "flashlight"],
       "stages": [
@@ -129,7 +131,8 @@
       "title": "秘密の隠し場所",
       "description": "古い日記の暗号を解いて、隠されたペットの居場所を見つけよう",
       "difficulty": "hard",
-      "category": "cipher",
+      "category": "pet_rescue",
+      "pet_type": "rabbit",
       "required_items": ["old_diary", "cipher_key", "map_fragment", "compass"],
       "optional_items": ["pencil", "ruler"],
       "stages": [

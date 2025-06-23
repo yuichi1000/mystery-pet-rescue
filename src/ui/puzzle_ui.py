@@ -253,6 +253,15 @@ class PuzzleUI:
         self.message_type = message_type
         self.message_timer = 3.0  # 3秒間表示
     
+    def hide(self):
+        """謎解きUIを非表示"""
+        self.active_puzzle_id = None
+        # self.puzzle_system.reset_current_puzzle()  # メソッドが存在しないためコメントアウト
+    
+    def show(self):
+        """謎解きUIを表示"""
+        pass  # start_puzzleで表示される
+    
     def draw(self):
         """UI描画"""
         self.screen.fill(self.colors.background)
@@ -269,12 +278,12 @@ class PuzzleUI:
     def draw_puzzle_selection(self):
         """謎解き選択画面を描画"""
         # タイトル
-        title_text = self.font_manager.render_text("謎解き選択", 32, self.colors.text)
+        title_text = self.font_manager.render_text("謎解き選択", "default", 32, self.colors.text)
         title_rect = title_text.get_rect(center=(self.screen_width // 2, 60))
         self.screen.blit(title_text, title_rect)
         
         # 操作説明
-        help_text = self.font_manager.render_text("クリックで謎解きを選択、ESCで終了", 16, self.colors.text)
+        help_text = self.font_manager.render_text("クリックで謎解きを選択、ESCで終了", "default", 16, self.colors.text)
         help_rect = help_text.get_rect(center=(self.screen_width // 2, 90))
         self.screen.blit(help_text, help_rect)
         
@@ -291,18 +300,18 @@ class PuzzleUI:
             pygame.draw.rect(self.screen, self.colors.border, button_rect, 2)
             
             # 謎解き情報（行間をさらに調整）
-            title_text = self.font_manager.render_text(puzzle['title'], 22, self.colors.text)
+            title_text = self.font_manager.render_text(puzzle['title'], "default", 22, self.colors.text)
             
             # 説明文を改行処理
             desc_lines = self._wrap_text(puzzle['description'], 20, 500)
-            diff_text = self.font_manager.render_text(f"難易度: {puzzle['difficulty']}", 16, self.colors.text)
+            diff_text = self.font_manager.render_text(f"難易度: {puzzle['difficulty']}", "default", 16, self.colors.text)
             
             # テキスト配置
             self.screen.blit(title_text, (button_rect.x + 20, button_rect.y + 15))
             
             # 説明文（複数行対応）
             for j, line in enumerate(desc_lines):
-                line_surface = self.font_manager.render_text(line, 16, self.colors.text)
+                line_surface = self.font_manager.render_text(line, "default", 16, self.colors.text)
                 self.screen.blit(line_surface, (button_rect.x + 20, button_rect.y + 40 + j * 20))
             
             # 難易度表示
@@ -319,17 +328,17 @@ class PuzzleUI:
         self.draw_panel(self.info_panel, "謎解き情報")
         
         info_y = self.info_panel.y + 40
-        title_text = self.font_manager.render_text(puzzle_status['title'], 18, self.colors.text)  # フォントサイズ縮小
+        title_text = self.font_manager.render_text(puzzle_status['title'], "default", 18, self.colors.text)  # フォントサイズ縮小
         
         # 説明文を改行処理（パネル幅に合わせて調整）
         desc_lines = self._wrap_text(puzzle_status['description'], 14, 450)  # 幅を450pxに調整
-        stage_text = self.font_manager.render_text(f"現在のステージ: {puzzle_status.get('current_stage', 1)}", 14, self.colors.text)
+        stage_text = self.font_manager.render_text(f"現在のステージ: {puzzle_status.get('current_stage', 1)}", "default", 14, self.colors.text)
         
         self.screen.blit(title_text, (self.info_panel.x + 15, info_y))
         
         # 説明文（複数行）- 行間を調整
         for i, line in enumerate(desc_lines):
-            line_surface = self.font_manager.render_text(line, 14, self.colors.text)
+            line_surface = self.font_manager.render_text(line, "default", 14, self.colors.text)
             self.screen.blit(line_surface, (self.info_panel.x + 15, info_y + 25 + i * 18))  # 行間を18pxに調整
         
         # ステージ情報 - 位置を動的に計算
@@ -359,7 +368,7 @@ class PuzzleUI:
         self.screen.blit(panel_surface, rect)
         pygame.draw.rect(self.screen, self.colors.border, rect, 2)
         
-        title_text = self.font_manager.render_text(title, 18, self.colors.text)  # フォントサイズ縮小
+        title_text = self.font_manager.render_text(title, "default", 18, self.colors.text)  # 正しい引数順序
         self.screen.blit(title_text, (rect.x + 15, rect.y + 8))
     
     def draw_items(self):
@@ -379,20 +388,20 @@ class PuzzleUI:
             pygame.draw.rect(self.screen, self.colors.border, item_rect, 1)
             
             # アイテム名
-            item_text = self.font_manager.render_text(item, 18, self.colors.text)
+            item_text = self.font_manager.render_text(item, "default", 18, self.colors.text)
             self.screen.blit(item_text, (item_rect.x + 8, item_rect.y + 8))
     
     def draw_selected_items(self):
         """選択中のアイテムを描画"""
         if not self.selected_items:
-            no_selection_text = self.font_manager.render_text("アイテムを選択してください", 16, self.colors.text)
+            no_selection_text = self.font_manager.render_text("アイテムを選択してください", "default", 16, self.colors.text)
             self.screen.blit(no_selection_text, (self.combination_panel.x + 15, self.combination_panel.y + 50))
             return
         
         # 選択されたアイテムを改行して表示（パネル幅に合わせて調整）
         selected_lines = self._wrap_items(self.selected_items, 16, 450)  # 幅を450pxに調整
         for i, line in enumerate(selected_lines):
-            text_surface = self.font_manager.render_text(line, 16, self.colors.text)
+            text_surface = self.font_manager.render_text(line, "default", 16, self.colors.text)
             # パネル内に収まるかチェック
             y_pos = self.combination_panel.y + 50 + i * 22
             if y_pos + 22 <= self.combination_panel.y + self.combination_panel.height - 10:
@@ -410,7 +419,7 @@ class PuzzleUI:
             pygame.draw.rect(self.screen, color, button_rect)
             pygame.draw.rect(self.screen, self.colors.border, button_rect, 2)
             
-            button_text = self.font_manager.render_text(text, 16, (255, 255, 255))  # フォントサイズ縮小
+            button_text = self.font_manager.render_text(text, "default", 16, (255, 255, 255))  # フォントサイズ縮小
             text_rect = button_text.get_rect(center=button_rect.center)
             self.screen.blit(button_text, text_rect)
     
@@ -430,12 +439,12 @@ class PuzzleUI:
         
         # 試行回数
         attempts_text = f"試行回数: {puzzle_status.get('attempts', 0)}"
-        attempts_surface = self.font_manager.render_text(attempts_text, 16, self.colors.text)
+        attempts_surface = self.font_manager.render_text(attempts_text, "default", 16, self.colors.text)
         self.screen.blit(attempts_surface, (50, progress_y))
         
         # ヒント使用状況
         hints_text = f"ヒント: {hint_status.get('used_hints', 0)}/{hint_status.get('max_hints', 3)}"
-        hints_surface = self.font_manager.render_text(hints_text, 16, self.colors.text)
+        hints_surface = self.font_manager.render_text(hints_text, "default", 16, self.colors.text)
         self.screen.blit(hints_surface, (200, progress_y))
         
         # 発見した組み合わせ
@@ -443,12 +452,12 @@ class PuzzleUI:
         if combinations:
             combo_lines = self._wrap_items(combinations, 14, 700)  # 幅を拡大
             combo_text = f"発見した組み合わせ: {combo_lines[0] if combo_lines else ''}"
-            combo_surface = self.font_manager.render_text(combo_text, 14, self.colors.success)
+            combo_surface = self.font_manager.render_text(combo_text, "default", 14, self.colors.success)
             self.screen.blit(combo_surface, (50, progress_y + 20))
             
             # 追加の組み合わせがある場合
             for i, line in enumerate(combo_lines[1:], 1):
-                additional_surface = self.font_manager.render_text(f"  {line}", 14, self.colors.success)
+                additional_surface = self.font_manager.render_text(f"  {line}", "default", 14, self.colors.success)
                 y_pos = progress_y + 20 + i * 18
                 # 画面内に収まるかチェック
                 if y_pos + 18 <= self.screen_height - 20:
@@ -475,7 +484,7 @@ class PuzzleUI:
         
         if message_lines:
             # 最初の行でサイズを計算
-            first_line_surface = self.font_manager.render_text(message_lines[0], 20, text_color)
+            first_line_surface = self.font_manager.render_text(message_lines[0], "default", 20, text_color)
             message_rect = first_line_surface.get_rect(center=(self.screen_width // 2, self.screen_height - 80))
             
             # 背景パネル（複数行対応）
@@ -489,7 +498,7 @@ class PuzzleUI:
             
             # メッセージテキスト（複数行）
             for i, line in enumerate(message_lines):
-                line_surface = self.font_manager.render_text(line, 20, text_color)
+                line_surface = self.font_manager.render_text(line, "default", 20, text_color)
                 line_rect = line_surface.get_rect(center=(self.screen_width // 2, message_rect.y + i * 25))
                 self.screen.blit(line_surface, line_rect)
     

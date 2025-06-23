@@ -82,8 +82,8 @@ class Pet:
         sprites = {}
         
         # スプライトファイル名と実際の方向のマッピング
-        # 犬のスプライトは前後が逆になっているため修正
-        if self.data.pet_type == PetType.DOG:
+        # 犬と鳥のスプライトは前後が逆になっているため修正
+        if self.data.pet_type in [PetType.DOG, PetType.BIRD]:
             sprite_mapping = {
                 "front": "back",   # frontスプライトを使いたい時はbackファイルを読み込む
                 "back": "front",   # backスプライトを使いたい時はfrontファイルを読み込む
@@ -91,7 +91,7 @@ class Pet:
                 "right": "right"
             }
         else:
-            # 他のペットは正常
+            # 他のペット（猫、うさぎ）は正常
             sprite_mapping = {
                 "front": "front",
                 "back": "back", 

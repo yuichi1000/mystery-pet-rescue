@@ -109,10 +109,13 @@ class GameFlowManager:
         Returns:
             Dict[str, Any]: ゲーム結果
         """
-        # ゲーム時間を計算
+        # GameSceneの新しいget_game_result()メソッドを使用
+        if hasattr(game_scene, 'get_game_result'):
+            return game_scene.get_game_result()
+        
+        # フォールバック：従来の方法
         game_time = time.time() - self.game_start_time
         
-        # ゲームシーンから統計を取得
         pets_rescued = 0
         total_pets = 4
         

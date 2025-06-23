@@ -34,6 +34,11 @@ class GameScene(Scene):
         self.victory = False
         self.pets_rescued = []
         
+        # ゲーム制限
+        self.time_limit = 300.0  # 5分制限
+        self.remaining_time = self.time_limit
+        self.player_lives = 3  # プレイヤーのライフ
+        
         # 統計情報
         self.start_time = time.time()
         self.total_pets = len(self.pets)
@@ -189,8 +194,20 @@ class GameScene(Scene):
                 pass
         
         elif event.type == pygame.USEREVENT + 1:
-            # ゲーム完了タイマー
+            # ゲーム完了タイマー（旧）
             if self.victory:
+                return "result"
+        
+        elif event.type == pygame.USEREVENT + 2:
+            # ゲーム勝利タイマー（新）
+            if self.victory:
+                print("🎉 勝利画面に移行")
+                return "result"
+        
+        elif event.type == pygame.USEREVENT + 3:
+            # ゲーム敗北タイマー
+            if self.game_over:
+                print("💀 敗北画面に移行")
                 return "result"
         
         # パズル中の場合はパズルUIにイベントを渡す
@@ -239,12 +256,33 @@ class GameScene(Scene):
         self.game_ui.update(time_delta)
         self._update_ui_stats()
         
+        # 時間更新
+        if not self.paused and not self.victory and not self.game_over:
+            self.remaining_time -= time_delta
+        
+        # 敗北条件チェック
+        if not self.game_over and not self.victory:
+            if self.remaining_time <= 0:
+                self.game_over = True
+                self.game_ui.add_notification("時間切れです！", NotificationType.ERROR)
+                print("⏰ 時間切れで敗北")
+                pygame.time.set_timer(pygame.USEREVENT + 3, 2000)  # 敗北画面へ
+            elif self.player_lives <= 0:
+                self.game_over = True
+                self.game_ui.add_notification("ライフが尽きました！", NotificationType.ERROR)
+                print("💔 ライフ切れで敗北")
+                pygame.time.set_timer(pygame.USEREVENT + 3, 2000)  # 敗北画面へ
+        
         # 勝利条件チェック
-        if len(self.pets_rescued) >= self.total_pets and not self.victory:
+        if len(self.pets_rescued) >= self.total_pets and not self.victory and not self.game_over:
             self.victory = True
             self.game_ui.add_notification("全てのペットを救出しました！", NotificationType.SUCCESS)
-            # 2秒後に結果画面に移行
-            pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
+            print("🎉 勝利条件達成！")
+            
+            # GameMainに勝利を通知
+            if self.flow_manager and hasattr(self.flow_manager, '_game_victory'):
+                # 2秒後に結果画面に移行
+                pygame.time.set_timer(pygame.USEREVENT + 2, 2000)
         
         return None
     
@@ -371,16 +409,70 @@ class GameScene(Scene):
         self.current_puzzle = None
         self.puzzle_ui.hide()
     
+    def _calculate_final_score(self) -> int:
+        """最終スコアを計算"""
+        base_score = 0
+        
+        # ペット救出ボーナス
+        pets_rescued_count = len(self.pets_rescued)
+        base_score += pets_rescued_count * 100
+        
+        # 完全クリアボーナス
+        if pets_rescued_count >= self.total_pets:
+            base_score += 500
+        
+        # 時間ボーナス
+        if self.victory and self.remaining_time > 0:
+            time_bonus = int(self.remaining_time * 2)
+            base_score += time_bonus
+        
+        # ライフボーナス
+        if self.victory:
+            life_bonus = self.player_lives * 50
+            base_score += life_bonus
+        
+        # 効率ボーナス（短時間でクリア）
+        elapsed_time = time.time() - self.start_time
+        if self.victory and elapsed_time < 180:  # 3分以内
+            base_score += 200
+        
+        return max(0, base_score)
+    
+    def get_game_result(self) -> Dict[str, Any]:
+        """ゲーム結果を取得"""
+        elapsed_time = time.time() - self.start_time
+        final_score = self._calculate_final_score()
+        
+        return {
+            'victory': self.victory,
+            'game_over': self.game_over,
+            'pets_rescued': len(self.pets_rescued),
+            'total_pets': self.total_pets,
+            'time_taken': elapsed_time,
+            'remaining_time': max(0, self.remaining_time),
+            'player_lives': self.player_lives,
+            'score': final_score,
+            'completion_rate': (len(self.pets_rescued) / self.total_pets) * 100 if self.total_pets > 0 else 0
+        }
+    
     def _update_ui_stats(self):
         """UI統計情報を更新"""
         elapsed_time = time.time() - self.start_time
         minutes = int(elapsed_time // 60)
         seconds = int(elapsed_time % 60)
         
+        # 残り時間の計算
+        remaining_minutes = int(self.remaining_time // 60)
+        remaining_seconds = int(self.remaining_time % 60)
+        
         stats = {
             'pets_rescued': len(self.pets_rescued),
             'total_pets': self.total_pets,
-            'time': f"{minutes:02d}:{seconds:02d}"
+            'time': f"{minutes:02d}:{seconds:02d}",
+            'remaining_time': f"{remaining_minutes:02d}:{remaining_seconds:02d}",
+            'lives': self.player_lives,
+            'health': getattr(self.player, 'health', 100),
+            'stamina': getattr(self.player, 'stamina', 100)
         }
         
         self.game_ui.update_stats(stats)

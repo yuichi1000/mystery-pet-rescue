@@ -209,12 +209,12 @@ class Pet:
                 self.velocity_x = (dx / distance) * self.speed * 0.8
                 self.velocity_y = (dy / distance) * self.speed * 0.8
                 
-                # 方向を更新（画面座標系に合わせて修正）
-                if abs(dx) > abs(dy):
-                    self.direction = "right" if dx > 0 else "left"
+                # 方向を更新（実際の移動方向に基づく）
+                if abs(self.velocity_x) > abs(self.velocity_y):
+                    self.direction = "right" if self.velocity_x > 0 else "left"
                 else:
-                    # Y軸方向の判定を修正：画像の向きに合わせる
-                    self.direction = "back" if dy > 0 else "front"
+                    # 実際の移動方向：下向き移動→front、上向き移動→back
+                    self.direction = "front" if self.velocity_y > 0 else "back"
         else:
             # 十分近い場合は停止
             self.velocity_x = 0
@@ -232,12 +232,12 @@ class Pet:
         self.velocity_x = math.cos(angle) * self.speed
         self.velocity_y = math.sin(angle) * self.speed
         
-        # 方向を更新（画面座標系に合わせて修正）
+        # 方向を更新（実際の移動方向に基づく）
         if abs(self.velocity_x) > abs(self.velocity_y):
             self.direction = "right" if self.velocity_x > 0 else "left"
         else:
-            # Y軸方向の判定を修正：画像の向きに合わせる
-            self.direction = "back" if self.velocity_y > 0 else "front"
+            # 実際の移動方向：下向き移動→front、上向き移動→back
+            self.direction = "front" if self.velocity_y > 0 else "back"
     
     def _update_movement(self, time_delta: float):
         """移動を更新"""

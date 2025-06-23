@@ -4,7 +4,9 @@ UIモジュール
 ユーザーインターフェース要素を管理
 """
 
-from .hud import HUD
-from .dialogs import DialogSystem
+from .game_ui import GameUI
+from .inventory_ui import InventoryUI
+from .pet_collection_ui import PetCollectionUI
+from .puzzle_ui import PuzzleUI
 
-__all__ = ['HUD', 'DialogSystem']
+__all__ = ['GameUI', 'InventoryUI', 'PetCollectionUI', 'PuzzleUI']

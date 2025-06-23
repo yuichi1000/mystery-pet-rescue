@@ -4,6 +4,9 @@
 ゲームの基本的なシステムコンポーネント
 """
 
-from .window import GameWindow
+from .game import Game
+from .scene import Scene
+from .animation import Animation
+from .minigame import MinigameBase
 
-__all__ = ['GameWindow']
+__all__ = ['Game', 'Scene', 'Animation', 'MinigameBase']

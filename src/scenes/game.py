@@ -44,6 +44,10 @@ class GameScene(Scene):
         self.asset_manager = get_asset_manager()
         self.font_manager = get_font_manager()
         
+        # 背景画像の読み込み
+        self.background_image = None
+        self._load_background()
+        
         # プレイヤー初期化
         self.player = Player(x=100, y=100)
         
@@ -73,6 +77,22 @@ class GameScene(Scene):
         # カメラオフセット
         self.camera_x = 0
         self.camera_y = 0
+    
+    def _load_background(self):
+        """背景画像を読み込み"""
+        try:
+            self.background_image = self.asset_manager.get_image("backgrounds/game_background.png")
+            if self.background_image:
+                print(f"✅ ゲーム背景画像読み込み成功: {self.background_image.get_size()}")
+                # 画面サイズに合わせてスケール
+                screen_size = (self.screen.get_width(), self.screen.get_height())
+                self.background_image = pygame.transform.scale(self.background_image, screen_size)
+                print(f"✅ ゲーム背景画像スケール完了: {screen_size}")
+            else:
+                print("⚠️ ゲーム背景画像が見つかりません")
+        except Exception as e:
+            print(f"❌ ゲーム背景画像読み込みエラー: {e}")
+            self.background_image = None
     
     def _create_pets(self) -> List[Pet]:
         """ペットを作成"""
@@ -230,8 +250,11 @@ class GameScene(Scene):
     
     def draw(self, surface: pygame.Surface) -> None:
         """描画処理"""
-        # 背景クリア
-        surface.fill((50, 100, 50))  # 緑っぽい背景
+        # 背景画像または背景色
+        if self.background_image:
+            surface.blit(self.background_image, (0, 0))
+        else:
+            surface.fill((50, 100, 50))  # 緑っぽい背景（フォールバック）
         
         # マップ描画
         self.map_system.draw(surface, self.camera_x, self.camera_y)

@@ -68,6 +68,9 @@ class GameUI:
         self.font_manager = get_font_manager()
         self.asset_manager = get_asset_manager()
         
+        # UI画像の読み込み
+        self._load_ui_images()
+        
         # UI要素の位置とサイズ
         self._setup_ui_layout()
         
@@ -105,6 +108,31 @@ class GameUI:
         }
         
         print("🎮 ゲーム内UI初期化完了")
+    
+    def _load_ui_images(self):
+        """UI画像を読み込み"""
+        self.ui_images = {}
+        ui_image_files = [
+            'pet_rescue_icon.png',
+            'score_icon.png', 
+            'time_icon.png',
+            'settings_icon.png',
+            'volume_icon.png'
+        ]
+        
+        for image_file in ui_image_files:
+            try:
+                image = self.asset_manager.get_image(f"ui/{image_file}")
+                if image:
+                    # アイコンサイズを統一（32x32）
+                    icon_size = int(32 * self.ui_scale)
+                    image = pygame.transform.scale(image, (icon_size, icon_size))
+                    self.ui_images[image_file.replace('.png', '')] = image
+                    print(f"✅ UI画像読み込み: {image_file}")
+                else:
+                    print(f"⚠️ UI画像が見つかりません: {image_file}")
+            except Exception as e:
+                print(f"❌ UI画像読み込みエラー {image_file}: {e}")
     
     def _setup_ui_layout(self):
         """UIレイアウトを設定"""
@@ -434,6 +462,16 @@ class GameUI:
         self.screen.blit(panel_surface, self.time_rect)
         pygame.draw.rect(self.screen, self.colors['ui_border'], self.time_rect, 1)
         
+        # 時間アイコンを表示
+        icon_x = self.time_rect.x + 5
+        if 'time_icon' in self.ui_images:
+            icon = self.ui_images['time_icon']
+            icon_y = self.time_rect.centery - icon.get_height() // 2
+            self.screen.blit(icon, (icon_x, icon_y))
+            text_start_x = icon_x + icon.get_width() + 5
+        else:
+            text_start_x = icon_x
+        
         if self.show_real_time:
             # リアルタイム表示
             current_time = time.strftime("%H:%M:%S")
@@ -449,7 +487,7 @@ class GameUI:
         time_surface = self.font_manager.render_text(
             time_text, "default", int(12 * self.ui_scale), self.colors['text']
         )
-        text_x = self.time_rect.centerx - time_surface.get_width() // 2
+        text_x = text_start_x
         text_y = self.time_rect.centery - time_surface.get_height() // 2
         self.screen.blit(time_surface, (text_x, text_y))
     

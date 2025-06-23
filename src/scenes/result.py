@@ -7,6 +7,7 @@ import pygame
 from typing import Optional, Dict, Any, List
 from src.core.scene import Scene
 from src.utils.font_manager import get_font_manager
+from src.utils.asset_manager import get_asset_manager
 
 class ResultButton:
     """結果画面のボタンクラス"""
@@ -24,6 +25,7 @@ class ResultScene(Scene):
         super().__init__(screen)
         self.game_result = game_result
         self.font_manager = get_font_manager()
+        self.asset_manager = get_asset_manager()
         
         # 結果データ
         self.pets_rescued = game_result.get('pets_rescued', 0)
@@ -36,8 +38,10 @@ class ResultScene(Scene):
         self.buttons: List[ResultButton] = []
         self.selected_index = 0
         
-        # 背景色
-        self.background_color = (30, 50, 80)
+        # 背景画像の読み込み
+        self.background_image = None
+        self.background_color = (30, 50, 80)  # フォールバック色
+        self._load_background()
         
         # 色設定
         self.normal_color = (255, 255, 255)
@@ -97,6 +101,22 @@ class ResultScene(Scene):
             return "D"
         else:
             return "E"
+    
+    def _load_background(self):
+        """背景画像を読み込み"""
+        try:
+            self.background_image = self.asset_manager.get_image("backgrounds/result_background.png")
+            if self.background_image:
+                print(f"✅ リザルト背景画像読み込み成功: {self.background_image.get_size()}")
+                # 画面サイズに合わせてスケール
+                screen_size = (self.screen.get_width(), self.screen.get_height())
+                self.background_image = pygame.transform.scale(self.background_image, screen_size)
+                print(f"✅ リザルト背景画像スケール完了: {screen_size}")
+            else:
+                print("⚠️ リザルト背景画像が見つかりません")
+        except Exception as e:
+            print(f"❌ リザルト背景画像読み込みエラー: {e}")
+            self.background_image = None
     
     def enter(self) -> None:
         """シーンに入る時の処理"""
@@ -177,16 +197,20 @@ class ResultScene(Scene):
     
     def draw(self, surface: pygame.Surface) -> None:
         """描画処理"""
-        # 背景を塗りつぶし
-        surface.fill(self.background_color)
-        
-        # グラデーション効果（簡易版）
-        for i in range(surface.get_height() // 4):
-            alpha = int(50 * (1 - i / (surface.get_height() // 4)))
-            color = (self.background_color[0] + alpha, 
-                    self.background_color[1] + alpha, 
-                    self.background_color[2] + alpha)
-            pygame.draw.line(surface, color, (0, i * 4), (surface.get_width(), i * 4))
+        # 背景画像または背景色
+        if self.background_image:
+            surface.blit(self.background_image, (0, 0))
+        else:
+            # フォールバック：背景色とグラデーション
+            surface.fill(self.background_color)
+            
+            # グラデーション効果（簡易版）
+            for i in range(surface.get_height() // 4):
+                alpha = int(50 * (1 - i / (surface.get_height() // 4)))
+                color = (self.background_color[0] + alpha, 
+                        self.background_color[1] + alpha, 
+                        self.background_color[2] + alpha)
+                pygame.draw.line(surface, color, (0, i * 4), (surface.get_width(), i * 4))
         
         # タイトル描画
         self._draw_title(surface)

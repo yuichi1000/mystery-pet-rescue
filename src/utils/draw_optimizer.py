@@ -134,12 +134,9 @@ class DrawOptimizer:
         return self.dirty_rects.copy()
     
     def optimize_surface_for_blitting(self, surface: pygame.Surface) -> pygame.Surface:
-        """描画用にサーフェスを最適化"""
-        # ピクセルフォーマットを画面に合わせる
-        if surface.get_flags() & pygame.SRCALPHA:
-            return surface.convert_alpha()
-        else:
-            return surface.convert()
+        """描画用にサーフェスを最適化（余計な処理なし）"""
+        # 画像をそのまま返す
+        return surface
     
     def set_optimization_level(self, level: int):
         """最適化レベルを設定"""

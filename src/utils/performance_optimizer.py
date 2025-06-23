@@ -226,13 +226,9 @@ def get_performance_optimizer() -> PerformanceOptimizer:
     return _global_optimizer
 
 def optimize_surface(surface: pygame.Surface) -> pygame.Surface:
-    """サーフェスを最適化"""
-    if surface.get_flags() & pygame.SRCALPHA:
-        # アルファチャンネル付き
-        return surface.convert_alpha()
-    else:
-        # 通常のサーフェス
-        return surface.convert()
+    """サーフェスを最適化（余計な処理なし）"""
+    # 画像をそのまま返す
+    return surface
 
 def batch_blit(surface: pygame.Surface, blits: List[Tuple[pygame.Surface, Tuple[int, int]]]):
     """バッチ描画（複数の描画を一度に実行）"""

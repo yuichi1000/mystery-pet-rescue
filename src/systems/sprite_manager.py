@@ -48,8 +48,8 @@ class SpriteManager:
             return self._create_default_sprite_variants()
         
         try:
-            # シンプルな画像読み込み（透過処理済み画像用）
-            original_sprite = pygame.image.load(file_path).convert_alpha()
+            # シンプルな画像読み込み（余計な処理なし）
+            original_sprite = pygame.image.load(file_path)
             
             # 各サイズのバリエーションを生成
             variants = {}

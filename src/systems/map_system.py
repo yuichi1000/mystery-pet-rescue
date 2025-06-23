@@ -124,33 +124,8 @@ class MapSystem:
                 self.tile_sprites[tile_type] = sprite
                 print(f"✅ タイル画像読み込み: {tile_type.value}")
             else:
-                # プレースホルダー作成
-                placeholder = self._create_placeholder_tile(tile_type)
-                self.tile_sprites[tile_type] = placeholder
-                print(f"⚠️ タイル画像未発見、プレースホルダー使用: {tile_type.value}")
-    
-    def _create_placeholder_tile(self, tile_type: TileType) -> pygame.Surface:
-        """プレースホルダータイルを作成"""
-        surface = pygame.Surface((self.tile_size, self.tile_size))
-        
-        # タイプ別の色
-        colors = {
-            TileType.GRASS: (100, 200, 100),
-            TileType.GROUND: (139, 69, 19),
-            TileType.CONCRETE: (128, 128, 128),
-            TileType.ROCK: (105, 105, 105),
-            TileType.STONE_WALL: (169, 169, 169),
-            TileType.TREE: (34, 139, 34),
-            TileType.WATER: (0, 191, 255)
-        }
-        
-        color = colors.get(tile_type, (255, 0, 255))
-        surface.fill(color)
-        
-        # 境界線
-        pygame.draw.rect(surface, (0, 0, 0), surface.get_rect(), 1)
-        
-        return surface
+                print(f"❌ タイル画像読み込み失敗: {tile_type.value} - {tile_data.sprite_path}")
+                # プレースホルダーは作らない！画像がないならエラー
     
     def load_map(self, map_file: str) -> bool:
         """マップファイルを読み込み"""

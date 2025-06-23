@@ -297,7 +297,7 @@ class GameScene(Scene):
         player_pos = (self.player.x, self.player.y)
         for pet in self.pets:
             if pet.data.pet_id not in self.pets_rescued:
-                pet.update(time_delta, player_pos)
+                pet.update(time_delta, player_pos, self.map_system)
         
         # カメラ更新
         self._update_camera()
@@ -394,9 +394,27 @@ class GameScene(Scene):
         self.camera_x += (target_x - self.camera_x) * 0.1
         self.camera_y += (target_y - self.camera_y) * 0.1
         
-        # カメラ範囲制限（必要に応じて）
-        self.camera_x = max(0, min(self.camera_x, 1000))
-        self.camera_y = max(0, min(self.camera_y, 1000))
+        # カメラ範囲制限（実際のマップサイズに基づく）
+        if self.map_system and self.map_system.map_surface:
+            map_width, map_height = self.map_system.map_surface.get_size()
+            screen_width = self.screen.get_width()
+            screen_height = self.screen.get_height()
+            
+            # カメラがマップの境界を超えないように制限
+            max_camera_x = max(0, map_width - screen_width)
+            max_camera_y = max(0, map_height - screen_height)
+            
+            self.camera_x = max(0, min(self.camera_x, max_camera_x))
+            self.camera_y = max(0, min(self.camera_y, max_camera_y))
+            
+            # デバッグ情報（境界付近でのみ表示）
+            if (self.camera_x <= 0 or self.camera_x >= max_camera_x or 
+                self.camera_y <= 0 or self.camera_y >= max_camera_y):
+                print(f"📷 カメラ境界制限: ({self.camera_x:.1f}, {self.camera_y:.1f}) - マップ: {map_width}x{map_height}")
+        else:
+            # フォールバック: 従来の制限
+            self.camera_x = max(0, min(self.camera_x, 1000))
+            self.camera_y = max(0, min(self.camera_y, 1000))
     
     def _check_pet_interactions(self):
         """ペットとの相互作用をチェック"""

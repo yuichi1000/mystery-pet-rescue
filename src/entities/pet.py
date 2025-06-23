@@ -104,16 +104,23 @@ class Pet:
         
         return sprites
     
-    def update(self, time_delta: float, player_pos: Tuple[float, float]):
+    def update(self, time_delta: float, player_pos: Optional[Tuple[float, float]] = None, map_system=None):
         """ペットを更新"""
+        # ミニゲーム用の簡単な更新（player_posがない場合）
+        if player_pos is None:
+            self._update_animation(time_delta)
+            self._update_emotion(time_delta)
+            return
+        
+        # 通常のゲーム更新
         # プレイヤーとの距離を計算
         distance_to_player = self._calculate_distance(player_pos)
         
         # 状態に応じた行動
         self._update_behavior(time_delta, player_pos, distance_to_player)
         
-        # 移動処理
-        self._update_movement(time_delta)
+        # 移動処理（境界チェック付き）
+        self._update_movement(time_delta, map_system)
         
         # アニメーション更新
         self._update_animation(time_delta)
@@ -248,10 +255,37 @@ class Pet:
                 print(f"🐾 {self.data.name}(ランダム): {move_type}移動 velocity_y={self.velocity_y:.2f} → {new_direction}画像を表示")
             self.direction = new_direction
     
-    def _update_movement(self, time_delta: float):
-        """移動を更新"""
-        self.x += self.velocity_x * time_delta
-        self.y += self.velocity_y * time_delta
+    def _update_movement(self, time_delta: float, map_system=None):
+        """移動を更新（境界チェック付き）"""
+        # 移動前の位置を保存
+        old_x = self.x
+        old_y = self.y
+        
+        # 新しい位置を計算
+        new_x = self.x + self.velocity_x * time_delta
+        new_y = self.y + self.velocity_y * time_delta
+        
+        # 境界・衝突判定
+        if map_system:
+            # X軸移動をチェック
+            test_rect_x = pygame.Rect(new_x, self.y, self.rect.width, self.rect.height)
+            if not map_system.check_collision(test_rect_x):
+                self.x = new_x
+            else:
+                # 衝突した場合は方向を変える（ログなし）
+                self.velocity_x = -self.velocity_x * 0.5
+            
+            # Y軸移動をチェック
+            test_rect_y = pygame.Rect(self.x, new_y, self.rect.width, self.rect.height)
+            if not map_system.check_collision(test_rect_y):
+                self.y = new_y
+            else:
+                # 衝突した場合は方向を変える（ログなし）
+                self.velocity_y = -self.velocity_y * 0.5
+        else:
+            # 境界判定なしの場合
+            self.x = new_x
+            self.y = new_y
         
         # 矩形更新
         self.rect.x = int(self.x)

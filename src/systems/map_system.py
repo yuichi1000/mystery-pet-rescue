@@ -153,10 +153,21 @@ class MapSystem:
             return False
     
     def _parse_map_data(self, map_json: Dict[str, Any]) -> MapData:
-        """JSONデータをMapDataに変換"""
-        width = map_json.get("width", 20)
-        height = map_json.get("height", 15)
-        tile_size = map_json.get("tile_size", self.tile_size)
+        """JSONデータをMapDataに変換（新旧形式対応）"""
+        # 新形式（dimensions）と旧形式の両方に対応
+        if "dimensions" in map_json:
+            # 新形式
+            dimensions = map_json["dimensions"]
+            width = dimensions.get("width", 20)
+            height = dimensions.get("height", 15)
+            tile_size = dimensions.get("tile_size", self.tile_size)
+        else:
+            # 旧形式
+            width = map_json.get("width", 20)
+            height = map_json.get("height", 15)
+            tile_size = map_json.get("tile_size", self.tile_size)
+        
+        print(f"📏 マップデータ解析: {width}x{height}, tile_size={tile_size}")
         
         # タイルデータの変換
         tiles = []
@@ -251,10 +262,18 @@ class MapSystem:
         if not self.current_map:
             return
         
-        map_width = self.current_map.width * self.tile_size
-        map_height = self.current_map.height * self.tile_size
+        map_width = self.current_map.width * self.current_map.tile_size
+        map_height = self.current_map.height * self.current_map.tile_size
+        
+        print(f"🗺️ マップサーフェス生成: {map_width} x {map_height}")
+        print(f"   タイル数: {self.current_map.width} x {self.current_map.height}")
+        print(f"   タイルサイズ: {self.current_map.tile_size}")
         
         self.map_surface = pygame.Surface((map_width, map_height))
+        
+        # 実際に生成されたサーフェスサイズを確認
+        actual_size = self.map_surface.get_size()
+        print(f"✅ 実際のマップサーフェスサイズ: {actual_size}")
         
         # 基本タイル（草・道路）を描画
         for y in range(self.current_map.height):
@@ -262,8 +281,8 @@ class MapSystem:
                 tile_type = self.current_map.tiles[y][x]
                 if tile_type in self.tile_sprites:
                     sprite = self.tile_sprites[tile_type]
-                    pos_x = x * self.tile_size
-                    pos_y = y * self.tile_size
+                    pos_x = x * self.current_map.tile_size
+                    pos_y = y * self.current_map.tile_size
                     self.map_surface.blit(sprite, (pos_x, pos_y))
         
         # 建物画像を描画
@@ -303,12 +322,12 @@ class MapSystem:
             # 画像を読み込み
             building_image = self.asset_manager.load_image(
                 image_path, 
-                (size['width'] * self.tile_size, size['height'] * self.tile_size)
+                (size['width'] * self.current_map.tile_size, size['height'] * self.current_map.tile_size)
             )
             
             if building_image:
-                pos_x = pos['x'] * self.tile_size
-                pos_y = pos['y'] * self.tile_size
+                pos_x = pos['x'] * self.current_map.tile_size
+                pos_y = pos['y'] * self.current_map.tile_size
                 self.map_surface.blit(building_image, (pos_x, pos_y))
                 print(f"🏠 建物画像描画: {building['name']} ({image_path})")
             else:
@@ -340,12 +359,12 @@ class MapSystem:
             # 画像を読み込み
             feature_image = self.asset_manager.load_image(
                 image_path,
-                (size['width'] * self.tile_size, size['height'] * self.tile_size)
+                (size['width'] * self.current_map.tile_size, size['height'] * self.current_map.tile_size)
             )
             
             if feature_image:
-                pos_x = pos['x'] * self.tile_size
-                pos_y = pos['y'] * self.tile_size
+                pos_x = pos['x'] * self.current_map.tile_size
+                pos_y = pos['y'] * self.current_map.tile_size
                 self.map_surface.blit(feature_image, (pos_x, pos_y))
                 print(f"🌳 自然地形画像描画: {feature['name']} ({image_path})")
             else:
@@ -401,11 +420,23 @@ class MapSystem:
         return tile_data.walkable if tile_data else True
     
     def check_collision(self, rect: pygame.Rect) -> bool:
-        """矩形との衝突判定"""
+        """矩形との衝突判定（マップ境界チェック含む）"""
         if not self.current_map:
             return False
         
-        # 矩形の四隅をチェック
+        # マップ境界チェック（正確な計算）
+        map_width_pixels = self.current_map.width * self.current_map.tile_size
+        map_height_pixels = self.current_map.height * self.current_map.tile_size
+        
+        # 境界チェック：キャラクターが完全にマップ内に収まるかチェック
+        if (rect.left < 0 or 
+            rect.top < 0 or 
+            rect.right > map_width_pixels or 
+            rect.bottom > map_height_pixels):
+            # ペット用の境界チェックログは出力しない
+            return True
+        
+        # タイル衝突チェック（マップ内の場合のみ）
         corners = [
             (rect.left, rect.top),
             (rect.right - 1, rect.top),

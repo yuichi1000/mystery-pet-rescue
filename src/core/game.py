@@ -338,7 +338,7 @@ class Game:
         player_pos = self.player.get_position()
         for pet in self.pets:
             if pet not in self.rescued_pets:
-                pet.update(time_delta, player_pos)
+                pet.update(time_delta, player_pos, self.map_system)
         
         # カメラ更新
         self._update_camera()

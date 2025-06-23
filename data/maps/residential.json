@@ -4,7 +4,7 @@
   "description": "静かな住宅街。多くのペットが住んでいる。",
   "width": 32,
   "height": 24,
-  "tile_size": 32,
+  "tile_size": 64,
   "background_music": "residential_bgm.ogg",
   "ambient_sounds": ["birds.ogg", "wind.ogg"],
   "spawn_points": {

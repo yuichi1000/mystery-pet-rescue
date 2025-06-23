@@ -155,32 +155,34 @@ class Player:
             self.velocity_y *= 0.707
     
     def _update_movement(self, time_delta: float, map_system=None):
-        """移動更新（衝突判定付き）"""
-        # 移動前の位置を保存
-        old_x = self.x
-        old_y = self.y
-        
+        """移動更新（実際のマップサイズに基づく境界チェック）"""
         # 新しい位置を計算
         new_x = self.x + self.velocity_x * time_delta
         new_y = self.y + self.velocity_y * time_delta
         
-        # 衝突判定
-        if map_system:
-            # X軸移動をチェック
-            test_rect_x = pygame.Rect(new_x, self.y, self.rect.width, self.rect.height)
-            if not map_system.check_collision(test_rect_x):
-                self.x = new_x
+        if map_system and map_system.map_surface:
+            # 実際に描画されているマップサーフェスのサイズを使用
+            actual_map_width, actual_map_height = map_system.map_surface.get_size()
             
-            # Y軸移動をチェック
-            test_rect_y = pygame.Rect(self.x, new_y, self.rect.width, self.rect.height)
-            if not map_system.check_collision(test_rect_y):
-                self.y = new_y
+            # 境界制限
+            new_x = max(0, min(new_x, actual_map_width - self.rect.width))
+            new_y = max(0, min(new_y, actual_map_height - self.rect.height))
+            
+            # 境界に達した場合のログ
+            if (new_x == 0 or new_x == actual_map_width - self.rect.width or 
+                new_y == 0 or new_y == actual_map_height - self.rect.height):
+                print(f"🚫 境界制限: ({new_x}, {new_y}) - 実際のマップサイズ: {actual_map_width}x{actual_map_height}")
         else:
-            # 衝突判定なしの場合
-            self.x = new_x
-            self.y = new_y
+            # フォールバック: ハードコード値
+            MAP_WIDTH = 2560
+            MAP_HEIGHT = 1920
+            new_x = max(0, min(new_x, MAP_WIDTH - self.rect.width))
+            new_y = max(0, min(new_y, MAP_HEIGHT - self.rect.height))
+            print("⚠️ フォールバック境界チェック使用")
         
-        # 矩形更新
+        # 位置を更新
+        self.x = new_x
+        self.y = new_y
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
     

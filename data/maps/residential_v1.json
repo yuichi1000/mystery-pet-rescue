@@ -8,7 +8,7 @@
   "dimensions": {
     "width": 40,
     "height": 30,
-    "tile_size": 32
+    "tile_size": 64
   },
   "spawn_point": {
     "x": 20,

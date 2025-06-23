@@ -121,19 +121,6 @@ class SaveLoadSystem:
         )
         
         return result if result is not None else False
-            )
-            
-            # ファイルに保存
-            save_file = self.save_dir / f"save_slot_{slot_id}.json"
-            with open(save_file, 'w', encoding='utf-8') as f:
-                json.dump(asdict(save_data), f, ensure_ascii=False, indent=2)
-                
-            print(f"✅ セーブ完了: スロット{slot_id} - {save_name}")
-            return True
-            
-        except Exception as e:
-            print(f"❌ セーブエラー: {e}")
-            return False
     
     def load_game(self, slot_id: int) -> Optional[SaveData]:
         """ゲームをロード"""

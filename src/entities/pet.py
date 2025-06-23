@@ -60,7 +60,7 @@ class Pet:
         
         # AI行動
         self.fear_distance = 100.0  # プレイヤーがこの距離に近づくと逃げる
-        self.trust_level = 0.0      # 信頼度（0-100）
+        self.trust_level = 20.0      # 信頼度（0-100）適度な初期値
         self.rescue_threshold = 80.0 # この信頼度で救出可能
         
         # アニメーション
@@ -285,7 +285,7 @@ class Pet:
                 self.emotion_timer = 2.0
                 
                 # 信頼度が高くなったら追従開始
-                if self.trust_level >= 60 and self.state != PetState.FOLLOWING:
+                if self.trust_level >= 30 and self.state != PetState.FOLLOWING:
                     self.state = PetState.FOLLOWING
                     print(f"💕 {self.data.name}があなたについてきます")
                 

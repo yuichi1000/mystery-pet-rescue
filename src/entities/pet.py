@@ -185,11 +185,12 @@ class Pet:
             self.velocity_x = (dx / length) * self.speed * 1.5  # 恐怖時は速く移動
             self.velocity_y = (dy / length) * self.speed * 1.5
             
-            # 方向を更新
+            # 方向を更新（scared状態でも正しい判定）
             if abs(dx) > abs(dy):
                 self.direction = "right" if dx > 0 else "left"
             else:
-                self.direction = "back" if dy > 0 else "front"
+                # 修正：下向き移動→front、上向き移動→back
+                self.direction = "front" if dy > 0 else "back"
         
         # エモーション表示
         self.current_emotion = "scared"
@@ -209,12 +210,16 @@ class Pet:
                 self.velocity_x = (dx / distance) * self.speed * 0.8
                 self.velocity_y = (dy / distance) * self.speed * 0.8
                 
-                # 方向を更新（実際の移動方向に基づく）
+                # 方向を更新（現在が逆なので反転）
                 if abs(self.velocity_x) > abs(self.velocity_y):
                     self.direction = "right" if self.velocity_x > 0 else "left"
                 else:
-                    # 実際の移動方向：下向き移動→front、上向き移動→back
-                    self.direction = "front" if self.velocity_y > 0 else "back"
+                    # 現在: 下向き→back, 上向き→front なので、これを逆転
+                    new_direction = "back" if self.velocity_y < 0 else "front"
+                    if new_direction != self.direction:
+                        move_type = "下向き" if self.velocity_y > 0 else "上向き"
+                        print(f"🐾 {self.data.name}: {move_type}移動 velocity_y={self.velocity_y:.2f} → {new_direction}画像を表示")
+                    self.direction = new_direction
         else:
             # 十分近い場合は停止
             self.velocity_x = 0
@@ -232,12 +237,16 @@ class Pet:
         self.velocity_x = math.cos(angle) * self.speed
         self.velocity_y = math.sin(angle) * self.speed
         
-        # 方向を更新（実際の移動方向に基づく）
+        # 方向を更新（現在が逆なので反転）
         if abs(self.velocity_x) > abs(self.velocity_y):
             self.direction = "right" if self.velocity_x > 0 else "left"
         else:
-            # 実際の移動方向：下向き移動→front、上向き移動→back
-            self.direction = "front" if self.velocity_y > 0 else "back"
+            # 現在: 下向き→back, 上向き→front なので、これを逆転
+            new_direction = "back" if self.velocity_y < 0 else "front"
+            if new_direction != self.direction:
+                move_type = "下向き" if self.velocity_y > 0 else "上向き"
+                print(f"🐾 {self.data.name}(ランダム): {move_type}移動 velocity_y={self.velocity_y:.2f} → {new_direction}画像を表示")
+            self.direction = new_direction
     
     def _update_movement(self, time_delta: float):
         """移動を更新"""

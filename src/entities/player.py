@@ -216,9 +216,10 @@ class Player:
         draw_x = self.rect.x - camera_offset[0]
         draw_y = self.rect.y - camera_offset[1]
         
-        # スプライト描画
+        # スプライト描画（透明度を保持）
         if self.direction in self.sprites:
             sprite = self.sprites[self.direction]
+            # 画像をそのまま描画（透明度保持）
             screen.blit(sprite, (draw_x, draw_y))
         else:
             # フォールバック: 矩形描画

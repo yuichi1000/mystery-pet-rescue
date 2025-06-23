@@ -11,7 +11,6 @@ import json
 
 from src.utils.exceptions import AssetLoadError
 from src.utils.error_handler import handle_error, safe_execute
-from src.utils.performance_optimizer import optimize_surface, get_performance_optimizer
 
 class AssetManager:
     """アセット管理クラス"""
@@ -35,8 +34,7 @@ class AssetManager:
         
         print("🎨 アセットマネージャー初期化完了")
     
-    def load_image(self, path: str, scale: Optional[Tuple[int, int]] = None, 
-                   colorkey: Optional[Tuple[int, int, int]] = None) -> Optional[pygame.Surface]:
+    def load_image(self, path: str, scale: Optional[Tuple[int, int]] = None) -> Optional[pygame.Surface]:
         """画像を読み込み（エラーハンドリング強化版）"""
         full_path = self.images_path / path
         
@@ -70,9 +68,6 @@ class AssetManager:
                 if scale[0] <= 0 or scale[1] <= 0:
                     raise AssetLoadError(str(full_path), f"無効なスケール: {scale}")
                 image = pygame.transform.scale(image, scale)
-            
-            # サーフェス最適化
-            image = optimize_surface(image)
             
             return image
         
@@ -109,9 +104,9 @@ class AssetManager:
             width = min(width, 2048)
             height = min(height, 2048)
             
-            # サーフェス作成
+            # サーフェス作成（透明背景）
             surface = pygame.Surface((width, height), pygame.SRCALPHA)
-            surface.fill((255, 0, 255, 128))  # 半透明マゼンタ背景
+            surface.fill((255, 0, 255, 128))  # 半透明マゼンタ（プレースホルダー用）
             
             # 枠線を描画
             pygame.draw.rect(surface, (0, 0, 0), surface.get_rect(), 2)

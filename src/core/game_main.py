@@ -1,11 +1,12 @@
 """
 メインゲームクラス（フロー管理版）
-GameFlowManagerを使用したゲーム実行
+GameFlowManagerを使用したゲーム実行（パフォーマンス最適化版）
 """
 
 import pygame
 import sys
 from src.core.game_flow import GameFlowManager
+from src.utils.performance_optimizer import get_performance_optimizer
 
 class GameMain:
     """メインゲームクラス"""
@@ -21,6 +22,9 @@ class GameMain:
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
         pygame.display.set_caption("ミステリー・ペット・レスキュー")
         
+        # パフォーマンス最適化
+        self.optimizer = get_performance_optimizer()
+        
         # ゲームフロー管理
         self.flow_manager = GameFlowManager(self.screen)
         
@@ -33,6 +37,9 @@ class GameMain:
         print("ゲーム開始")
         
         while self.flow_manager.is_running():
+            # パフォーマンス最適化：フレーム開始
+            self.optimizer.begin_frame()
+            
             # フレーム時間計算
             time_delta = self.clock.tick(self.target_fps) / 1000.0
             
@@ -45,15 +52,27 @@ class GameMain:
                 else:
                     self.flow_manager.handle_event(event)
             
-            # 更新処理
+            # 更新処理（最適化付き）
+            self.optimizer.begin_update()
             self.flow_manager.update(time_delta)
+            self.optimizer.end_update()
             
-            # 描画処理
+            # フレームスキップ判定
+            should_skip = self.optimizer.end_frame()
+            if should_skip:
+                continue  # 描画をスキップ
+            
+            # 描画処理（最適化付き）
+            self.optimizer.begin_draw()
             self.screen.fill((0, 0, 0))  # 背景クリア
             self.flow_manager.draw(self.screen)
+            self.optimizer.end_draw()
             
             # 画面更新
             pygame.display.flip()
+        
+        # パフォーマンスレポート表示
+        print(self.optimizer.get_performance_report())
         
         print("ゲーム終了")
         self._cleanup()

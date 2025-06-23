@@ -11,6 +11,7 @@ import json
 
 from src.utils.exceptions import AssetLoadError
 from src.utils.error_handler import handle_error, safe_execute
+from src.utils.performance_optimizer import optimize_surface, get_performance_optimizer
 
 class AssetManager:
     """アセット管理クラス"""
@@ -70,6 +71,9 @@ class AssetManager:
                     raise AssetLoadError(str(full_path), f"無効なスケール: {scale}")
                 image = pygame.transform.scale(image, scale)
             
+            # サーフェス最適化
+            image = optimize_surface(image)
+            
             return image
         
         # 安全な実行
@@ -84,7 +88,7 @@ class AssetManager:
             print(f"⚠️ プレースホルダー画像を使用: {path}")
             image = self._create_placeholder_image(scale or self.default_scale)
         
-        # キャッシュに保存
+        # キャッシュに保存（最適化済み）
         if image:
             self.images[path] = image
         

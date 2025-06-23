@@ -424,31 +424,72 @@ class MenuSystem:
     def _view_collection(self) -> MenuState:
         """図鑑を見る"""
         print("📖 図鑑を表示")
-        # TODO: 図鑑画面の実装
+        # ペット図鑑の詳細表示
+        collection_data = self.settings.get('pet_collection', {})
+        total_pets = 4  # デモでは4匹（犬、猫、うさぎ、鳥）
+        found_pets = len([p for p in collection_data.values() if p.get('found', False)])
+        print(f"  発見済み: {found_pets}/{total_pets}")
+        
+        pet_types = ['犬', '猫', 'うさぎ', '鳥']
+        for pet_type in pet_types:
+            status = "発見済み" if collection_data.get(pet_type, {}).get('found', False) else "未発見"
+            print(f"  {pet_type}: {status}")
         return None
     
     def _view_stats(self) -> MenuState:
         """統計を見る"""
         print("📊 統計を表示")
-        # TODO: 統計画面の実装
+        # ゲーム統計の詳細表示
+        stats = self.settings.get('game_stats', {})
+        play_time = stats.get('total_play_time', 0)
+        pets_rescued = stats.get('pets_rescued', 0)
+        areas_explored = stats.get('areas_explored', 0)
+        items_collected = stats.get('items_collected', 0)
+        
+        print(f"  プレイ時間: {play_time//3600}時間{(play_time%3600)//60}分")
+        print(f"  救出したペット: {pets_rescued}匹")
+        print(f"  探索したエリア: {areas_explored}箇所")
+        print(f"  収集したアイテム: {items_collected}個")
         return None
     
     def _open_audio_settings(self) -> MenuState:
         """音量設定"""
         print("🔊 音量設定")
-        # TODO: 音量設定画面の実装
+        # 音量設定の詳細表示
+        master_volume = self.settings.get('master_volume', 0.8)
+        bgm_volume = self.settings.get('bgm_volume', 0.7)
+        se_volume = self.settings.get('se_volume', 0.8)
+        print(f"  マスター音量: {master_volume:.1%}")
+        print(f"  BGM音量: {bgm_volume:.1%}")
+        print(f"  効果音音量: {se_volume:.1%}")
         return None
     
     def _open_key_config(self) -> MenuState:
         """キー設定"""
         print("⌨️ キー設定")
-        # TODO: キー設定画面の実装
+        # キー設定の詳細表示
+        key_bindings = self.settings.get('key_bindings', {
+            'move_up': 'W',
+            'move_down': 'S', 
+            'move_left': 'A',
+            'move_right': 'D',
+            'interact': 'SPACE',
+            'menu': 'ESC'
+        })
+        for action, key in key_bindings.items():
+            print(f"  {action}: {key}")
         return None
     
     def _open_display_settings(self) -> MenuState:
         """画面設定"""
         print("🖥️ 画面設定")
-        # TODO: 画面設定の実装
+        # 画面設定の詳細表示
+        fullscreen = self.settings.get('fullscreen', False)
+        resolution = self.settings.get('resolution', '1280x720')
+        vsync = self.settings.get('vsync', True)
+        print(f"  フルスクリーン: {'ON' if fullscreen else 'OFF'}")
+        print(f"  解像度: {resolution}")
+        print(f"  垂直同期: {'ON' if vsync else 'OFF'}")
         return None
     
     def draw(self):

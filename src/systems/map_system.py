@@ -515,7 +515,7 @@ class MapSystem:
             self.current_map = MapData(
                 width=width,
                 height=height,
-                tile_size=32,  # 新しいタイルサイズ
+                tile_size=self.tile_size,  # 既存のタイルサイズを使用（64）
                 tiles=tiles,
                 spawn_points={
                     'player': {'x': width//2, 'y': height-2},

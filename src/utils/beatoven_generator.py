@@ -22,7 +22,7 @@ class BeatovenGenerator:
     
     def __init__(self):
         self.api_key = os.getenv('BEATOVEN_API_KEY')
-        self.api_url = os.getenv('BEATOVEN_API_URL', 'https://api.beatoven.ai/v1')
+        self.api_url = os.getenv('BEATOVEN_API_URL', 'https://public-api.beatoven.ai/api/v1')
         self.timeout = int(os.getenv('BEATOVEN_TIMEOUT', '60'))
         
         # キャッシュディレクトリ
@@ -149,25 +149,49 @@ class BeatovenGenerator:
             'Content-Type': 'application/json'
         }
         
-        url = f"{self.api_url}/{endpoint}"
+        # 正しいエンドポイントを使用
+        url = f"{self.api_url}/tracks/compose"
         
-        logger.info(f"API リクエスト開始: {endpoint}")
-        logger.debug(f"パラメータ: {params}")
+        # パラメータを適切な形式に変換
+        if endpoint == 'generate/sfx':
+            # 効果音用パラメータ
+            effect_type = params.get('effect_type', 'sound')
+            intensity = params.get('intensity', 'medium')
+            duration = int(params.get('duration', 2))
+            
+            prompt_text = f"{duration} seconds {intensity} {effect_type} sound effect"
+        else:
+            # BGM用パラメータ
+            scene_type = params.get('scene_type', 'ambient')
+            mood = params.get('mood', 'neutral')
+            duration = params.get('duration', 60)
+            
+            prompt_text = f"{duration} seconds {mood} {scene_type} background music"
+        
+        payload = {
+            'prompt': {
+                'text': prompt_text
+            },
+            'format': 'mp3',
+            'looping': False
+        }
+        
+        logger.info(f"API リクエスト開始: {url}")
+        logger.debug(f"プロンプト: {prompt_text}")
         
         try:
             response = requests.post(
                 url,
                 headers=headers,
-                json=params,
+                json=payload,
                 timeout=self.timeout
             )
             response.raise_for_status()
             
             # レスポンスがJSONの場合（非同期処理）
-            if response.headers.get('content-type', '').startswith('application/json'):
-                result = response.json()
-                if 'job_id' in result:
-                    return self._wait_for_completion(result['job_id'])
+            result = response.json()
+            if 'task_id' in result:
+                return self._wait_for_completion(result['task_id'])
             
             # 直接音声データが返される場合
             return response.content
@@ -176,14 +200,13 @@ class BeatovenGenerator:
             logger.error(f"API リクエストエラー: {e}")
             return None
     
-    def _wait_for_completion(self, job_id: str, max_wait: int = 300) -> Optional[bytes]:
+    def _wait_for_completion(self, task_id: str, max_wait: int = 300) -> Optional[bytes]:
         """非同期ジョブの完了を待機"""
         headers = {
             'Authorization': f'Bearer {self.api_key}',
         }
         
-        status_url = f"{self.api_url}/jobs/{job_id}/status"
-        download_url = f"{self.api_url}/jobs/{job_id}/download"
+        status_url = f"{self.api_url}/tasks/{task_id}"
         
         start_time = time.time()
         
@@ -195,17 +218,23 @@ class BeatovenGenerator:
                 status_data = response.json()
                 status = status_data.get('status')
                 
-                if status == 'completed':
-                    # 音声データをダウンロード
-                    download_response = requests.get(download_url, headers=headers, timeout=30)
-                    download_response.raise_for_status()
-                    return download_response.content
+                if status == 'composed':
+                    # 音声データのURLを取得してダウンロード
+                    meta = status_data.get('meta', {})
+                    download_url = meta.get('track_url')
+                    if download_url:
+                        download_response = requests.get(download_url, timeout=30)
+                        download_response.raise_for_status()
+                        return download_response.content
+                    else:
+                        logger.error("ダウンロードURLが見つかりません")
+                        return None
                 
                 elif status == 'failed':
                     logger.error(f"音声生成失敗: {status_data.get('error', 'Unknown error')}")
                     return None
                 
-                elif status in ['pending', 'processing']:
+                elif status in ['composing', 'running']:
                     logger.info(f"生成中... ({status})")
                     time.sleep(5)
                 
@@ -354,8 +383,8 @@ class BeatovenGenerator:
             results[name] = audio_data is not None
             
             if audio_data:
-                # assetsディレクトリに保存
-                self._save_to_assets(name + '.wav', audio_data)
+                # assetsディレクトリに保存（MP3形式）
+                self._save_to_assets(name + '.mp3', audio_data)
         
         return results
     

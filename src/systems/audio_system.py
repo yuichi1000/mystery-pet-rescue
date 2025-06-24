@@ -86,6 +86,17 @@ class AudioSystem:
                     logger.info(f"効果音読み込み: {sound_name}")
                 except pygame.error as e:
                     logger.error(f"効果音読み込み失敗: {sfx_file} - {e}")
+            
+            # MP3ファイルも読み込み
+            for sfx_file in self.sfx_path.glob("*.mp3"):
+                try:
+                    sound_name = sfx_file.stem
+                    sound = pygame.mixer.Sound(str(sfx_file))
+                    sound.set_volume(self.sfx_volume * self.master_volume)
+                    self.sound_effects[sound_name] = sound
+                    logger.info(f"効果音読み込み: {sound_name}")
+                except pygame.error as e:
+                    logger.error(f"効果音読み込み失敗: {sfx_file} - {e}")
     
     def play_bgm(self, track_name: str, loop: bool = True, fade_in: bool = True):
         """BGMを再生"""

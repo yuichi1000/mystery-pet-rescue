@@ -81,7 +81,7 @@ def generate_single_sfx(effect_type: str, intensity: str = "medium", duration: f
     audio_data = generator.generate_sfx(effect_type, intensity, duration)
     
     if audio_data:
-        filename = f"{effect_type}.wav"
+        filename = f"{effect_type}.mp3"
         output_path = Path("assets/sounds") / filename
         output_path.parent.mkdir(parents=True, exist_ok=True)
         

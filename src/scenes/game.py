@@ -11,6 +11,7 @@ from src.entities.player import Player
 from src.entities.pet import Pet, PetData, PetType
 from src.systems.puzzle_system import PuzzleSystem
 from src.systems.map_system import MapSystem
+from src.systems.audio_system import get_audio_system
 from src.systems.pet_collection import PetCollection
 from src.systems.map_data_loader import get_map_data_loader
 from src.systems.pet_data_loader import get_pet_data_loader
@@ -98,6 +99,9 @@ class GameScene(Scene):
         # UI初期化
         self.game_ui = GameUI(self.screen)
         self.game_ui.set_map_system(self.map_system)
+        
+        # 音響システム初期化
+        self.audio_system = get_audio_system()
         
         # カメラオフセット
         self.camera_x = 0
@@ -219,6 +223,9 @@ class GameScene(Scene):
         self.victory = False
         self.paused = False
         
+        # BGM開始
+        self.audio_system.play_bgm("residential_bgm")
+        
         # UIに初期状態を設定
         self.game_ui.add_notification("ペットを探しましょう！", NotificationType.INFO)
         self._update_ui_stats()
@@ -336,6 +343,9 @@ class GameScene(Scene):
             self.victory = True
             self.game_ui.add_notification("全てのペットを救出しました！", NotificationType.SUCCESS)
             print("🎉 勝利条件達成！")
+            
+            # 勝利BGMに変更
+            self.audio_system.play_bgm("victory_bgm")
             
             # GameMainに勝利を通知
             if self.flow_manager and hasattr(self.flow_manager, '_game_victory'):
@@ -458,6 +468,11 @@ class GameScene(Scene):
                 # ペット図鑑に追加（デモで動作していた機能）
                 self.pet_collection.add_pet(pet.data)
                 self.game_ui.add_notification("ペットを救出しました！", NotificationType.SUCCESS)
+                # 効果音再生
+                self.audio_system.play_sfx("pet_rescued")
+        
+        # ペット発見効果音
+        self.audio_system.play_sfx("pet_found")
         self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
     
     def _handle_puzzle_solved(self):

@@ -1,0 +1,30 @@
+{
+  "audio_settings": {
+    "master_volume": 1.0,
+    "bgm_volume": 0.7,
+    "sfx_volume": 0.8,
+    "fade_duration": 1000
+  },
+  "scene_bgm_mapping": {
+    "menu": "menu_bgm",
+    "residential": "residential_bgm",
+    "forest": "forest_bgm",
+    "puzzle": "puzzle_bgm",
+    "victory": "victory_bgm",
+    "game_over": "game_over_bgm"
+  },
+  "sound_effects": {
+    "pet_found": "pet_found.wav",
+    "pet_rescued": "pet_rescued.wav",
+    "item_pickup": "item_pickup.wav",
+    "button_click": "button_click.wav",
+    "footstep": "footstep.wav",
+    "puzzle_solve": "puzzle_solve.wav",
+    "notification": "notification.wav",
+    "error": "error.wav"
+  },
+  "audio_formats": {
+    "bgm_formats": [".mp3", ".ogg"],
+    "sfx_formats": [".wav", ".ogg"]
+  }
+}

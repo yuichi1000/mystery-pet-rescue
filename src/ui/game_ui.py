@@ -68,6 +68,13 @@ class GameUI:
         
         # フォント・アセット管理
         self.font_manager = get_font_manager()
+        
+        # マップシステム参照（ミニマップ用）
+        self.map_system = None
+    
+    def set_map_system(self, map_system):
+        """マップシステムを設定（ミニマップ用）"""
+        self.map_system = map_system
         self.asset_manager = get_asset_manager()
         
         # UI画像の読み込み
@@ -229,7 +236,7 @@ class GameUI:
         self._draw_quick_slots()
         
         # ミニマップ
-        self._draw_minimap(world_objects or [], player_pos)
+        self._draw_minimap(world_objects or [], player_pos, self.map_system)
         
         # 現在の目標
         self._draw_objective()
@@ -342,14 +349,18 @@ class GameUI:
             )
             self.screen.blit(num_surface, (rect.x + 2, rect.y + 2))
     
-    def _draw_minimap(self, world_objects: List[Any], player_pos: Tuple[float, float]):
+    def _draw_minimap(self, world_objects: List[Any], player_pos: Tuple[float, float], map_system=None):
         """ミニマップを描画"""
         # ミニマップ背景
         self.minimap_surface.fill((50, 50, 50))
         
-        # 世界の境界を計算（仮の値）
-        world_width = 2000
-        world_height = 2000
+        # 実際のマップサイズを取得
+        if map_system and map_system.map_surface:
+            world_width, world_height = map_system.map_surface.get_size()
+        else:
+            # フォールバック: デフォルト値
+            world_width = 2000
+            world_height = 2000
         
         # プレイヤー位置をミニマップ座標に変換
         map_player_x = int((player_pos[0] / world_width) * self.minimap_size)
@@ -402,6 +413,15 @@ class GameUI:
         title_x = self.minimap_rect.centerx - title_surface.get_width() // 2
         title_y = self.minimap_rect.bottom + 5
         self.screen.blit(title_surface, (title_x, title_y))
+        
+        # デバッグ情報（マップサイズ表示）
+        debug_text = f"{world_width}x{world_height}"
+        debug_surface = self.font_manager.render_text(
+            debug_text, "default", int(10 * self.ui_scale), (150, 150, 150)
+        )
+        debug_x = self.minimap_rect.left
+        debug_y = self.minimap_rect.bottom + 25
+        self.screen.blit(debug_surface, (debug_x, debug_y))
     
     def _draw_objective(self):
         """現在の目標を描画"""

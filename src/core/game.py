@@ -58,6 +58,7 @@ class Game:
         
         # ゲーム内UI
         self.game_ui = GameUI(self.screen)
+        self.game_ui.set_map_system(self.map_system)
         
         # プレイヤー
         self.player = None

@@ -97,6 +97,7 @@ class GameScene(Scene):
         
         # UI初期化
         self.game_ui = GameUI(self.screen)
+        self.game_ui.set_map_system(self.map_system)
         
         # カメラオフセット
         self.camera_x = 0

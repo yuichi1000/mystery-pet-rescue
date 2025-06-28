@@ -12,6 +12,7 @@ from src.entities.pet import Pet, PetData, PetType
 from src.systems.puzzle_system import PuzzleSystem
 from src.systems.map_system import MapSystem
 from src.systems.audio_system import get_audio_system
+from src.systems.timer_system import TimerSystem
 from src.systems.map_data_loader import get_map_data_loader
 from src.systems.pet_data_loader import get_pet_data_loader
 from src.ui.game_ui import GameUI, NotificationType, QuickSlotItem
@@ -95,6 +96,12 @@ class GameScene(Scene):
         
         # 音響システム初期化
         self.audio_system = get_audio_system()
+        
+        # タイマーシステム初期化（5分）
+        self.timer_system = TimerSystem(300.0)
+        self.timer_system.set_hint_callback(self._on_timer_hint)
+        self.timer_system.set_time_warning_callback(self._on_time_warning)
+        self.timer_system.set_time_up_callback(self._on_time_up)
         
         # カメラオフセット
         self.camera_x = 0
@@ -216,6 +223,9 @@ class GameScene(Scene):
         self.victory = False
         self.paused = False
         
+        # タイマー開始
+        self.timer_system.start()
+        
         # BGM開始
         self.audio_system.play_bgm("residential_bgm")
         
@@ -243,8 +253,10 @@ class GameScene(Scene):
                 # ポーズ切り替え
                 self.paused = not self.paused
                 if self.paused:
+                    self.timer_system.pause()
                     self.game_ui.add_notification("ゲーム一時停止", NotificationType.INFO)
                 else:
+                    self.timer_system.start()
                     self.game_ui.add_notification("ゲーム再開", NotificationType.INFO)
             
             elif event.key == pygame.K_c:
@@ -288,6 +300,14 @@ class GameScene(Scene):
     def update(self, time_delta: float) -> Optional[str]:
         """更新処理"""
         if self.paused or self.game_over:
+            return None
+        
+        # タイマー更新
+        self.timer_system.update()
+        
+        # 時間切れチェック
+        if self.timer_system.is_finished():
+            self.game_over = True
             return None
         
         # Phase 1: プレイヤー基本更新
@@ -334,7 +354,16 @@ class GameScene(Scene):
         # 勝利条件チェック
         if len(self.pets_rescued) >= self.total_pets and not self.victory and not self.game_over:
             self.victory = True
+            
+            # タイマー停止
+            self.timer_system.pause()
+            
+            # タイムボーナス計算
+            time_bonus = self.timer_system.calculate_time_bonus()
+            bonus_message = f"タイムボーナス: {time_bonus}点"
+            
             self.game_ui.add_notification("全てのペットを救出しました！", NotificationType.SUCCESS)
+            self.game_ui.add_notification(bonus_message, NotificationType.INFO)
             print("🎉 勝利条件達成！")
             
             # 勝利BGMに変更
@@ -380,6 +409,11 @@ class GameScene(Scene):
             'max_stamina': self.player.stats.max_stamina
         }
         self.game_ui.draw(player_stats, [], (self.player.x, self.player.y))
+        
+        # タイマー表示
+        time_string = self.timer_system.get_time_string()
+        is_warning = self.timer_system.is_warning_time()
+        self.game_ui.draw_timer(time_string, is_warning)
         
         # ポーズ表示
         if self.paused:
@@ -490,15 +524,15 @@ class GameScene(Scene):
         
         # ペット救出ボーナス
         pets_rescued_count = len(self.pets_rescued)
-        base_score += pets_rescued_count * 100
+        base_score += pets_rescued_count * 1000
         
         # 完全クリアボーナス
         if pets_rescued_count >= self.total_pets:
-            base_score += 500
+            base_score += 2000
         
-        # 時間ボーナス
-        if self.victory and self.remaining_time > 0:
-            time_bonus = int(self.remaining_time * 2)
+        # タイムボーナス（新システム）
+        if self.victory:
+            time_bonus = self.timer_system.calculate_time_bonus()
             base_score += time_bonus
         
         # ライフボーナス
@@ -570,3 +604,39 @@ class GameScene(Scene):
         help_text = help_font.render("P: 再開, ESC: メニューに戻る", True, (200, 200, 200))
         help_rect = help_text.get_rect(center=(surface.get_width()//2, surface.get_height()//2 + 60))
         surface.blit(help_text, help_rect)
+    
+    def _on_timer_hint(self, hint_message: str, minute: int):
+        """タイマーヒントコールバック"""
+        self.game_ui.add_notification(f"ヒント: {hint_message}", NotificationType.INFO)
+        
+        # ヒント効果音再生
+        if self.audio_system:
+            self.audio_system.play_sfx("hint")
+    
+    def _on_time_warning(self):
+        """時間警告コールバック"""
+        # 警告は一度だけ表示
+        if not hasattr(self, '_warning_shown'):
+            self.game_ui.add_notification("残り時間が少なくなりました！", NotificationType.WARNING)
+            self._warning_shown = True
+            
+            # 警告効果音再生
+            if self.audio_system:
+                self.audio_system.play_sfx("time_warning")
+    
+    def _on_time_up(self):
+        """時間切れコールバック"""
+        self.game_ui.add_notification("時間切れ！ゲームオーバー", NotificationType.ERROR)
+        
+        # ゲームオーバー効果音再生
+        if self.audio_system:
+            self.audio_system.play_sfx("game_over")
+        
+        # ゲームオーバー処理
+        if self.flow_manager:
+            self.flow_manager.game_over("time_up")
+    
+    def start_game(self):
+        """ゲーム開始（タイマー開始）"""
+        self.timer_system.start()
+        self.game_ui.add_notification("ペットを探しましょう！", NotificationType.INFO)

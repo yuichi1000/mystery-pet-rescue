@@ -11,6 +11,7 @@ from enum import Enum
 from pathlib import Path
 
 from src.utils.asset_manager import get_asset_manager
+from src.systems.building_system import BuildingSystem
 
 class TileType(Enum):
     """タイルタイプ"""
@@ -21,6 +22,10 @@ class TileType(Enum):
     STONE_WALL = "stone_wall"
     TREE = "tree"
     WATER = "water"
+    ROAD = "road"
+    SIDEWALK = "sidewalk"
+    BUSH = "bush"
+    FLOWER_BED = "flower_bed"
 
 @dataclass
 class TileData:
@@ -46,6 +51,9 @@ class MapSystem:
     def __init__(self, tile_size: int = 64):
         self.tile_size = tile_size
         self.asset_manager = get_asset_manager()
+        
+        # 建物システム
+        self.building_system = BuildingSystem(tile_size)
         
         # タイル定義
         self.tile_definitions = self._setup_tile_definitions()
@@ -110,6 +118,30 @@ class MapSystem:
                 walkable=False,
                 sprite_path="tiles/water_tile.png",
                 collision=True
+            ),
+            TileType.ROAD: TileData(
+                tile_type=TileType.ROAD,
+                walkable=True,
+                sprite_path="tiles/road_tile.png",
+                collision=False
+            ),
+            TileType.SIDEWALK: TileData(
+                tile_type=TileType.SIDEWALK,
+                walkable=True,
+                sprite_path="tiles/sidewalk_tile.png",
+                collision=False
+            ),
+            TileType.BUSH: TileData(
+                tile_type=TileType.BUSH,
+                walkable=False,
+                sprite_path="tiles/bush_tile.png",
+                collision=True
+            ),
+            TileType.FLOWER_BED: TileData(
+                tile_type=TileType.FLOWER_BED,
+                walkable=False,
+                sprite_path="tiles/flower_bed_tile.png",
+                collision=True
             )
         }
     
@@ -137,6 +169,7 @@ class MapSystem:
                     map_json = json.load(f)
                 
                 self.current_map = self._parse_map_data(map_json)
+                self.building_system.load_buildings_from_map(map_json)
                 self._generate_map_surface()
                 
                 print(f"✅ マップ読み込み完了: {map_file}")
@@ -171,17 +204,33 @@ class MapSystem:
         
         # タイルデータの変換
         tiles = []
-        tile_data = map_json.get("tiles", [])
         
-        for row in tile_data:
-            tile_row = []
-            for tile_str in row:
-                try:
-                    tile_type = TileType(tile_str)
+        # 新形式のレイアウト文字列をチェック
+        if "terrain" in map_json and "layout" in map_json["terrain"]:
+            # 新形式: 文字列レイアウト
+            layout = map_json["terrain"]["layout"]
+            tile_mapping = map_json.get("tile_mapping", {})
+            
+            for row_str in layout:
+                tile_row = []
+                for char in row_str:
+                    tile_name = tile_mapping.get(char, "grass")
+                    tile_type = self._string_to_tile_type(tile_name)
                     tile_row.append(tile_type)
-                except ValueError:
-                    tile_row.append(TileType.GRASS)  # デフォルト
-            tiles.append(tile_row)
+                tiles.append(tile_row)
+        else:
+            # 旧形式: 数値配列
+            tile_data = map_json.get("tiles", [])
+            
+            for row in tile_data:
+                tile_row = []
+                for tile_str in row:
+                    try:
+                        tile_type = TileType(tile_str)
+                        tile_row.append(tile_type)
+                    except ValueError:
+                        tile_row.append(TileType.GRASS)  # デフォルト
+                tiles.append(tile_row)
         
         # 不足分を埋める
         while len(tiles) < height:
@@ -192,13 +241,23 @@ class MapSystem:
                 row.append(TileType.GRASS)
         
         # スポーン地点
-        spawn_points = map_json.get("spawn_points", {
-            "player": [5, 5],
-            "pets": [[10, 8], [15, 12], [8, 3], [18, 10]]
-        })
+        spawn_points = {}
+        if "spawn_point" in map_json:
+            spawn_points["player"] = [map_json["spawn_point"]["x"], map_json["spawn_point"]["y"]]
+        else:
+            spawn_points = map_json.get("spawn_points", {
+                "player": [5, 5],
+                "pets": [[10, 8], [15, 12], [8, 3], [18, 10]]
+            })
         
-        # ペット位置
-        pet_locations = map_json.get("pet_locations", [[10, 8], [15, 12], [8, 3], [18, 10]])
+        # ペット位置（新形式から取得）
+        pet_locations = []
+        if "pets" in map_json:
+            for pet in map_json["pets"]:
+                if "spawn_position" in pet:
+                    pet_locations.append([pet["spawn_position"]["x"], pet["spawn_position"]["y"]])
+        else:
+            pet_locations = map_json.get("pet_locations", [[10, 8], [15, 12], [8, 3], [18, 10]])
         
         return MapData(
             width=width,
@@ -208,6 +267,24 @@ class MapSystem:
             spawn_points=spawn_points,
             pet_locations=pet_locations
         )
+    
+    def _string_to_tile_type(self, tile_name: str) -> TileType:
+        """文字列をTileTypeに変換"""
+        tile_map = {
+            "grass": TileType.GRASS,
+            "ground": TileType.GROUND,
+            "concrete": TileType.CONCRETE,
+            "road": TileType.ROAD,
+            "sidewalk": TileType.SIDEWALK,
+            "water": TileType.WATER,
+            "tree": TileType.TREE,
+            "bush": TileType.BUSH,
+            "flower_bed": TileType.FLOWER_BED,
+            "rock": TileType.ROCK,
+            "stone_wall": TileType.STONE_WALL,
+            "house_area": TileType.GRASS  # 建物エリアは草地として扱う
+        }
+        return tile_map.get(tile_name, TileType.GRASS)
     
     def _create_default_map(self):
         """デフォルトマップを作成"""
@@ -399,6 +476,9 @@ class MapSystem:
         
         if source_rect.width > 0 and source_rect.height > 0:
             screen.blit(self.map_surface, (0, 0), source_rect)
+        
+        # 建物を描画
+        self.building_system.draw_buildings(screen, (int(camera_x), int(camera_y)))
     
     def get_tile_at_position(self, world_x: float, world_y: float) -> Optional[TileType]:
         """ワールド座標のタイルタイプを取得"""
@@ -421,7 +501,16 @@ class MapSystem:
             return False
         
         tile_data = self.tile_definitions.get(tile_type)
-        return tile_data.walkable if tile_data else True
+        if not (tile_data.walkable if tile_data else True):
+            return False
+        
+        # 建物による衝突もチェック
+        tile_x = int(world_x // self.tile_size)
+        tile_y = int(world_y // self.tile_size)
+        if self.building_system.is_position_blocked_by_building(tile_x, tile_y):
+            return False
+        
+        return True
     
     def check_collision(self, rect: pygame.Rect) -> bool:
         """矩形との衝突判定（マップ境界・建物チェック含む）"""

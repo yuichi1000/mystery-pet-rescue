@@ -1,0 +1,456 @@
+{
+  "version": "1.0",
+  "map_id": "realistic_city_v1",
+  "name": "リアル住宅街",
+  "name_en": "Realistic Residential City",
+  "description": "全タイルを使用した本格的な街マップ",
+  "estimated_playtime": "25-35分",
+  "dimensions": {
+    "width": 50,
+    "height": 40,
+    "tile_size": 64
+  },
+  "spawn_point": {
+    "x": 25,
+    "y": 38,
+    "direction": "north"
+  },
+  "zones": {
+    "residential_north": {
+      "name": "北住宅地",
+      "name_en": "North Residential",
+      "bounds": {"x": 5, "y": 5, "width": 40, "height": 15},
+      "description": "高級住宅街エリア"
+    },
+    "commercial_center": {
+      "name": "商業地区",
+      "name_en": "Commercial District", 
+      "bounds": {"x": 15, "y": 20, "width": 20, "height": 10},
+      "description": "ペットショップや商店街"
+    },
+    "park_area": {
+      "name": "公園エリア",
+      "name_en": "Park Area",
+      "bounds": {"x": 35, "y": 15, "width": 12, "height": 20},
+      "description": "大きな公園と池"
+    },
+    "residential_south": {
+      "name": "南住宅地", 
+      "name_en": "South Residential",
+      "bounds": {"x": 5, "y": 30, "width": 25, "height": 8},
+      "description": "一般住宅街"
+    }
+  },
+  "terrain": {
+    "base_layer": "grass",
+    "layout": [
+      "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRW",
+      "WSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRW",
+      "WSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRW",
+      "WSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRW",
+      "WSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRW",
+      "WSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRW",
+      "WSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGHHHHGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRW",
+      "WSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGW",
+      "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+    ]
+  },
+  "tile_mapping": {
+    "G": "grass",
+    "R": "road", 
+    "S": "sidewalk",
+    "C": "concrete",
+    "W": "water",
+    "T": "tree",
+    "B": "bush",
+    "F": "flower_bed",
+    "K": "rock",
+    "M": "stone_wall",
+    "D": "ground",
+    "H": "house_area"
+  },
+  "buildings": [
+    {
+      "id": "house_01",
+      "type": "house_residential",
+      "position": {"x": 7, "y": 2},
+      "size": {"width": 4, "height": 2},
+      "name": "田中さんの家",
+      "name_en": "Tanaka House",
+      "interactable": true,
+      "description": "静かな住宅街の一軒家"
+    },
+    {
+      "id": "house_02", 
+      "type": "house_residential",
+      "position": {"x": 17, "y": 2},
+      "size": {"width": 4, "height": 2},
+      "name": "佐藤さんの家",
+      "name_en": "Sato House",
+      "interactable": true,
+      "description": "庭に花壇がある家"
+    },
+    {
+      "id": "house_03",
+      "type": "house_residential", 
+      "position": {"x": 27, "y": 2},
+      "size": {"width": 4, "height": 2},
+      "name": "鈴木さんの家",
+      "name_en": "Suzuki House",
+      "interactable": true,
+      "description": "大きな窓が特徴的な家"
+    },
+    {
+      "id": "house_04",
+      "type": "house_residential",
+      "position": {"x": 7, "y": 7},
+      "size": {"width": 4, "height": 2},
+      "name": "山田さんの家",
+      "name_en": "Yamada House", 
+      "interactable": true,
+      "description": "ペットを飼っている家"
+    },
+    {
+      "id": "house_05",
+      "type": "house_residential",
+      "position": {"x": 17, "y": 7},
+      "size": {"width": 4, "height": 2},
+      "name": "高橋さんの家",
+      "name_en": "Takahashi House",
+      "interactable": true,
+      "description": "赤い屋根の家"
+    },
+    {
+      "id": "house_06",
+      "type": "house_residential",
+      "position": {"x": 27, "y": 7},
+      "size": {"width": 4, "height": 2},
+      "name": "伊藤さんの家",
+      "name_en": "Ito House",
+      "interactable": true,
+      "description": "緑に囲まれた家"
+    },
+    {
+      "id": "house_07",
+      "type": "house_residential",
+      "position": {"x": 7, "y": 12},
+      "size": {"width": 4, "height": 2},
+      "name": "渡辺さんの家",
+      "name_en": "Watanabe House",
+      "interactable": true,
+      "description": "角地にある家"
+    },
+    {
+      "id": "house_08",
+      "type": "house_residential",
+      "position": {"x": 17, "y": 12},
+      "size": {"width": 4, "height": 2},
+      "name": "中村さんの家",
+      "name_en": "Nakamura House",
+      "interactable": true,
+      "description": "二階建ての家"
+    },
+    {
+      "id": "house_09",
+      "type": "house_residential",
+      "position": {"x": 27, "y": 12},
+      "size": {"width": 4, "height": 2},
+      "name": "小林さんの家",
+      "name_en": "Kobayashi House",
+      "interactable": true,
+      "description": "白い壁の家"
+    },
+    {
+      "id": "petshop_01",
+      "type": "house_petshop",
+      "position": {"x": 20, "y": 22},
+      "size": {"width": 6, "height": 3},
+      "name": "ハッピーペットショップ",
+      "name_en": "Happy Pet Shop",
+      "interactable": true,
+      "description": "街で唯一のペットショップ",
+      "special": true
+    },
+    {
+      "id": "park_01",
+      "type": "park_facility",
+      "position": {"x": 37, "y": 17},
+      "size": {"width": 8, "height": 6},
+      "name": "みどり公園",
+      "name_en": "Midori Park",
+      "interactable": true,
+      "description": "大きな池がある公園"
+    },
+    {
+      "id": "house_10",
+      "type": "house_residential",
+      "position": {"x": 7, "y": 27},
+      "size": {"width": 4, "height": 2},
+      "name": "松本さんの家",
+      "name_en": "Matsumoto House",
+      "interactable": true,
+      "description": "南側住宅街の家"
+    },
+    {
+      "id": "house_11",
+      "type": "house_residential",
+      "position": {"x": 17, "y": 27},
+      "size": {"width": 4, "height": 2},
+      "name": "井上さんの家",
+      "name_en": "Inoue House",
+      "interactable": true,
+      "description": "庭が広い家"
+    },
+    {
+      "id": "house_12",
+      "type": "house_residential",
+      "position": {"x": 7, "y": 32},
+      "size": {"width": 4, "height": 2},
+      "name": "木村さんの家",
+      "name_en": "Kimura House",
+      "interactable": true,
+      "description": "駅に近い家"
+    },
+    {
+      "id": "house_13",
+      "type": "house_residential",
+      "position": {"x": 17, "y": 32},
+      "size": {"width": 4, "height": 2},
+      "name": "林さんの家",
+      "name_en": "Hayashi House",
+      "interactable": true,
+      "description": "新築の家"
+    }
+  ],
+  "decorations": [
+    {
+      "type": "tree",
+      "positions": [
+        {"x": 5, "y": 5}, {"x": 12, "y": 5}, {"x": 22, "y": 5}, {"x": 32, "y": 5},
+        {"x": 5, "y": 10}, {"x": 12, "y": 10}, {"x": 22, "y": 10}, {"x": 32, "y": 10},
+        {"x": 5, "y": 15}, {"x": 12, "y": 15}, {"x": 22, "y": 15}, {"x": 32, "y": 15},
+        {"x": 35, "y": 16}, {"x": 36, "y": 18}, {"x": 38, "y": 20}, {"x": 40, "y": 22},
+        {"x": 42, "y": 24}, {"x": 44, "y": 26}, {"x": 46, "y": 28}
+      ]
+    },
+    {
+      "type": "bush",
+      "positions": [
+        {"x": 6, "y": 4}, {"x": 13, "y": 4}, {"x": 23, "y": 4}, {"x": 33, "y": 4},
+        {"x": 6, "y": 9}, {"x": 13, "y": 9}, {"x": 23, "y": 9}, {"x": 33, "y": 9},
+        {"x": 6, "y": 14}, {"x": 13, "y": 14}, {"x": 23, "y": 14}, {"x": 33, "y": 14},
+        {"x": 37, "y": 19}, {"x": 39, "y": 21}, {"x": 41, "y": 23}, {"x": 43, "y": 25}
+      ]
+    },
+    {
+      "type": "flower_bed",
+      "positions": [
+        {"x": 15, "y": 3}, {"x": 16, "y": 3}, {"x": 25, "y": 3}, {"x": 26, "y": 3},
+        {"x": 15, "y": 8}, {"x": 16, "y": 8}, {"x": 25, "y": 8}, {"x": 26, "y": 8},
+        {"x": 15, "y": 13}, {"x": 16, "y": 13}, {"x": 25, "y": 13}, {"x": 26, "y": 13},
+        {"x": 18, "y": 25}, {"x": 19, "y": 25}, {"x": 24, "y": 25}, {"x": 25, "y": 25}
+      ]
+    },
+    {
+      "type": "rock",
+      "positions": [
+        {"x": 36, "y": 17}, {"x": 45, "y": 19}, {"x": 38, "y": 25}, {"x": 44, "y": 27}
+      ]
+    },
+    {
+      "type": "water",
+      "positions": [
+        {"x": 40, "y": 18}, {"x": 41, "y": 18}, {"x": 42, "y": 18},
+        {"x": 39, "y": 19}, {"x": 40, "y": 19}, {"x": 41, "y": 19}, {"x": 42, "y": 19}, {"x": 43, "y": 19},
+        {"x": 39, "y": 20}, {"x": 40, "y": 20}, {"x": 41, "y": 20}, {"x": 42, "y": 20}, {"x": 43, "y": 20},
+        {"x": 40, "y": 21}, {"x": 41, "y": 21}, {"x": 42, "y": 21}
+      ]
+    }
+  ],
+  "pets": [
+    {
+      "id": "dog_01",
+      "type": "dog",
+      "name": "ポチ",
+      "name_en": "Pochi",
+      "spawn_position": {"x": 9, "y": 4},
+      "hiding_spots": [
+        {"x": 9, "y": 4, "description": "田中さんの家の庭"},
+        {"x": 14, "y": 6, "description": "街路樹の陰"},
+        {"x": 19, "y": 9, "description": "佐藤さんの家の裏"}
+      ],
+      "personality": "friendly",
+      "required_item": "dog_treat",
+      "rescue_difficulty": "easy"
+    },
+    {
+      "id": "cat_01", 
+      "type": "cat",
+      "name": "ミケ",
+      "name_en": "Mike",
+      "spawn_position": {"x": 29, "y": 14},
+      "hiding_spots": [
+        {"x": 29, "y": 14, "description": "小林さんの家の屋根"},
+        {"x": 24, "y": 11, "description": "商店街の路地"},
+        {"x": 31, "y": 8, "description": "高い塀の上"}
+      ],
+      "personality": "cautious",
+      "required_item": "cat_food",
+      "rescue_difficulty": "medium"
+    },
+    {
+      "id": "rabbit_01",
+      "type": "rabbit", 
+      "name": "ウサ太",
+      "name_en": "Usata",
+      "spawn_position": {"x": 41, "y": 20},
+      "hiding_spots": [
+        {"x": 41, "y": 20, "description": "公園の茂みの中"},
+        {"x": 38, "y": 23, "description": "池の近くの草むら"},
+        {"x": 44, "y": 18, "description": "大きな木の根元"}
+      ],
+      "personality": "timid",
+      "required_item": "carrot",
+      "rescue_difficulty": "medium"
+    },
+    {
+      "id": "bird_01",
+      "type": "bird",
+      "name": "ピーちゃん",
+      "name_en": "Pii-chan", 
+      "spawn_position": {"x": 22, "y": 24},
+      "hiding_spots": [
+        {"x": 22, "y": 24, "description": "ペットショップの看板"},
+        {"x": 35, "y": 16, "description": "公園の高い木"},
+        {"x": 12, "y": 10, "description": "街路樹の枝"}
+      ],
+      "personality": "energetic",
+      "required_item": "bird_seed",
+      "rescue_difficulty": "hard"
+    }
+  ],
+  "items": [
+    {
+      "id": "dog_treat",
+      "name": "犬のおやつ",
+      "name_en": "Dog Treat",
+      "position": {"x": 22, "y": 23},
+      "description": "ペットショップで売っている犬用おやつ"
+    },
+    {
+      "id": "cat_food",
+      "name": "キャットフード",
+      "name_en": "Cat Food", 
+      "position": {"x": 21, "y": 23},
+      "description": "猫の好物の缶詰"
+    },
+    {
+      "id": "carrot",
+      "name": "ニンジン",
+      "name_en": "Carrot",
+      "position": {"x": 15, "y": 3},
+      "description": "田中さんの家の花壇で育てているニンジン"
+    },
+    {
+      "id": "bird_seed",
+      "name": "鳥の餌",
+      "name_en": "Bird Seed",
+      "position": {"x": 23, "y": 23},
+      "description": "小鳥用の種のミックス"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "shop_owner",
+      "name": "ペットショップ店長",
+      "name_en": "Pet Shop Owner",
+      "position": {"x": 22, "y": 22},
+      "dialogue": {
+        "initial": "いらっしゃいませ！迷子のペットをお探しですか？",
+        "initial_en": "Welcome! Are you looking for lost pets?",
+        "hint": "最近、この辺りで動物たちをよく見かけますよ。",
+        "hint_en": "I've been seeing animals around here lately."
+      }
+    },
+    {
+      "id": "park_visitor",
+      "name": "公園の散歩者",
+      "name_en": "Park Visitor",
+      "position": {"x": 39, "y": 19},
+      "dialogue": {
+        "initial": "こんにちは。公園でお散歩ですか？",
+        "initial_en": "Hello. Taking a walk in the park?",
+        "hint": "さっき、池の近くで小さな動物を見ましたよ。",
+        "hint_en": "I saw a small animal near the pond earlier."
+      }
+    }
+  ],
+  "interactive_objects": [
+    {
+      "id": "park_bench",
+      "type": "bench",
+      "position": {"x": 37, "y": 21},
+      "name": "公園のベンチ",
+      "name_en": "Park Bench",
+      "action": "rest",
+      "description": "疲れた時に休憩できるベンチ"
+    },
+    {
+      "id": "water_fountain",
+      "type": "fountain", 
+      "position": {"x": 41, "y": 19},
+      "name": "噴水",
+      "name_en": "Water Fountain",
+      "action": "examine",
+      "description": "公園の中央にある美しい噴水"
+    }
+  ],
+  "hints": [
+    {
+      "trigger_time": 120,
+      "message": "ペットたちは人懐っこい場所に隠れているかもしれません。",
+      "message_en": "The pets might be hiding in friendly places."
+    },
+    {
+      "trigger_time": 180,
+      "message": "ペットショップで必要なアイテムが見つかるかもしれません。",
+      "message_en": "You might find necessary items at the pet shop."
+    },
+    {
+      "trigger_time": 240,
+      "message": "公園は動物たちが好む場所です。よく探してみましょう。",
+      "message_en": "The park is a place animals love. Search carefully."
+    }
+  ]
+}

@@ -29,11 +29,11 @@ class GameScene(Scene):
         self.map_loader = get_map_data_loader()
         self.pet_data_loader = get_pet_data_loader()
         
-        # Version 1.0マップを読み込み
-        if not self.map_loader.load_map('residential_v1'):
-            print("⚠️ 新マップ読み込み失敗、従来マップを使用")
+        # リアル住宅街マップを読み込み
+        if not self.map_loader.load_map('realistic_city_v1'):
+            print("⚠️ リアル住宅街マップ読み込み失敗、従来マップを使用")
         else:
-            print("✅ Version 1.0マップ読み込み成功")
+            print("✅ リアル住宅街マップ読み込み成功")
         
         # ゲーム要素の初期化
         self._initialize_game_elements()
@@ -80,8 +80,8 @@ class GameScene(Scene):
             # MapSystemに新しいサイズを設定
             self.map_system._update_from_new_map_data(current_map)
         else:
-            # フォールバック: 従来のマップを読み込み
-            if not self.map_system.load_map("residential.json"):
+            # フォールバック: リアル住宅街マップを読み込み
+            if not self.map_system.load_map("realistic_city_v1.json"):
                 print("⚠️ マップファイルが見つからないため、デフォルトマップを使用します")
         
         # ペット初期化

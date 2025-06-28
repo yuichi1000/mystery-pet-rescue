@@ -28,6 +28,16 @@ class LanguageSelector:
         self.languages = [Language.ENGLISH, Language.JAPANESE]
         self.language_manager = get_language_manager()
         
+        print(f"🔧 言語選択ボックス初期化:")
+        print(f"  位置: {rect}")
+        print(f"  言語リスト: {[lang.value for lang in self.languages]}")
+        print(f"  現在の言語: {self.language_manager.get_current_language().value}")
+        
+        # 各言語の表示名を確認
+        for lang in self.languages:
+            display_name = self.language_manager.get_language_display_name(lang)
+            print(f"  {lang.value} -> '{display_name}'")
+        
     def handle_click(self, pos: tuple) -> bool:
         """クリック処理"""
         if self.rect.collidepoint(pos):
@@ -86,6 +96,7 @@ class LanguageSelector:
         
         # 展開されている場合、オプションを表示
         if self.expanded:
+            print(f"🔽 言語選択展開中: {len(self.languages)}個の言語 {[lang.value for lang in self.languages]}")
             for i, lang in enumerate(self.languages):
                 option_rect = pygame.Rect(
                     self.rect.x, 
@@ -94,16 +105,23 @@ class LanguageSelector:
                     self.rect.height
                 )
                 
-                # 背景
-                option_color = (90, 90, 90) if lang != current_lang else (120, 120, 120)
+                # 背景色を決定
+                if lang == current_lang:
+                    option_color = (120, 120, 120)  # 現在選択中の言語
+                else:
+                    option_color = (90, 90, 90)     # その他の言語
+                
+                # 背景を描画
                 pygame.draw.rect(screen, option_color, option_rect)
                 pygame.draw.rect(screen, (200, 200, 200), option_rect, 1)
                 
-                # テキスト
+                # テキストを描画
                 option_text = self.language_manager.get_language_display_name(lang)
                 option_surface = font.render(option_text, True, (255, 255, 255))
                 option_text_rect = option_surface.get_rect(center=option_rect.center)
                 screen.blit(option_surface, option_text_rect)
+                
+                print(f"  📝 描画: {lang.value} -> '{option_text}' at y={option_rect.y}")
 
 class MenuScene(Scene):
     """メニューシーン"""

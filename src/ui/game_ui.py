@@ -420,13 +420,16 @@ class GameUI:
             self.screen.blit(progress_surface, (text_x, text_y))
     
     def _draw_notifications(self):
-        """通知を描画"""
+        """通知を描画（左下に表示）"""
         notification_height = int(40 * self.ui_scale)
         notification_width = int(300 * self.ui_scale)
-        start_y = int(100 * self.ui_scale)
+        margin = int(20 * self.ui_scale)
         
+        # 左下から上に向かって表示
         for i, notification in enumerate(self.notifications):
-            y_pos = start_y + i * (notification_height + 5)
+            # 下から上に向かって配置
+            y_pos = (self.screen_height - margin - 
+                    (i + 1) * (notification_height + 5))
             
             # フェードアウト効果
             alpha = 255
@@ -439,9 +442,10 @@ class GameUI:
                                                 pygame.SRCALPHA)
             notification_surface.fill((*bg_color, alpha))
             
+            # 左下に配置
             notification_rect = pygame.Rect(
-                self.screen_width - notification_width - 20,
-                y_pos,
+                margin,  # 左端からマージン
+                y_pos,   # 下から上に向かって配置
                 notification_width,
                 notification_height
             )

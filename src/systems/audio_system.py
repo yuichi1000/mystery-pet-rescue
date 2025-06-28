@@ -157,13 +157,34 @@ class AudioSystem:
         logger.info("BGM再開")
     
     def play_sfx(self, sound_name: str, volume: float = 1.0) -> bool:
-        """効果音を再生"""
+        """
+        効果音を再生（1回のみ、ループなし）
+        
+        Args:
+            sound_name: 効果音名
+            volume: 音量 (0.0-1.0)
+        """
         if sound_name not in self.sound_effects:
             logger.warning(f"効果音未発見: {sound_name}")
             return False
         
         try:
             sound = self.sound_effects[sound_name]
+            
+            # 重複再生チェック
+            current_time = pygame.time.get_ticks()
+            recent_sounds = getattr(self, '_recent_sounds', {})
+            
+            # 同じ効果音が200ms以内に再生されていたらスキップ
+            if sound_name in recent_sounds:
+                if current_time - recent_sounds[sound_name] < 200:
+                    logger.debug(f"効果音重複スキップ: {sound_name}")
+                    return False
+            
+            # 再生記録を更新
+            if not hasattr(self, '_recent_sounds'):
+                self._recent_sounds = {}
+            self._recent_sounds[sound_name] = current_time
             
             # 空いているチャンネルを探す
             channel = None
@@ -175,19 +196,41 @@ class AudioSystem:
             # 全チャンネルが使用中の場合は最初のチャンネルを使用
             if channel is None:
                 channel = self.sound_channels[0]
+                channel.stop()  # 既存の音を停止
             
             # 音量調整
             adjusted_volume = volume * self.sfx_volume * self.master_volume
             sound.set_volume(adjusted_volume)
             
-            # 再生
-            channel.play(sound)
-            logger.debug(f"効果音再生: {sound_name}")
+            # 再生（必ず1回のみ、loops=0）
+            channel.play(sound, loops=0)
+            logger.debug(f"効果音再生: {sound_name} (1回のみ)")
             return True
             
         except pygame.error as e:
             logger.error(f"効果音再生失敗: {sound_name} - {e}")
             return False
+    
+    def stop_all_sfx(self):
+        """全ての効果音を停止"""
+        try:
+            for channel in self.sound_channels:
+                if channel.get_busy():
+                    channel.stop()
+            logger.debug("全効果音停止")
+        except Exception as e:
+            logger.error(f"効果音停止失敗: {e}")
+    
+    def stop_sfx(self, sound_name: str):
+        """特定の効果音を停止"""
+        try:
+            # 簡易的に全チャンネルをチェック（実際は音声識別が必要）
+            for channel in self.sound_channels:
+                if channel.get_busy():
+                    channel.stop()
+            logger.debug(f"効果音停止: {sound_name}")
+        except Exception as e:
+            logger.error(f"効果音停止失敗: {e}")
     
     def set_master_volume(self, volume: float):
         """マスター音量を設定 (0.0-1.0)"""

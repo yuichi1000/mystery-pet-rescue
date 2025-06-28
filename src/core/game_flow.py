@@ -60,11 +60,15 @@ class GameFlowManager:
         if scene_name == "quit":
             self.running = False
             self.audio_system.stop_bgm()
+            self.audio_system.stop_all_sfx()  # 全効果音停止
             return True
         
         # 現在のシーンを終了
         if self.current_scene:
             self.current_scene.exit()
+        
+        # シーン切り替え時に効果音を停止
+        self.audio_system.stop_all_sfx()
         
         # 新しいシーンを作成または取得
         if scene_name == "game":

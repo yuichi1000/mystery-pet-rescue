@@ -454,10 +454,10 @@ class GameScene(Scene):
             pet_rect = pygame.Rect(pet.x - 20, pet.y - 20, 40, 40)
             
             if player_rect.colliderect(pet_rect):
-                # ペット発見通知（1回のみ）
+                # ペット発見通知（音なし）
                 if not hasattr(pet, 'discovered'):
                     pet.discovered = True
-                    self.audio_system.play_sfx("pet_found")
+                    # self.audio_system.play_sfx("pet_found", loops=0)  # 音を出さない
                     self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
                     self.game_ui.add_notification("Eキーで救出できます", NotificationType.INFO)
                 
@@ -478,6 +478,7 @@ class GameScene(Scene):
             # 救出されたペットをUIに追加
             self.game_ui.add_rescued_pet(pet.data.name, pet_type_str)
             
+            # 短い効果音を1回のみ再生
             self.audio_system.play_sfx("pet_rescued")
             
             # ペットを非表示にする
@@ -576,7 +577,7 @@ class GameScene(Scene):
         
         # ヒント効果音再生
         if self.audio_system:
-            self.audio_system.play_sfx("hint")
+            self.audio_system.play_sfx("hint")  # 1回のみ再生
     
     def _on_time_warning(self):
         """時間警告コールバック"""
@@ -587,7 +588,7 @@ class GameScene(Scene):
             
             # 警告効果音再生
             if self.audio_system:
-                self.audio_system.play_sfx("time_warning")
+                self.audio_system.play_sfx("time_warning")  # 1回のみ再生
     
     def _on_time_up(self):
         """時間切れコールバック"""
@@ -595,7 +596,7 @@ class GameScene(Scene):
         
         # ゲームオーバー効果音再生
         if self.audio_system:
-            self.audio_system.play_sfx("game_over")
+            self.audio_system.play_sfx("game_over")  # 1回のみ再生
         
         # ゲームオーバー処理
         if self.flow_manager:

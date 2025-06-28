@@ -49,6 +49,10 @@ coverage.xml
 profile_default/
 ipython_config.py
 
+# Audio cache (generated files)
+cache/audio/
+cache/audio/*
+
 # pyenv
 .python-version
 

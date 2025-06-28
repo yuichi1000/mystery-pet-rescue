@@ -293,7 +293,6 @@
         {"x": 14, "y": 9, "description": "佐藤さんの家の裏"}
       ],
       "personality": "friendly",
-      "required_item": "dog_treat",
       "rescue_difficulty": "easy"
     },
     {
@@ -308,7 +307,6 @@
         {"x": 16, "y": 6, "description": "高い塀の上"}
       ],
       "personality": "cautious",
-      "required_item": "cat_food",
       "rescue_difficulty": "medium"
     },
     {
@@ -323,7 +321,6 @@
         {"x": 22, "y": 10, "description": "大きな木の根元"}
       ],
       "personality": "timid",
-      "required_item": "carrot",
       "rescue_difficulty": "medium"
     },
     {
@@ -338,133 +335,7 @@
         {"x": 7, "y": 10, "description": "街路樹の枝"}
       ],
       "personality": "energetic",
-      "required_item": "bird_seed",
       "rescue_difficulty": "hard"
-    }
-  ],
-  "items": [
-    {
-      "id": "dog_treat",
-      "name": "犬のおやつ",
-      "name_en": "Dog Treat",
-      "position": {"x": 9, "y": 12},
-      "description": "ハッピーペットショップで売っている犬用おやつ"
-    },
-    {
-      "id": "cat_food",
-      "name": "キャットフード",
-      "name_en": "Cat Food", 
-      "position": {"x": 15, "y": 12},
-      "description": "アニマルフレンズの猫の好物の缶詰"
-    },
-    {
-      "id": "carrot",
-      "name": "ニンジン",
-      "name_en": "Carrot",
-      "position": {"x": 13, "y": 3},
-      "description": "佐藤さんの家の花壇で育てているニンジン"
-    },
-    {
-      "id": "bird_seed",
-      "name": "鳥の餌",
-      "name_en": "Bird Seed",
-      "position": {"x": 10, "y": 12},
-      "description": "小鳥用の種のミックス"
-    },
-    {
-      "id": "extra_treat",
-      "name": "特製おやつ",
-      "name_en": "Special Treat",
-      "position": {"x": 3, "y": 13},
-      "description": "ちびっこ広場で見つけた特別なおやつ"
-    }
-  ],
-  "npcs": [
-    {
-      "id": "shop_owner_01",
-      "name": "ペットショップ店長",
-      "name_en": "Pet Shop Owner",
-      "position": {"x": 9, "y": 11},
-      "dialogue": {
-        "initial": "いらっしゃいませ！迷子のペットをお探しですか？",
-        "initial_en": "Welcome! Are you looking for lost pets?",
-        "hint": "最近、この辺りで動物たちをよく見かけますよ。",
-        "hint_en": "I've been seeing animals around here lately."
-      }
-    },
-    {
-      "id": "shop_owner_02",
-      "name": "アニマルフレンズ店員",
-      "name_en": "Animal Friends Staff",
-      "position": {"x": 15, "y": 11},
-      "dialogue": {
-        "initial": "こんにちは！ペット用品をお探しですか？",
-        "initial_en": "Hello! Looking for pet supplies?",
-        "hint": "猫ちゃんなら、うちの缶詰がおすすめですよ。",
-        "hint_en": "For cats, I recommend our canned food."
-      }
-    },
-    {
-      "id": "park_visitor_01",
-      "name": "公園の散歩者",
-      "name_en": "Park Visitor",
-      "position": {"x": 20, "y": 13},
-      "dialogue": {
-        "initial": "こんにちは。公園でお散歩ですか？",
-        "initial_en": "Hello. Taking a walk in the park?",
-        "hint": "さっき、池の近くで小さな動物を見ましたよ。",
-        "hint_en": "I saw a small animal near the pond earlier."
-      }
-    },
-    {
-      "id": "park_visitor_02",
-      "name": "ちびっこ広場の管理人",
-      "name_en": "Plaza Caretaker",
-      "position": {"x": 3, "y": 12},
-      "dialogue": {
-        "initial": "子供たちが安全に遊べるよう見守っています。",
-        "initial_en": "I'm watching to keep the children safe.",
-        "hint": "動物たちもここで遊んでいることがありますね。",
-        "hint_en": "Animals sometimes play here too."
-      }
-    }
-  ],
-  "interactive_objects": [
-    {
-      "id": "park_bench_01",
-      "type": "bench",
-      "position": {"x": 20, "y": 14},
-      "name": "みどり公園のベンチ",
-      "name_en": "Midori Park Bench",
-      "action": "rest",
-      "description": "疲れた時に休憩できるベンチ"
-    },
-    {
-      "id": "park_bench_02",
-      "type": "bench",
-      "position": {"x": 3, "y": 13},
-      "name": "ちびっこ広場のベンチ",
-      "name_en": "Plaza Bench",
-      "action": "rest",
-      "description": "子供たちを見守るベンチ"
-    },
-    {
-      "id": "water_fountain",
-      "type": "fountain", 
-      "position": {"x": 21, "y": 13},
-      "name": "噴水",
-      "name_en": "Water Fountain",
-      "action": "examine",
-      "description": "公園の中央にある美しい噴水"
-    },
-    {
-      "id": "playground_equipment",
-      "type": "playground",
-      "position": {"x": 4, "y": 13},
-      "name": "遊具",
-      "name_en": "Playground Equipment",
-      "action": "examine",
-      "description": "子供たちが遊ぶ滑り台とブランコ"
     }
   ],
   "hints": [
@@ -475,8 +346,8 @@
     },
     {
       "trigger_time": 180,
-      "message": "2つのペットショップで必要なアイテムが見つかるかもしれません。",
-      "message_en": "You might find necessary items at the two pet shops."
+      "message": "建物の周りや木の近くを探してみましょう。",
+      "message_en": "Try searching around buildings and near trees."
     },
     {
       "trigger_time": 240,

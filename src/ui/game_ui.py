@@ -88,22 +88,14 @@ class GameUI:
         self.max_notifications = 5
         
         # クイックスロット
-        self.quick_slots: List[Optional[QuickSlotItem]] = [None] * 6
+        self.quick_slots: List[Optional[QuickSlotItem]] = [None] * 4
         self.selected_slot = 0
         
         # 目標システム
         self.current_objective: Optional[GameObjective] = None
         
-        # 時間システム
-        self.game_start_time = time.time()
-        self.show_real_time = False
-        
         # 色設定
         self.colors = {
-            'health': (220, 20, 60),
-            'health_bg': (100, 20, 20),
-            'stamina': (255, 215, 0),
-            'stamina_bg': (100, 100, 20),
             'ui_bg': (0, 0, 0, 180),
             'ui_border': (255, 255, 255, 100),
             'text': (255, 255, 255),
@@ -149,28 +141,13 @@ class GameUI:
         self.minimap_zoom = 0.1
         self.minimap_surface = pygame.Surface((self.minimap_size, self.minimap_size))
         
-        # ヘルス・スタミナバーの位置
-        self.health_bar_rect = pygame.Rect(
-            int(20 * self.ui_scale),
-            int(20 * self.ui_scale),
-            int(200 * self.ui_scale),
-            int(20 * self.ui_scale)
-        )
-        
-        self.stamina_bar_rect = pygame.Rect(
-            int(20 * self.ui_scale),
-            int(50 * self.ui_scale),
-            int(200 * self.ui_scale),
-            int(15 * self.ui_scale)
-        )
-        
         # クイックスロットの位置
         slot_size = int(50 * self.ui_scale)
         slot_spacing = int(60 * self.ui_scale)
-        start_x = (self.screen_width - (6 * slot_spacing - 10)) // 2
+        start_x = (self.screen_width - (4 * slot_spacing - 10)) // 2
         
         self.quick_slot_rects = []
-        for i in range(6):
+        for i in range(4):
             rect = pygame.Rect(
                 start_x + i * slot_spacing,
                 self.screen_height - int(80 * self.ui_scale),
@@ -193,14 +170,6 @@ class GameUI:
             int(100 * self.ui_scale),
             int(300 * self.ui_scale),
             int(80 * self.ui_scale)
-        )
-        
-        # 時間表示の位置
-        self.time_rect = pygame.Rect(
-            self.screen_width - int(150 * self.ui_scale),
-            self.screen_height - int(40 * self.ui_scale),
-            int(130 * self.ui_scale),
-            int(30 * self.ui_scale)
         )
     
     def update(self, time_delta: float):
@@ -228,9 +197,6 @@ class GameUI:
     def draw(self, player_stats: Dict[str, Any], world_objects: List[Any] = None, 
              player_pos: Tuple[float, float] = (0, 0)):
         """UIを描画"""
-        # ヘルス・スタミナバー
-        self._draw_health_stamina_bars(player_stats)
-        
         # クイックスロット
         self._draw_quick_slots()
         
@@ -240,65 +206,8 @@ class GameUI:
         # 現在の目標
         self._draw_objective()
         
-        # 時間表示
-        self._draw_time()
-        
         # 通知システム
         self._draw_notifications()
-    
-    def _draw_health_stamina_bars(self, player_stats: Dict[str, Any]):
-        """ヘルス・スタミナバーを描画"""
-        # ヘルスバー
-        health = player_stats.get('health', 100)
-        max_health = player_stats.get('max_health', 100)
-        health_ratio = health / max_health if max_health > 0 else 0
-        
-        # ヘルスバー背景
-        pygame.draw.rect(self.screen, self.colors['health_bg'], self.health_bar_rect)
-        pygame.draw.rect(self.screen, self.colors['ui_border'], self.health_bar_rect, 2)
-        
-        # ヘルスバー本体
-        health_width = int(self.health_bar_rect.width * health_ratio)
-        health_fill_rect = pygame.Rect(
-            self.health_bar_rect.x, self.health_bar_rect.y,
-            health_width, self.health_bar_rect.height
-        )
-        pygame.draw.rect(self.screen, self.colors['health'], health_fill_rect)
-        
-        # ヘルステキスト
-        health_text = f"HP: {int(health)}/{int(max_health)}"
-        health_surface = self.font_manager.render_text(
-            health_text, "default", int(14 * self.ui_scale), self.colors['text']
-        )
-        text_x = self.health_bar_rect.centerx - health_surface.get_width() // 2
-        text_y = self.health_bar_rect.centery - health_surface.get_height() // 2
-        self.screen.blit(health_surface, (text_x, text_y))
-        
-        # スタミナバー
-        stamina = player_stats.get('stamina', 100)
-        max_stamina = player_stats.get('max_stamina', 100)
-        stamina_ratio = stamina / max_stamina if max_stamina > 0 else 0
-        
-        # スタミナバー背景
-        pygame.draw.rect(self.screen, self.colors['stamina_bg'], self.stamina_bar_rect)
-        pygame.draw.rect(self.screen, self.colors['ui_border'], self.stamina_bar_rect, 2)
-        
-        # スタミナバー本体
-        stamina_width = int(self.stamina_bar_rect.width * stamina_ratio)
-        stamina_fill_rect = pygame.Rect(
-            self.stamina_bar_rect.x, self.stamina_bar_rect.y,
-            stamina_width, self.stamina_bar_rect.height
-        )
-        pygame.draw.rect(self.screen, self.colors['stamina'], stamina_fill_rect)
-        
-        # スタミナテキスト
-        stamina_text = f"SP: {int(stamina)}/{int(max_stamina)}"
-        stamina_surface = self.font_manager.render_text(
-            stamina_text, "default", int(12 * self.ui_scale), self.colors['text']
-        )
-        text_x = self.stamina_bar_rect.centerx - stamina_surface.get_width() // 2
-        text_y = self.stamina_bar_rect.centery - stamina_surface.get_height() // 2
-        self.screen.blit(stamina_surface, (text_x, text_y))
     
     def _draw_quick_slots(self):
         """クイックスロットを描画"""
@@ -474,44 +383,6 @@ class GameUI:
             text_y = progress_bar_rect.centery - progress_surface.get_height() // 2
             self.screen.blit(progress_surface, (text_x, text_y))
     
-    def _draw_time(self):
-        """時間表示を描画"""
-        # 時間パネル背景
-        panel_surface = pygame.Surface((self.time_rect.width, self.time_rect.height), 
-                                     pygame.SRCALPHA)
-        panel_surface.fill(self.colors['ui_bg'])
-        self.screen.blit(panel_surface, self.time_rect)
-        pygame.draw.rect(self.screen, self.colors['ui_border'], self.time_rect, 1)
-        
-        # 時間アイコンを表示
-        icon_x = self.time_rect.x + 5
-        if 'time_icon' in self.ui_images:
-            icon = self.ui_images['time_icon']
-            icon_y = self.time_rect.centery - icon.get_height() // 2
-            self.screen.blit(icon, (icon_x, icon_y))
-            text_start_x = icon_x + icon.get_width() + 5
-        else:
-            text_start_x = icon_x
-        
-        if self.show_real_time:
-            # リアルタイム表示
-            current_time = time.strftime("%H:%M:%S")
-            time_text = f"時刻: {current_time}"
-        else:
-            # ゲーム時間表示
-            elapsed_time = time.time() - self.game_start_time
-            hours = int(elapsed_time // 3600)
-            minutes = int((elapsed_time % 3600) // 60)
-            seconds = int(elapsed_time % 60)
-            time_text = f"プレイ時間: {hours:02d}:{minutes:02d}:{seconds:02d}"
-        
-        time_surface = self.font_manager.render_text(
-            time_text, "default", int(12 * self.ui_scale), self.colors['text']
-        )
-        text_x = text_start_x
-        text_y = self.time_rect.centery - time_surface.get_height() // 2
-        self.screen.blit(time_surface, (text_x, text_y))
-    
     def _draw_notifications(self):
         """通知を描画"""
         notification_height = int(40 * self.ui_scale)
@@ -632,25 +503,17 @@ class GameUI:
         """目標をクリア"""
         self.current_objective = None
     
-    def toggle_time_display(self):
-        """時間表示を切り替え"""
-        self.show_real_time = not self.show_real_time
-    
     def handle_input(self, event: pygame.event.Event):
         """入力処理"""
         if event.type == pygame.KEYDOWN:
             # クイックスロット選択
-            if pygame.K_1 <= event.key <= pygame.K_6:
+            if pygame.K_1 <= event.key <= pygame.K_4:
                 slot_index = event.key - pygame.K_1
                 self.selected_slot = slot_index
             
             # クイックスロット使用
             elif event.key == pygame.K_SPACE:
                 self.use_quick_slot(self.selected_slot)
-            
-            # 時間表示切り替え
-            elif event.key == pygame.K_t:
-                self.toggle_time_display()
     
     def resize(self, new_width: int, new_height: int):
         """画面サイズ変更に対応"""

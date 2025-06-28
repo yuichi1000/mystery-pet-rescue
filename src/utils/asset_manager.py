@@ -189,17 +189,10 @@ class AssetManager:
         return ui_images
     
     def load_background_images(self) -> Dict[str, pygame.Surface]:
-        """背景画像を読み込み"""
-        backgrounds = {}
-        bg_names = ["building_house", "nature_bush"]
-        
-        for bg_name in bg_names:
-            bg_path = f"backgrounds/{bg_name}.png"
-            bg_image = self.load_image(bg_path)
-            if bg_image:
-                backgrounds[bg_name] = bg_image
-        
-        return backgrounds
+        """背景画像を読み込み（未使用のため空実装）"""
+        # building_house.pngとnature_bush.pngは実際には使用されていない
+        # 実際の背景はgame_background.pngとmenu_background.pngを個別読み込み
+        return {}
     
     def load_sound(self, path: str) -> Optional[pygame.mixer.Sound]:
         """音声を読み込み"""

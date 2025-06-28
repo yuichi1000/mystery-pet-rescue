@@ -172,6 +172,10 @@ class GameUI:
             int(80 * self.ui_scale)
         )
     
+    def set_timer_system(self, timer_system):
+        """タイマーシステムを設定"""
+        self.timer_system = timer_system
+    
     def update(self, time_delta: float):
         """UI更新"""
         # 通知システム更新
@@ -205,6 +209,9 @@ class GameUI:
         
         # 現在の目標
         self._draw_objective()
+        
+        # 残り時間表示
+        self._draw_timer()
         
         # 通知システム
         self._draw_notifications()
@@ -422,6 +429,52 @@ class GameUI:
             text_x = notification_rect.x + 10
             text_y = notification_rect.centery - text_surface.get_height() // 2
             self.screen.blit(text_surface, (text_x, text_y))
+    
+    def _draw_timer(self):
+        """残り時間を描画"""
+        # タイマーシステムから残り時間を取得
+        if hasattr(self, 'timer_system') and self.timer_system:
+            remaining_time = self.timer_system.get_remaining_time()
+        else:
+            remaining_time = 300.0  # デフォルト5分
+        
+        # 時間を分:秒形式に変換
+        minutes = int(remaining_time // 60)
+        seconds = int(remaining_time % 60)
+        time_text = f"{minutes:02d}:{seconds:02d}"
+        
+        # 警告色の判定
+        is_warning = remaining_time <= 30
+        text_color = (255, 100, 100) if is_warning else (255, 255, 255)
+        
+        # タイマー背景
+        timer_bg_rect = pygame.Rect(
+            self.screen_width // 2 - 80,
+            20,
+            160,
+            50
+        )
+        
+        # 警告時は赤色、通常時は黒色
+        bg_color = (200, 50, 50, 180) if is_warning else (0, 0, 0, 180)
+        timer_surface = pygame.Surface((160, 50), pygame.SRCALPHA)
+        timer_surface.fill(bg_color)
+        self.screen.blit(timer_surface, timer_bg_rect.topleft)
+        
+        # 枠線
+        pygame.draw.rect(self.screen, text_color, timer_bg_rect, 2)
+        
+        # 時間テキスト
+        timer_font = self.font_manager.get_font('default', 24)
+        timer_text_surface = timer_font.render(time_text, True, text_color)
+        text_rect = timer_text_surface.get_rect(center=timer_bg_rect.center)
+        self.screen.blit(timer_text_surface, text_rect)
+        
+        # "残り時間" ラベル
+        label_font = self.font_manager.get_font('default', 18)
+        label_text = label_font.render("残り時間", True, text_color)
+        label_rect = label_text.get_rect(centerx=timer_bg_rect.centerx, bottom=timer_bg_rect.top - 5)
+        self.screen.blit(label_text, label_rect)
     
     # 公開メソッド
     def add_notification(self, message: str, notification_type: NotificationType = NotificationType.INFO, 

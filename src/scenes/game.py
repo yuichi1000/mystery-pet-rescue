@@ -103,6 +103,9 @@ class GameScene(Scene):
         self.timer_system.set_time_warning_callback(self._on_time_warning)
         self.timer_system.set_time_up_callback(self._on_time_up)
         
+        # GameUIにタイマーシステムを設定
+        self.game_ui.set_timer_system(self.timer_system)
+        
         # カメラオフセット
         self.camera_x = 0
         self.camera_y = 0
@@ -124,96 +127,65 @@ class GameScene(Scene):
             self.background_image = None
     
     def _create_pets(self) -> List[Pet]:
-        """ペットを作成（新データローダー使用）"""
+        """ペットを作成（フォールバック強制版）"""
         pets = []
         
-        # 新しいマップデータからペット隠れ場所を取得
-        current_map = self.map_loader.get_current_map()
-        if current_map:
-            print("🐾 新マップデータからペット生成中...")
-            
-            for hiding_spot in current_map.pet_hiding_spots:
-                # ペットデータローダーからペット情報を取得
-                pet_data_info = self.pet_data_loader.get_pet(hiding_spot.pet_id)
-                
-                if pet_data_info:
-                    # 新しいペットデータ形式に変換
-                    pet_type_map = {
-                        'cat': PetType.CAT,
-                        'dog': PetType.DOG,
-                        'rabbit': PetType.RABBIT,
-                        'bird': PetType.BIRD
-                    }
-                    
-                    pet_data = PetData(
-                        pet_id=pet_data_info.id,
-                        name=pet_data_info.name,
-                        pet_type=pet_type_map.get(pet_data_info.species, PetType.CAT),
-                        personality=pet_data_info.personality.traits[0] if pet_data_info.personality.traits else "friendly",
-                        rarity=pet_data_info.rarity,
-                        description=pet_data_info.description_ja
-                    )
-                    
-                    # 隠れ場所の位置にペットを配置
-                    pet = Pet(pet_data, x=hiding_spot.position.x * 32, y=hiding_spot.position.y * 32)
-                    pets.append(pet)
-                    
-                    print(f"🐾 ペット生成: {pet_data_info.name} ({pet_data_info.species}) at ({hiding_spot.position.x}, {hiding_spot.position.y})")
-                else:
-                    print(f"⚠️ ペットデータが見つかりません: {hiding_spot.pet_id}")
-        else:
-            # フォールバック: 従来の方法
-            print("⚠️ 従来の方法でペット生成")
-            
-            # 犬
-            dog_data = PetData(
-                pet_id="dog_001",
-                name="ポチ",
-                pet_type=PetType.DOG,
-                personality="friendly",
-                rarity="common",
-                description="人懐っこい茶色の犬"
-            )
-            dog = Pet(dog_data, x=300, y=200)
-            pets.append(dog)
-            
-            # 猫
-            cat_data = PetData(
-                pet_id="cat_001", 
-                name="ミケ",
-                pet_type=PetType.CAT,
-                personality="shy",
-                rarity="common",
-                description="三毛猫の女の子"
-            )
-            cat = Pet(cat_data, x=500, y=300)
-            pets.append(cat)
-            
-            # うさぎ
-            rabbit_data = PetData(
-                pet_id="rabbit_001",
-                name="ミミ",
-                pet_type=PetType.RABBIT,
-                personality="gentle",
-                rarity="uncommon",
-                description="白いうさぎ"
-            )
-            rabbit = Pet(rabbit_data, x=200, y=400)
-            pets.append(rabbit)
-            
-            # 鳥
-            bird_data = PetData(
-                pet_id="bird_001",
-                name="ピーちゃん",
-                pet_type=PetType.BIRD,
-                personality="energetic",
-                rarity="rare",
-                description="カラフルなインコ"
-            )
-            bird = Pet(bird_data, x=400, y=150)
-            pets.append(bird)
+        print("🐾 フォールバック強制でペット生成中...")
+        
+        # 犬
+        dog_data = PetData(
+            pet_id="dog_001",
+            name="ポチ",
+            pet_type=PetType.DOG,
+            personality="friendly",
+            rarity="common",
+            description="忠実な柴犬"
+        )
+        dog = Pet(dog_data, x=300, y=200)
+        pets.append(dog)
+        
+        # 猫
+        cat_data = PetData(
+            pet_id="cat_001", 
+            name="ミケ",
+            pet_type=PetType.CAT,
+            personality="shy",
+            rarity="common",
+            description="三毛猫の女の子"
+        )
+        cat = Pet(cat_data, x=500, y=300)
+        pets.append(cat)
+        
+        # うさぎ
+        rabbit_data = PetData(
+            pet_id="rabbit_001",
+            name="ミミ",
+            pet_type=PetType.RABBIT,
+            personality="gentle",
+            rarity="uncommon",
+            description="白いうさぎ"
+        )
+        rabbit = Pet(rabbit_data, x=700, y=400)
+        pets.append(rabbit)
+        
+        # 鳥
+        bird_data = PetData(
+            pet_id="bird_001",
+            name="ピーちゃん",
+            pet_type=PetType.BIRD,
+            personality="active",
+            rarity="rare",
+            description="カラフルな小鳥"
+        )
+        bird = Pet(bird_data, x=400, y=150)
+        pets.append(bird)
+        
+        print(f"✅ フォールバックペット生成完了: {len(pets)}匹")
+        for pet in pets:
+            print(f"  🐾 {pet.data.name} ({pet.data.pet_type.value}) at ({pet.x}, {pet.y})")
         
         return pets
+    
     
     def enter(self) -> None:
         """シーンに入る時の処理"""
@@ -351,8 +323,8 @@ class GameScene(Scene):
                 print("💔 ライフ切れで敗北")
                 pygame.time.set_timer(pygame.USEREVENT + 3, 2000)  # 敗北画面へ
         
-        # 勝利条件チェック
-        if len(self.pets_rescued) >= self.total_pets and not self.victory and not self.game_over:
+        # 勝利条件チェック（ペットが存在する場合のみ）
+        if self.total_pets > 0 and len(self.pets_rescued) >= self.total_pets and not self.victory and not self.game_over:
             self.victory = True
             
             # タイマー停止

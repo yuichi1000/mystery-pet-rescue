@@ -111,6 +111,10 @@ class TimerSystem:
         seconds = int(self.remaining_time % 60)
         return f"{minutes:02d}:{seconds:02d}"
     
+    def get_remaining_time(self) -> float:
+        """残り時間を秒で取得"""
+        return max(0.0, self.remaining_time)
+    
     def get_progress_ratio(self) -> float:
         """進行率を0.0-1.0で取得"""
         return (self.time_limit - self.remaining_time) / self.time_limit

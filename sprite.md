@@ -160,39 +160,6 @@ Create a 16-bit pixel art speaker icon for audio settings. The icon should be:
 
 ---
 
-## 🧩 パズル・ミニゲーム要素
-
-### パズルピース
-**ファイル名**: `puzzle_piece_[number].png`
-**配置場所**: `assets/images/ui/`
-**必要な数**: 1-9
-
-**作成指示**:
-```
-Create 16-bit pixel art puzzle pieces for a children's matching game. Each piece should be:
-- 64x64 pixels with transparent background
-- Colorful jigsaw puzzle piece shape
-- Number [1-9] clearly displayed in the center
-- Bright, child-friendly colors (different color for each number)
-- Clear and readable design
-```
-
-### カード背面
-**ファイル名**: `card_back.png`
-**配置場所**: `assets/images/ui/`
-
-**作成指示**:
-```
-Create a 16-bit pixel art card back design for a memory matching game. The design should be:
-- 64x64 pixels with transparent background
-- Cute paw print pattern or pet-themed design
-- Warm, inviting colors
-- Suitable for children's memory game
-- Clear border to define card edges
-```
-
----
-
 ## 🏘️ 建物・環境要素
 
 ### 家屋
@@ -293,34 +260,6 @@ Create a 16-bit pixel art road/street tile. The tile should be:
 
 ---
 
-## 🎵 効果・装飾要素
-
-### パーティクル効果
-**ファイル名**: `[effect_name].png`
-**配置場所**: `assets/images/effects/`
-
-**キラキラ効果**
-**ファイル名**: `sparkle_effect.png`
-```
-Create a 16-bit pixel art sparkle/twinkle effect for successful actions. The effect should be:
-- 32x32 pixels with transparent background
-- Golden/yellow sparkle with radiating points
-- Bright, celebratory appearance
-- Suitable for success animations
-```
-
-**ハート効果**
-**ファイル名**: `heart_effect.png`
-```
-Create a 16-bit pixel art floating heart for pet interaction feedback. The heart should be:
-- 32x32 pixels with transparent background
-- Pink/red heart shape
-- Cute, friendly appearance
-- Suitable for showing affection/success
-```
-
----
-
 ## 📁 ディレクトリ構造
 
 作成後の配置場所:
@@ -343,11 +282,7 @@ assets/images/
 │   ├── time_icon.png
 │   ├── score_icon.png
 │   ├── settings_icon.png
-│   ├── volume_icon.png
-│   ├── puzzle_piece_1.png
-│   ├── puzzle_piece_2.png
-│   ├── ... (puzzle_piece_9.png)
-│   └── card_back.png
+│   └── volume_icon.png
 ├── buildings/
 │   ├── house_residential.png
 │   ├── house_petshop.png

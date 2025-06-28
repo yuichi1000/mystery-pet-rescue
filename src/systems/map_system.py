@@ -420,7 +420,7 @@ class MapSystem:
         return tile_data.walkable if tile_data else True
     
     def check_collision(self, rect: pygame.Rect) -> bool:
-        """矩形との衝突判定（マップ境界チェック含む）"""
+        """矩形との衝突判定（マップ境界・建物チェック含む）"""
         if not self.current_map:
             return False
         
@@ -436,6 +436,10 @@ class MapSystem:
             # ペット用の境界チェックログは出力しない
             return True
         
+        # 建物衝突チェック
+        if self._check_building_collision(rect):
+            return True
+        
         # タイル衝突チェック（マップ内の場合のみ）
         corners = [
             (rect.left, rect.top),
@@ -446,6 +450,29 @@ class MapSystem:
         
         for x, y in corners:
             if not self.is_walkable(x, y):
+                return True
+        
+        return False
+    
+    def _check_building_collision(self, rect: pygame.Rect) -> bool:
+        """建物との衝突判定"""
+        if not hasattr(self, 'buildings') or not self.buildings:
+            return False
+        
+        for building in self.buildings:
+            # 建物の矩形を計算
+            pos = building['position']
+            size = building['size']
+            
+            building_rect = pygame.Rect(
+                pos['x'] * self.current_map.tile_size,
+                pos['y'] * self.current_map.tile_size,
+                size['width'] * self.current_map.tile_size,
+                size['height'] * self.current_map.tile_size
+            )
+            
+            # 衝突判定
+            if rect.colliderect(building_rect):
                 return True
         
         return False

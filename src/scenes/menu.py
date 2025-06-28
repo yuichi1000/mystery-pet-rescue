@@ -201,13 +201,25 @@ class MenuScene(Scene):
             rect = pygame.Rect(x, y, item_width, item_height)
             self.menu_items.append(MenuItem(text, action, rect))
         
-        # 言語選択セレクトボックスを作成（ゲーム終了の下）
+        # 言語選択セレクトボックスを作成（既存のものがあれば展開状態を保持）
         lang_width = 200
         lang_height = 40
         lang_x = (screen_width - lang_width) // 2
         lang_y = start_y + len(menu_data) * spacing + 20
         lang_rect = pygame.Rect(lang_x, lang_y, lang_width, lang_height)
+        
+        # 既存の言語選択ボックスがある場合は展開状態を保持
+        was_expanded = False
+        if self.language_selector:
+            was_expanded = self.language_selector.expanded
+            print(f"🔄 既存の言語選択ボックスの展開状態を保持: {was_expanded}")
+        
         self.language_selector = LanguageSelector(lang_rect)
+        
+        # 展開状態を復元
+        if was_expanded:
+            self.language_selector.expanded = True
+            print(f"✅ 展開状態を復元: {self.language_selector.expanded}")
         
         # 最初のアイテムを選択
         if self.menu_items:
@@ -244,14 +256,29 @@ class MenuScene(Scene):
             if event.button == 1:  # 左クリック
                 # 言語選択のクリック処理
                 if self.language_selector and self.language_selector.handle_click(event.pos):
-                    # 言語が変更された場合、メニューアイテムを再作成
-                    print(f"🌐 言語変更検出、メニューを更新中...")
-                    self._create_menu_items()
+                    # 言語が変更された場合のみメニューアイテムのテキストを更新
+                    print(f"🌐 言語変更検出、メニューテキストを更新中...")
+                    self._update_menu_item_texts()
                     return None
                 
                 return self._handle_mouse_click(event.pos)
         
         return None
+    
+    def _update_menu_item_texts(self):
+        """メニューアイテムのテキストのみを更新（位置は変更しない）"""
+        if not self.menu_items:
+            return
+            
+        # 現在の言語でテキストを更新
+        texts = [get_text("start_game"), get_text("quit_game")]
+        actions = ["start_game", "quit_game"]
+        
+        for i, (text, action) in enumerate(zip(texts, actions)):
+            if i < len(self.menu_items):
+                self.menu_items[i].text = text
+                self.menu_items[i].action = action
+                print(f"📝 メニューアイテム更新: {action} -> '{text}'")
     
     def _move_selection(self, direction: int):
         """選択を移動"""

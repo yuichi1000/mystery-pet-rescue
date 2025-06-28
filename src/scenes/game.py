@@ -44,6 +44,10 @@ class GameScene(Scene):
         self.victory = False
         self.pets_rescued = []
         
+        # 勝利表示用
+        self.victory_display_time = 0.0
+        self.victory_message_shown = False
+        
         # ゲーム制限
         self.time_limit = 300.0  # 5分制限
         self.remaining_time = self.time_limit
@@ -246,6 +250,13 @@ class GameScene(Scene):
                 return "result"
         
         elif event.type == pygame.USEREVENT + 3:
+            # ゲームクリア後メニューに戻る
+            print(f"🎯 USEREVENT+3 受信: victory={self.victory}")
+            if self.victory:
+                print("🏠 メニューに戻ります")
+                return "menu"
+        
+        elif event.type == pygame.USEREVENT + 4:
             # ゲーム敗北タイマー
             if self.game_over:
                 print("💀 敗北画面に移行")
@@ -303,21 +314,30 @@ class GameScene(Scene):
         if not self.paused and not self.victory and not self.game_over:
             self.remaining_time -= time_delta
         
+        # 勝利表示時間更新
+        if self.victory:
+            self.victory_display_time += time_delta
+            # 3秒経過したら直接メニューに戻る（フォールバック）
+            if self.victory_display_time >= 3.0:
+                print("⏰ 3秒経過によりメニューに戻ります")
+                return "menu"
+        
         # 敗北条件チェック
         if not self.game_over and not self.victory:
             if self.remaining_time <= 0:
                 self.game_over = True
                 self.game_ui.add_notification("時間切れです！", NotificationType.ERROR)
                 print("⏰ 時間切れで敗北")
-                pygame.time.set_timer(pygame.USEREVENT + 3, 2000)  # 敗北画面へ
+                pygame.time.set_timer(pygame.USEREVENT + 4, 2000)  # 敗北画面へ
             elif self.player_lives <= 0:
                 self.game_over = True
                 self.game_ui.add_notification("ライフが尽きました！", NotificationType.ERROR)
                 print("💔 ライフ切れで敗北")
-                pygame.time.set_timer(pygame.USEREVENT + 3, 2000)  # 敗北画面へ
+                pygame.time.set_timer(pygame.USEREVENT + 4, 2000)  # 敗北画面へ
         
         # 勝利条件チェック（ペットが存在する場合のみ）
         if self.total_pets > 0 and len(self.pets_rescued) >= self.total_pets and not self.victory and not self.game_over:
+            print(f"🎉 勝利条件達成！ 救出: {len(self.pets_rescued)}/{self.total_pets}")
             self.victory = True
             
             # タイマー停止
@@ -334,10 +354,13 @@ class GameScene(Scene):
             # 勝利BGMに変更
             self.audio_system.play_bgm("victory_bgm")
             
-            # GameMainに勝利を通知
-            if self.flow_manager and hasattr(self.flow_manager, '_game_victory'):
-                # 2秒後に結果画面に移行
-                pygame.time.set_timer(pygame.USEREVENT + 2, 2000)
+            # 勝利表示開始
+            self.victory_display_time = 0.0
+            self.victory_message_shown = False
+            
+            # 3秒後にメニューに戻る（無条件で設定）
+            pygame.time.set_timer(pygame.USEREVENT + 3, 3000)
+            print("⏰ 3秒後にメニューに戻るタイマー設定完了")
         
         return None
     
@@ -379,6 +402,10 @@ class GameScene(Scene):
         time_string = self.timer_system.get_time_string()
         is_warning = self.timer_system.is_warning_time()
         self.game_ui.draw_timer(time_string, is_warning)
+        
+        # 勝利画面描画
+        if self.victory:
+            self._draw_victory_screen(surface)
         
         # ポーズ表示
         if self.paused:
@@ -578,3 +605,44 @@ class GameScene(Scene):
         """ゲーム開始（タイマー開始）"""
         self.timer_system.start()
         self.game_ui.add_notification("ペットを探しましょう！", NotificationType.INFO)
+    def _draw_victory_screen(self, surface: pygame.Surface):
+        """勝利画面を描画"""
+        # 半透明オーバーレイ
+        overlay = pygame.Surface((surface.get_width(), surface.get_height()))
+        overlay.set_alpha(200)
+        overlay.fill((0, 0, 0))
+        surface.blit(overlay, (0, 0))
+        
+        # ゲームクリアテキスト
+        font_large = self.font_manager.get_font('default', 72)
+        font_medium = self.font_manager.get_font('default', 36)
+        font_small = self.font_manager.get_font('default', 24)
+        
+        # メインタイトル
+        clear_text = font_large.render("ゲームクリア！", True, (255, 215, 0))  # ゴールド色
+        clear_rect = clear_text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2 - 100))
+        surface.blit(clear_text, clear_rect)
+        
+        # サブタイトル
+        subtitle_text = font_medium.render("全てのペットを救出しました！", True, (255, 255, 255))
+        subtitle_rect = subtitle_text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2 - 40))
+        surface.blit(subtitle_text, subtitle_rect)
+        
+        # 統計情報
+        stats_y = surface.get_height() // 2 + 20
+        
+        # 救出ペット数
+        pets_text = font_small.render(f"救出したペット: {len(self.pets_rescued)}/{self.total_pets}匹", True, (255, 255, 255))
+        pets_rect = pets_text.get_rect(center=(surface.get_width() // 2, stats_y))
+        surface.blit(pets_text, pets_rect)
+        
+        # 残り時間
+        time_text = font_small.render(f"残り時間: {self.timer_system.get_time_string()}", True, (255, 255, 255))
+        time_rect = time_text.get_rect(center=(surface.get_width() // 2, stats_y + 30))
+        surface.blit(time_text, time_rect)
+        
+        # メニューに戻る案内（2秒後に表示）
+        if self.victory_display_time > 2.0:
+            menu_text = font_small.render("まもなくメニューに戻ります...", True, (200, 200, 200))
+            menu_rect = menu_text.get_rect(center=(surface.get_width() // 2, stats_y + 80))
+            surface.blit(menu_text, menu_rect)

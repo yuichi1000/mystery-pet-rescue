@@ -32,6 +32,7 @@ class LanguageSelector:
         """クリック処理"""
         if self.rect.collidepoint(pos):
             self.expanded = not self.expanded
+            print(f"🔽 言語選択ボックスクリック: expanded={self.expanded}")
             return True
         
         if self.expanded:
@@ -44,7 +45,11 @@ class LanguageSelector:
                     self.rect.height
                 )
                 if option_rect.collidepoint(pos):
+                    print(f"🌐 言語選択: {lang.value}")
+                    old_lang = self.language_manager.get_current_language()
                     self.language_manager.set_language(lang)
+                    new_lang = self.language_manager.get_current_language()
+                    print(f"🔄 言語変更: {old_lang.value} → {new_lang.value}")
                     self.expanded = False
                     return True
             
@@ -151,6 +156,10 @@ class MenuScene(Scene):
         screen_width = self.screen.get_width()
         screen_height = self.screen.get_height()
         
+        # 現在の言語を確認
+        current_lang = self.language_manager.get_current_language()
+        print(f"📝 メニューアイテム作成中 - 現在の言語: {current_lang.value}")
+        
         # メニューアイテムのサイズと位置
         item_width = 300
         item_height = 60
@@ -158,9 +167,13 @@ class MenuScene(Scene):
         spacing = 80
         
         # メニューアイテムを作成（言語に応じて更新）
+        start_text = get_text("start_game")
+        quit_text = get_text("quit_game")
+        print(f"📝 翻訳テキスト: start='{start_text}', quit='{quit_text}'")
+        
         menu_data = [
-            (get_text("start_game"), "start_game"),
-            (get_text("quit_game"), "quit_game")
+            (start_text, "start_game"),
+            (quit_text, "quit_game")
         ]
         
         self.menu_items = []
@@ -214,6 +227,7 @@ class MenuScene(Scene):
                 # 言語選択のクリック処理
                 if self.language_selector and self.language_selector.handle_click(event.pos):
                     # 言語が変更された場合、メニューアイテムを再作成
+                    print(f"🌐 言語変更検出、メニューを更新中...")
                     self._create_menu_items()
                     return None
                 
@@ -307,7 +321,7 @@ class MenuScene(Scene):
     def _draw_title(self, surface: pygame.Surface):
         """タイトルを描画"""
         title_font = self.font_manager.get_font("default", 48)
-        title_text = "Mystery Pet Rescue"
+        title_text = get_text("game_title")
         title_surface = title_font.render(title_text, True, (255, 255, 255))
         title_rect = title_surface.get_rect()
         title_rect.centerx = surface.get_width() // 2

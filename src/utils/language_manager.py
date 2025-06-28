@@ -31,17 +31,20 @@ class LanguageManager:
                 "language": "Language",
                 "english": "English",
                 "japanese": "日本語",
+                "game_title": "Mystery Pet Rescue",
                 
                 # ゲーム内
                 "pets_found": "Pets Found",
                 "time_remaining": "Time Remaining",
                 "game_paused": "Game Paused",
                 "game_resumed": "Game Resumed",
-                "pet_rescued": "Pet Rescued!",
+                "pet_rescued": " rescued!",
                 "all_pets_rescued": "All pets rescued!",
                 "game_over": "Game Over",
                 "victory": "Victory!",
                 "find_pets": "Find the pets!",
+                "pet_found": "found!",
+                "rescue_instruction": "Press E to rescue",
                 
                 # 結果画面
                 "congratulations": "Congratulations!",
@@ -61,17 +64,20 @@ class LanguageManager:
                 "language": "言語",
                 "english": "English",
                 "japanese": "日本語",
+                "game_title": "ミステリー・ペット・レスキュー",
                 
                 # ゲーム内
                 "pets_found": "救出したペット",
                 "time_remaining": "残り時間",
                 "game_paused": "ゲーム一時停止",
                 "game_resumed": "ゲーム再開",
-                "pet_rescued": "ペットを救出しました！",
+                "pet_rescued": "を救出しました！",
                 "all_pets_rescued": "すべてのペットを救出しました！",
                 "game_over": "ゲームオーバー",
                 "victory": "勝利！",
                 "find_pets": "ペットを探しましょう！",
+                "pet_found": "を見つけました！",
+                "rescue_instruction": "Eキーで救出できます",
                 
                 # 結果画面
                 "congratulations": "おめでとうございます！",
@@ -88,8 +94,14 @@ class LanguageManager:
     
     def set_language(self, language: Language):
         """言語を設定"""
+        print(f"🌐 言語設定要求: {language.value}")
+        old_lang = self.current_language
         self.current_language = language
-        print(f"🌐 言語を{language.value}に変更しました")
+        print(f"🔄 言語変更完了: {old_lang.value} → {self.current_language.value}")
+        
+        # テスト用に現在の翻訳を確認
+        test_text = self.get_text("start_game")
+        print(f"🧪 テスト翻訳 'start_game': {test_text}")
     
     def get_current_language(self) -> Language:
         """現在の言語を取得"""

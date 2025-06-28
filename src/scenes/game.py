@@ -484,8 +484,8 @@ class GameScene(Scene):
                 if not hasattr(pet, 'discovered'):
                     pet.discovered = True
                     # self.audio_system.play_sfx("pet_found", loops=0)  # 音を出さない
-                    self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
-                    self.game_ui.add_notification("Eキーで救出できます", NotificationType.INFO)
+                    self.game_ui.add_notification(f"{pet.data.name}{get_text('pet_found')}", NotificationType.INFO)
+                    self.game_ui.add_notification(get_text("rescue_instruction"), NotificationType.INFO)
                 
                 # Eキーで救出
                 keys = pygame.key.get_pressed()
@@ -496,7 +496,7 @@ class GameScene(Scene):
         """ペットを救出（パズルなし）"""
         if pet.data.pet_id not in self.pets_rescued:
             self.pets_rescued.append(pet.data.pet_id)
-            self.game_ui.add_notification(f"{pet.data.name}を救出しました！", NotificationType.SUCCESS)
+            self.game_ui.add_notification(f"{pet.data.name}{get_text('pet_rescued')}", NotificationType.SUCCESS)
             
             # ペットタイプを文字列に変換
             pet_type_str = str(pet.data.pet_type).lower().replace('pettype.', '')

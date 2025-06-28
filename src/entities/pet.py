@@ -58,10 +58,8 @@ class Pet:
         self.wander_timer = 0.0
         self.wander_interval = random.uniform(2.0, 5.0)
         
-        # AI行動
+        # AI行動（簡素化版）
         self.fear_distance = 100.0  # プレイヤーがこの距離に近づくと逃げる
-        self.trust_level = 20.0      # 信頼度（0-100）適度な初期値
-        self.rescue_threshold = 80.0 # この信頼度で救出可能
         
         # アニメーション
         self.animation_timer = 0.0
@@ -139,8 +137,8 @@ class Pet:
         if self.state == PetState.RESCUED:
             return
         
-        # 恐怖状態の判定
-        if distance < self.fear_distance and self.trust_level < 50:
+        # 恐怖状態の判定（簡素化版）
+        if distance < self.fear_distance:
             self._enter_scared_state(player_pos)
         elif self.state == PetState.SCARED and distance > self.fear_distance * 1.5:
             self.state = PetState.IDLE
@@ -309,42 +307,37 @@ class Pet:
                 self.current_emotion = None
     
     def interact(self, player_pos: Tuple[float, float]) -> bool:
-        """プレイヤーとの相互作用"""
+        """プレイヤーとの相互作用（簡素化版）"""
         distance = self._calculate_distance(player_pos)
         
         if distance < 60.0:  # 相互作用可能距離
             if self.state == PetState.SCARED:
-                # 恐怖状態では信頼度が下がる
-                self.trust_level = max(0, self.trust_level - 5)
-                print(f"😰 {self.data.name}の信頼度が下がりました: {self.trust_level:.1f}")
+                # 恐怖状態では相互作用失敗
+                print(f"😰 {self.data.name}は怖がっています")
                 return False
             else:
-                # 信頼度を上げる
-                self.trust_level = min(100, self.trust_level + 10)
-                print(f"😊 {self.data.name}の信頼度が上がりました: {self.trust_level:.1f}")
+                # 相互作用成功
+                print(f"😊 {self.data.name}と仲良くなりました")
                 
                 # エモーション表示
                 self.current_emotion = "happy"
                 self.emotion_timer = 2.0
                 
-                # 信頼度が高くなったら追従開始
-                if self.trust_level >= 30 and self.state != PetState.FOLLOWING:
+                # 追従開始
+                if self.state != PetState.FOLLOWING:
                     self.state = PetState.FOLLOWING
                     print(f"💕 {self.data.name}があなたについてきます")
                 
-                # 救出可能判定
-                if self.trust_level >= self.rescue_threshold:
-                    return True
+                # 救出可能（簡素化版では常に可能）
+                return True
         
         return False
     
     def rescue(self) -> bool:
-        """ペットを救出"""
-        if self.trust_level >= self.rescue_threshold:
-            self.state = PetState.RESCUED
-            print(f"🎉 {self.data.name}を救出しました！")
-            return True
-        return False
+        """ペットを救出（簡素化版）"""
+        self.state = PetState.RESCUED
+        print(f"🎉 {self.data.name}を救出しました！")
+        return True
     
     def draw(self, screen: pygame.Surface, camera_offset: Tuple[int, int] = (0, 0)):
         """ペットを描画"""
@@ -371,27 +364,9 @@ class Pet:
             name_surface = font.render(self.data.name, True, (255, 255, 255))
             screen.blit(name_surface, (draw_x, draw_y - 20))
         
-        # 信頼度バー
-        if self.trust_level > 0:
-            self._draw_trust_bar(screen, draw_x, draw_y)
-        
         # エモーション表示
         if self.current_emotion:
             self._draw_emotion(screen, draw_x, draw_y)
-    
-    def _draw_trust_bar(self, screen: pygame.Surface, x: int, y: int):
-        """信頼度バーを描画"""
-        bar_width = self.rect.width
-        bar_height = 3
-        bar_y = y - 12
-        
-        # 背景
-        pygame.draw.rect(screen, (100, 100, 100), (x, bar_y, bar_width, bar_height))
-        
-        # 信頼度
-        trust_width = int(bar_width * (self.trust_level / 100))
-        trust_color = (0, 255, 0) if self.trust_level >= self.rescue_threshold else (255, 255, 0)
-        pygame.draw.rect(screen, trust_color, (x, bar_y, trust_width, bar_height))
     
     def _draw_emotion(self, screen: pygame.Surface, x: int, y: int):
         """エモーションを描画"""
@@ -414,13 +389,9 @@ class Pet:
         """位置を取得"""
         return (self.x, self.y)
     
-    def get_trust_level(self) -> float:
-        """信頼度を取得"""
-        return self.trust_level
-    
     def is_rescuable(self) -> bool:
-        """救出可能かチェック"""
-        return self.trust_level >= self.rescue_threshold
+        """救出可能かチェック（簡素化版では常に可能）"""
+        return True
     
     def get_state(self) -> PetState:
         """状態を取得"""

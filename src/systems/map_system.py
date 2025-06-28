@@ -337,10 +337,14 @@ class MapSystem:
             print(f"❌ 建物画像描画エラー: {e}")
     
     def _draw_natural_feature_image(self, feature):
-        """自然地形画像を描画（マップデータ使用版）"""
+        """自然地形画像を描画（サイズ調整版）"""
         try:
             pos = feature['position']
             size = feature['size']
+            
+            # サイズを建物と同じくらいに調整
+            adjusted_width = min(size['width'], 4)  # 最大4タイル
+            adjusted_height = min(size['height'], 3)  # 最大3タイル
             
             # マップデータから直接画像パスを取得
             if 'image_path' in feature:
@@ -356,17 +360,17 @@ class MapSystem:
                     print(f"⚠️ 自然地形画像パス不明: {feature}")
                     return
             
-            # 画像を読み込み
+            # 画像を読み込み（調整されたサイズで）
             feature_image = self.asset_manager.load_image(
                 image_path,
-                (size['width'] * self.current_map.tile_size, size['height'] * self.current_map.tile_size)
+                (adjusted_width * self.current_map.tile_size, adjusted_height * self.current_map.tile_size)
             )
             
             if feature_image:
                 pos_x = pos['x'] * self.current_map.tile_size
                 pos_y = pos['y'] * self.current_map.tile_size
                 self.map_surface.blit(feature_image, (pos_x, pos_y))
-                print(f"🌳 自然地形画像描画: {feature['name']} ({image_path})")
+                print(f"🌳 自然地形画像描画: {feature['name']} ({image_path}) - サイズ調整: {adjusted_width}x{adjusted_height}")
             else:
                 print(f"⚠️ 自然地形画像未発見: {image_path}")
                 
@@ -455,25 +459,46 @@ class MapSystem:
         return False
     
     def _check_building_collision(self, rect: pygame.Rect) -> bool:
-        """建物との衝突判定"""
-        if not hasattr(self, 'buildings') or not self.buildings:
-            return False
+        """建物・自然地形との衝突判定"""
+        # 建物との衝突チェック
+        if hasattr(self, 'buildings') and self.buildings:
+            for building in self.buildings:
+                # 建物の矩形を計算
+                pos = building['position']
+                size = building['size']
+                
+                building_rect = pygame.Rect(
+                    pos['x'] * self.current_map.tile_size,
+                    pos['y'] * self.current_map.tile_size,
+                    size['width'] * self.current_map.tile_size,
+                    size['height'] * self.current_map.tile_size
+                )
+                
+                # 衝突判定
+                if rect.colliderect(building_rect):
+                    return True
         
-        for building in self.buildings:
-            # 建物の矩形を計算
-            pos = building['position']
-            size = building['size']
-            
-            building_rect = pygame.Rect(
-                pos['x'] * self.current_map.tile_size,
-                pos['y'] * self.current_map.tile_size,
-                size['width'] * self.current_map.tile_size,
-                size['height'] * self.current_map.tile_size
-            )
-            
-            # 衝突判定
-            if rect.colliderect(building_rect):
-                return True
+        # 自然地形との衝突チェック（公園施設など）
+        if hasattr(self, 'natural_features') and self.natural_features:
+            for feature in self.natural_features:
+                # 自然地形の矩形を計算
+                pos = feature['position']
+                size = feature['size']
+                
+                # サイズを建物と同じくらいに調整
+                adjusted_width = min(size['width'], 4)  # 最大4タイル
+                adjusted_height = min(size['height'], 3)  # 最大3タイル
+                
+                feature_rect = pygame.Rect(
+                    pos['x'] * self.current_map.tile_size,
+                    pos['y'] * self.current_map.tile_size,
+                    adjusted_width * self.current_map.tile_size,
+                    adjusted_height * self.current_map.tile_size
+                )
+                
+                # 衝突判定
+                if rect.colliderect(feature_rect):
+                    return True
         
         return False
     

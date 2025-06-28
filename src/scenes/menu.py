@@ -36,11 +36,6 @@ class MenuScene(Scene):
         self.menu_items: List[MenuItem] = []
         self.selected_index = 0
         
-        # アニメーション用
-        self.title_alpha = 255
-        self.title_fade_direction = -1
-        self.fade_speed = 50
-        
         # 色設定
         self.normal_color = (255, 255, 255)
         self.hover_color = (255, 255, 0)
@@ -80,9 +75,6 @@ class MenuScene(Scene):
         # メニューアイテムを作成
         menu_data = [
             ("ゲーム開始", "game"),
-            ("続きから", "load"),  # 足りなかったメニュー項目
-            ("ペット図鑑", "pet_collection"),
-            ("設定", "settings"),
             ("ゲーム終了", "quit")
         ]
         
@@ -98,9 +90,6 @@ class MenuScene(Scene):
     def enter(self) -> None:
         """シーンに入る時の処理"""
         print("メニューシーンに入りました")
-        # タイトルアニメーションをリセット
-        self.title_alpha = 255
-        self.title_fade_direction = -1
     
     def exit(self) -> None:
         """シーンから出る時の処理"""
@@ -170,16 +159,6 @@ class MenuScene(Scene):
     
     def update(self, time_delta: float) -> Optional[str]:
         """更新処理"""
-        # タイトルのフェードアニメーション
-        self.title_alpha += self.title_fade_direction * self.fade_speed * time_delta
-        
-        if self.title_alpha <= 150:
-            self.title_alpha = 150
-            self.title_fade_direction = 1
-        elif self.title_alpha >= 255:
-            self.title_alpha = 255
-            self.title_fade_direction = -1
-        
         return None
     
     def draw(self, surface: pygame.Surface) -> None:
@@ -191,14 +170,8 @@ class MenuScene(Scene):
             # 背景画像がない場合はグラデーション背景
             self._draw_gradient_background(surface)
         
-        # タイトルテキストを手動描画（アニメーション効果付き）
-        self._draw_animated_title(surface)
-        
         # メニューアイテムを描画
         self._draw_menu_items(surface)
-        
-        # 操作説明を描画
-        self._draw_controls_help(surface)
     
     def _draw_menu_items(self, surface: pygame.Surface):
         """メニューアイテムを描画"""
@@ -235,40 +208,3 @@ class MenuScene(Scene):
             b = int(80 + (160 - 80) * ratio)
             color = (r, g, b)
             pygame.draw.line(surface, color, (0, y), (surface.get_width(), y))
-    
-    def _draw_animated_title(self, surface: pygame.Surface):
-        """アニメーション付きタイトルを描画"""
-        # 大きなフォントでタイトルを描画
-        title_font = self.font_manager.get_font("default", 48)
-        title_text = "ミステリー・ペット・レスキュー"
-        
-        # アルファ値を適用したサーフェスを作成
-        title_surface = title_font.render(title_text, True, (255, 255, 255))
-        title_surface.set_alpha(int(self.title_alpha))
-        
-        # 中央に配置
-        title_rect = title_surface.get_rect(center=(surface.get_width()//2, 150))
-        surface.blit(title_surface, title_rect)
-        
-        # サブタイトル
-        subtitle_font = self.font_manager.get_font("default", 24)
-        subtitle_text = "〜 迷子のペットを救出するアドベンチャー 〜"
-        subtitle_surface = subtitle_font.render(subtitle_text, True, (200, 200, 200))
-        subtitle_rect = subtitle_surface.get_rect(center=(surface.get_width()//2, 200))
-        surface.blit(subtitle_surface, subtitle_rect)
-    
-    def _draw_controls_help(self, surface: pygame.Surface):
-        """操作説明を描画"""
-        help_font = self.font_manager.get_font("default", 18)
-        help_texts = [
-            "↑↓/WS: 選択移動",
-            "ENTER/SPACE: 決定",
-            "ESC/Q: ゲーム終了",
-            "マウス: ホバー＆クリック"
-        ]
-        
-        y_offset = surface.get_height() - 80
-        for i, text in enumerate(help_texts):
-            help_surface = help_font.render(text, True, (150, 150, 150))
-            help_rect = help_surface.get_rect(center=(surface.get_width()//2, y_offset + i * 25))
-            surface.blit(help_surface, help_rect)

@@ -125,7 +125,6 @@ class GameUI:
             'pet_rescue_icon.png',
             'score_icon.png', 
             'time_icon.png',
-            'settings_icon.png',
             'volume_icon.png'
         ]
         

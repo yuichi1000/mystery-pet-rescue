@@ -17,9 +17,7 @@ from src.systems.save_load_system import SaveLoadSystem
 class MenuState(Enum):
     """メニュー状態"""
     TITLE = "title"
-    SETTINGS = "settings"
     PAUSE = "pause"
-    PET_COLLECTION = "pet_collection"
     SAVE_LOAD = "save_load"
     GAME = "game"
     QUIT = "quit"

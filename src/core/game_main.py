@@ -7,6 +7,7 @@ import pygame
 import sys
 from src.core.game_flow import GameFlowManager
 from src.utils.performance_optimizer import get_performance_optimizer
+from src.utils.language_manager import get_language_manager, get_text
 
 class GameMain:
     """メインゲームクラス"""
@@ -20,7 +21,10 @@ class GameMain:
         self.screen_width = 1280
         self.screen_height = 720
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
-        pygame.display.set_caption("ミステリー・ペット・レスキュー")
+        
+        # 言語管理システム
+        self.language_manager = get_language_manager()
+        self.update_window_title()
         
         # パフォーマンス最適化
         self.optimizer = get_performance_optimizer()
@@ -28,9 +32,18 @@ class GameMain:
         # ゲームフロー管理
         self.flow_manager = GameFlowManager(self.screen)
         
+        # 初期ウィンドウタイトル設定
+        self.update_window_title()
+        
         # ゲーム設定
         self.clock = pygame.time.Clock()
         self.target_fps = 60
+    
+    def update_window_title(self):
+        """ウィンドウタイトルを現在の言語に応じて更新"""
+        title = get_text("game_title")
+        pygame.display.set_caption(title)
+        print(f"🪟 ウィンドウタイトル更新: '{title}'")
     
     def run(self):
         """メインゲームループ"""

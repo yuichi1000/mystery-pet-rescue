@@ -155,7 +155,14 @@ class MenuScene(Scene):
         # 言語選択セレクトボックス
         self.language_selector = None
         
+        # GameFlowManagerの参照（言語変更時のウィンドウタイトル更新用）
+        self.game_flow_manager = None
+        
         self._create_menu_items()
+    
+    def set_game_flow_manager(self, game_flow_manager):
+        """GameFlowManagerの参照を設定"""
+        self.game_flow_manager = game_flow_manager
     
     def _load_background(self):
         """背景画像を読み込み"""
@@ -236,6 +243,10 @@ class MenuScene(Scene):
         """言語変更時のコールバック"""
         print("🌐 言語変更検出、メニューテキストを更新中...")
         self._create_menu_items()
+        
+        # ウィンドウタイトルも更新
+        if self.game_flow_manager:
+            self.game_flow_manager.update_window_title()
     
     def enter(self) -> None:
         """シーンに入る時の処理"""
@@ -356,9 +367,6 @@ class MenuScene(Scene):
         # メニューアイテムを描画
         self._draw_menu_items(surface)
         
-        # ゲームタイトルを描画
-        self._draw_game_title(surface)
-        
         # 言語選択を描画
         if self.language_selector:
             font = self.font_manager.get_font("default", 24)
@@ -401,25 +409,6 @@ class MenuScene(Scene):
             text_surface = button_font.render(item.text, True, text_color)
             text_rect = text_surface.get_rect(center=item.rect.center)
             surface.blit(text_surface, text_rect)
-    
-    def _draw_game_title(self, surface: pygame.Surface):
-        """ゲームタイトルを描画"""
-        title_font = self.font_manager.get_font("default", 48)
-        title_text = get_text("game_title")
-        
-        # タイトルの影を描画
-        shadow_surface = title_font.render(title_text, True, (0, 0, 0))
-        shadow_rect = shadow_surface.get_rect()
-        shadow_rect.centerx = surface.get_width() // 2 + 3
-        shadow_rect.y = 80 + 3
-        surface.blit(shadow_surface, shadow_rect)
-        
-        # タイトル本体を描画
-        title_surface = title_font.render(title_text, True, (255, 255, 255))
-        title_rect = title_surface.get_rect()
-        title_rect.centerx = surface.get_width() // 2
-        title_rect.y = 80
-        surface.blit(title_surface, title_rect)
     
     def _draw_gradient_background(self, surface: pygame.Surface):
         """グラデーション背景を描画"""

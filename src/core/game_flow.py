@@ -11,6 +11,7 @@ from src.scenes.menu import MenuScene
 from src.scenes.game import GameScene
 from src.scenes.result import ResultScene
 from src.systems.audio_system import AudioSystem
+from src.utils.language_manager import get_text
 
 class GameFlowManager:
     """ゲームフロー管理クラス"""
@@ -39,10 +40,18 @@ class GameFlowManager:
         # 最初のシーンを設定
         self.change_scene("menu")
     
+    def update_window_title(self):
+        """ウィンドウタイトルを現在の言語に応じて更新"""
+        title = get_text("game_title")
+        pygame.display.set_caption(title)
+        print(f"🪟 ウィンドウタイトル更新: '{title}'")
+    
     def _initialize_scenes(self):
         """シーンを初期化"""
         # メニューシーンは常に利用可能
-        self.scenes["menu"] = MenuScene(self.screen)
+        menu_scene = MenuScene(self.screen)
+        menu_scene.set_game_flow_manager(self)  # 参照を設定
+        self.scenes["menu"] = menu_scene
         
         # ゲームシーンと結果シーンは必要に応じて作成
         # （ゲーム開始時に最新の状態で作成するため）

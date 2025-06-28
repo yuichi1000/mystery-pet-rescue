@@ -64,7 +64,7 @@ PET_TYPES = [
 PET_STATE_LOST = "lost"         # 迷子
 PET_STATE_FOUND = "found"       # 発見済み
 PET_STATE_RESCUED = "rescued"   # 救助済み
-PET_STATE_RETURNED = "returned" # 返却済み
+PET_STATE_RETURNED = "returned"  # 返却済み
 
 # ゲーム状態
 GAME_STATE_MENU = "menu"

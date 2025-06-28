@@ -87,6 +87,9 @@ class GameUI:
         self.notifications: List[Notification] = []
         self.max_notifications = 5
         
+        # 救出されたペットのリスト
+        self.rescued_pets = []
+        
         # クイックスロット
         self.quick_slots: List[Optional[QuickSlotItem]] = [None] * 4
         self.selected_slot = 0
@@ -217,47 +220,50 @@ class GameUI:
         self._draw_notifications()
     
     def _draw_quick_slots(self):
-        """クイックスロットを描画"""
-        for i, (rect, slot) in enumerate(zip(self.quick_slot_rects, self.quick_slots)):
+        """救出されたペットを表示（クイックスロット枠を使用）"""
+        for i, rect in enumerate(self.quick_slot_rects):
             # スロット背景
-            is_selected = i == self.selected_slot
-            bg_color = (100, 100, 150) if is_selected else (60, 60, 60)
-            border_color = (255, 255, 255) if is_selected else (150, 150, 150)
+            bg_color = (60, 60, 60)
+            border_color = (150, 150, 150)
             
             pygame.draw.rect(self.screen, bg_color, rect)
             pygame.draw.rect(self.screen, border_color, rect, 2)
             
-            if slot:
-                # アイテムアイコン（仮の色表示）
-                icon_rect = pygame.Rect(
-                    rect.x + 5, rect.y + 5,
-                    rect.width - 10, rect.height - 20
-                )
-                pygame.draw.rect(self.screen, (200, 150, 100), icon_rect)
+            # 救出されたペットがあれば表示
+            if i < len(self.rescued_pets):
+                pet = self.rescued_pets[i]
                 
-                # アイテム数量
-                if slot.quantity > 1:
-                    qty_text = str(slot.quantity)
-                    qty_surface = self.font_manager.render_text(
-                        qty_text, "default", int(12 * self.ui_scale), self.colors['text']
-                    )
-                    qty_x = rect.right - qty_surface.get_width() - 2
-                    qty_y = rect.bottom - qty_surface.get_height() - 2
-                    self.screen.blit(qty_surface, (qty_x, qty_y))
+                # ペットタイプに応じた色
+                pet_type_str = str(pet['type']).lower().replace('pettype.', '')
+                pet_colors = {
+                    'dog': (139, 69, 19),    # 茶色
+                    'cat': (255, 165, 0),    # オレンジ
+                    'rabbit': (255, 192, 203), # ピンク
+                    'bird': (135, 206, 235)   # 水色
+                }
                 
-                # クールダウン表示
-                if slot.cooldown > 0:
-                    cooldown_ratio = slot.cooldown / slot.max_cooldown
-                    cooldown_height = int(rect.height * cooldown_ratio)
-                    cooldown_rect = pygame.Rect(
-                        rect.x, rect.bottom - cooldown_height,
-                        rect.width, cooldown_height
-                    )
-                    cooldown_surface = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-                    cooldown_surface.fill((0, 0, 0, 128))
-                    self.screen.blit(cooldown_surface, rect)
+                color = pet_colors.get(pet_type_str, (128, 128, 128))
+                
+                # ペットアイコン（円）
+                center_x = rect.centerx
+                center_y = rect.centery - 5
+                radius = min(rect.width, rect.height) // 3
+                
+                pygame.draw.circle(self.screen, color, (center_x, center_y), radius)
+                pygame.draw.circle(self.screen, (255, 255, 255), (center_x, center_y), radius, 2)
+                
+                # ペット名（小さく表示）
+                name_font = self.font_manager.get_font('default', 10)
+                name_surface = name_font.render(pet['name'], True, (255, 255, 255))
+                name_x = rect.centerx - name_surface.get_width() // 2
+                name_y = rect.bottom - 15
+                self.screen.blit(name_surface, (name_x, name_y))
             
             # スロット番号
+            num_surface = self.font_manager.render_text(
+                str(i + 1), "default", int(12 * self.ui_scale), (200, 200, 200)
+            )
+            self.screen.blit(num_surface, (rect.x + 2, rect.y + 2))
             slot_num = str(i + 1)
             num_surface = self.font_manager.render_text(
                 slot_num, "default", int(10 * self.ui_scale), self.colors['text']
@@ -476,6 +482,20 @@ class GameUI:
         label_rect = label_text.get_rect(centerx=timer_bg_rect.centerx, bottom=timer_bg_rect.top - 5)
         self.screen.blit(label_text, label_rect)
     
+    def add_rescued_pet(self, pet_name: str, pet_type: str):
+        """救出されたペットを追加"""
+        rescued_pet = {
+            'name': pet_name,
+            'type': pet_type,
+            'rescued_time': time.time()
+        }
+        self.rescued_pets.append(rescued_pet)
+        print(f"🎉 救出ペット追加: {pet_name} ({pet_type})")
+    
+    def clear_rescued_pets(self):
+        """救出されたペットリストをクリア"""
+        self.rescued_pets = []
+    
     # 公開メソッド
     def add_notification(self, message: str, notification_type: NotificationType = NotificationType.INFO, 
                         duration: float = 3.0):
@@ -617,3 +637,8 @@ class GameUI:
         label_text = label_font.render("残り時間", True, text_color)
         label_rect = label_text.get_rect(centerx=timer_bg_rect.centerx, bottom=timer_bg_rect.top - 5)
         self.screen.blit(label_text, label_rect)
+    def _draw_rescued_pets(self):
+        """救出されたペットを描画"""
+        if not self.rescued_pets:
+            return
+        

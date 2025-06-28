@@ -192,6 +192,9 @@ class GameScene(Scene):
         self.victory = False
         self.paused = False
         
+        # 救出ペットUIをクリア
+        self.game_ui.clear_rescued_pets()
+        
         # タイマー開始
         self.timer_system.start()
         
@@ -441,6 +444,13 @@ class GameScene(Scene):
         if pet.data.pet_id not in self.pets_rescued:
             self.pets_rescued.append(pet.data.pet_id)
             self.game_ui.add_notification(f"{pet.data.name}を救出しました！", NotificationType.SUCCESS)
+            
+            # ペットタイプを文字列に変換
+            pet_type_str = str(pet.data.pet_type).lower().replace('pettype.', '')
+            
+            # 救出されたペットをUIに追加
+            self.game_ui.add_rescued_pet(pet.data.name, pet_type_str)
+            
             self.audio_system.play_sfx("pet_rescued")
             
             # ペットを非表示にする

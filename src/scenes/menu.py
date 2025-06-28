@@ -8,6 +8,7 @@ from typing import Optional, List
 from src.core.scene import Scene
 from src.utils.asset_manager import get_asset_manager
 from src.utils.font_manager import get_font_manager
+from src.utils.language_manager import get_language_manager, Language, get_text
 
 class MenuItem:
     """メニューアイテムクラス"""
@@ -18,6 +19,87 @@ class MenuItem:
         self.hovered = False
         self.selected = False
 
+class LanguageSelector:
+    """言語選択セレクトボックス"""
+    def __init__(self, rect: pygame.Rect):
+        self.rect = rect
+        self.expanded = False
+        self.hovered = False
+        self.languages = [Language.ENGLISH, Language.JAPANESE]
+        self.language_manager = get_language_manager()
+        
+    def handle_click(self, pos: tuple) -> bool:
+        """クリック処理"""
+        if self.rect.collidepoint(pos):
+            self.expanded = not self.expanded
+            return True
+        
+        if self.expanded:
+            # 展開されている場合、各言語オプションをチェック
+            for i, lang in enumerate(self.languages):
+                option_rect = pygame.Rect(
+                    self.rect.x, 
+                    self.rect.y + (i + 1) * self.rect.height,
+                    self.rect.width, 
+                    self.rect.height
+                )
+                if option_rect.collidepoint(pos):
+                    self.language_manager.set_language(lang)
+                    self.expanded = False
+                    return True
+            
+            # 外側をクリックした場合は閉じる
+            self.expanded = False
+        
+        return False
+    
+    def update_hover(self, pos: tuple):
+        """ホバー状態を更新"""
+        self.hovered = self.rect.collidepoint(pos)
+    
+    def draw(self, screen: pygame.Surface, font: pygame.font.Font):
+        """描画"""
+        # メインボックス
+        color = (100, 100, 100) if self.hovered else (70, 70, 70)
+        pygame.draw.rect(screen, color, self.rect)
+        pygame.draw.rect(screen, (200, 200, 200), self.rect, 2)
+        
+        # 現在の言語を表示
+        current_lang = self.language_manager.get_current_language()
+        current_text = self.language_manager.get_language_display_name(current_lang)
+        text_surface = font.render(current_text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+        
+        # ドロップダウン矢印
+        arrow_points = [
+            (self.rect.right - 15, self.rect.centery - 3),
+            (self.rect.right - 10, self.rect.centery + 3),
+            (self.rect.right - 5, self.rect.centery - 3)
+        ]
+        pygame.draw.polygon(screen, (255, 255, 255), arrow_points)
+        
+        # 展開されている場合、オプションを表示
+        if self.expanded:
+            for i, lang in enumerate(self.languages):
+                option_rect = pygame.Rect(
+                    self.rect.x, 
+                    self.rect.y + (i + 1) * self.rect.height,
+                    self.rect.width, 
+                    self.rect.height
+                )
+                
+                # 背景
+                option_color = (90, 90, 90) if lang != current_lang else (120, 120, 120)
+                pygame.draw.rect(screen, option_color, option_rect)
+                pygame.draw.rect(screen, (200, 200, 200), option_rect, 1)
+                
+                # テキスト
+                option_text = self.language_manager.get_language_display_name(lang)
+                option_surface = font.render(option_text, True, (255, 255, 255))
+                option_text_rect = option_surface.get_rect(center=option_rect.center)
+                screen.blit(option_surface, option_text_rect)
+
 class MenuScene(Scene):
     """メニューシーン"""
     
@@ -27,6 +109,7 @@ class MenuScene(Scene):
         # アセットマネージャー
         self.asset_manager = get_asset_manager()
         self.font_manager = get_font_manager()
+        self.language_manager = get_language_manager()
         
         # 背景画像
         self.background_image = None
@@ -40,6 +123,9 @@ class MenuScene(Scene):
         self.normal_color = (255, 255, 255)
         self.hover_color = (255, 255, 0)
         self.selected_color = (0, 255, 0)
+        
+        # 言語選択セレクトボックス
+        self.language_selector = None
         
         self._create_menu_items()
     
@@ -65,26 +151,36 @@ class MenuScene(Scene):
         screen_width = self.screen.get_width()
         screen_height = self.screen.get_height()
         
-        # ボタンの配置
-        button_width = 200
-        button_height = 50
-        button_x = screen_width // 2 - button_width // 2
-        button_start_y = screen_height // 2
-        button_spacing = 70
+        # メニューアイテムのサイズと位置
+        item_width = 300
+        item_height = 60
+        start_y = screen_height // 2
+        spacing = 80
         
-        # メニューアイテムを作成
+        # メニューアイテムを作成（言語に応じて更新）
         menu_data = [
-            ("ゲーム開始", "game"),
-            ("ゲーム終了", "quit")
+            (get_text("start_game"), "start_game"),
+            (get_text("quit_game"), "quit_game")
         ]
         
+        self.menu_items = []
         for i, (text, action) in enumerate(menu_data):
-            rect = pygame.Rect(button_x, button_start_y + i * button_spacing, button_width, button_height)
-            item = MenuItem(text, action, rect)
-            self.menu_items.append(item)
+            x = (screen_width - item_width) // 2
+            y = start_y + i * spacing
+            rect = pygame.Rect(x, y, item_width, item_height)
+            self.menu_items.append(MenuItem(text, action, rect))
+        
+        # 言語選択セレクトボックスを作成（ゲーム終了の下）
+        lang_width = 200
+        lang_height = 40
+        lang_x = (screen_width - lang_width) // 2
+        lang_y = start_y + len(menu_data) * spacing + 20
+        lang_rect = pygame.Rect(lang_x, lang_y, lang_width, lang_height)
+        self.language_selector = LanguageSelector(lang_rect)
         
         # 最初のアイテムを選択
         if self.menu_items:
+            self.menu_items[self.selected_index].selected = True
             self.menu_items[self.selected_index].selected = True
     
     def enter(self) -> None:
@@ -109,9 +205,18 @@ class MenuScene(Scene):
         
         elif event.type == pygame.MOUSEMOTION:
             self._handle_mouse_hover(event.pos)
+            # 言語選択のホバー処理
+            if self.language_selector:
+                self.language_selector.update_hover(event.pos)
         
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # 左クリック
+                # 言語選択のクリック処理
+                if self.language_selector and self.language_selector.handle_click(event.pos):
+                    # 言語が変更された場合、メニューアイテムを再作成
+                    self._create_menu_items()
+                    return None
+                
                 return self._handle_mouse_click(event.pos)
         
         return None
@@ -133,7 +238,11 @@ class MenuScene(Scene):
     def _activate_selected(self) -> str:
         """選択されたアイテムを実行"""
         if self.menu_items and 0 <= self.selected_index < len(self.menu_items):
-            return self.menu_items[self.selected_index].action
+            action = self.menu_items[self.selected_index].action
+            if action == "start_game":
+                return "game"
+            elif action == "quit_game":
+                return "quit"
         return "game"
     
     def _handle_mouse_hover(self, pos: tuple):
@@ -154,7 +263,11 @@ class MenuScene(Scene):
         """マウスクリック処理"""
         for item in self.menu_items:
             if item.rect.collidepoint(pos):
-                return item.action
+                action = item.action
+                if action == "start_game":
+                    return "game"
+                elif action == "quit_game":
+                    return "quit"
         return None
     
     def update(self, time_delta: float) -> Optional[str]:
@@ -170,8 +283,36 @@ class MenuScene(Scene):
             # 背景画像がない場合はグラデーション背景
             self._draw_gradient_background(surface)
         
+        # タイトル描画
+        self._draw_title(surface)
+        
         # メニューアイテムを描画
         self._draw_menu_items(surface)
+        
+        # 言語選択を描画
+        if self.language_selector:
+            font = self.font_manager.get_font("default", 24)
+            
+            # "Language" ラベル
+            label_text = get_text("language")
+            label_surface = font.render(label_text, True, (255, 255, 255))
+            label_rect = label_surface.get_rect()
+            label_rect.centerx = self.language_selector.rect.centerx
+            label_rect.bottom = self.language_selector.rect.top - 10
+            surface.blit(label_surface, label_rect)
+            
+            # 言語選択ボックス
+            self.language_selector.draw(surface, font)
+    
+    def _draw_title(self, surface: pygame.Surface):
+        """タイトルを描画"""
+        title_font = self.font_manager.get_font("default", 48)
+        title_text = "Mystery Pet Rescue"
+        title_surface = title_font.render(title_text, True, (255, 255, 255))
+        title_rect = title_surface.get_rect()
+        title_rect.centerx = surface.get_width() // 2
+        title_rect.y = 100
+        surface.blit(title_surface, title_rect)
     
     def _draw_menu_items(self, surface: pygame.Surface):
         """メニューアイテムを描画"""

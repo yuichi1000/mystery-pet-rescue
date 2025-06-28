@@ -17,6 +17,7 @@ from src.systems.pet_data_loader import get_pet_data_loader
 from src.ui.game_ui import GameUI, NotificationType, QuickSlotItem
 from src.utils.asset_manager import get_asset_manager
 from src.utils.font_manager import get_font_manager
+from src.utils.language_manager import get_language_manager, get_text
 
 class GameScene(Scene):
     """ゲームシーン"""
@@ -62,6 +63,7 @@ class GameScene(Scene):
         # アセットマネージャーとフォントマネージャー
         self.asset_manager = get_asset_manager()
         self.font_manager = get_font_manager()
+        self.language_manager = get_language_manager()
         
         # 背景画像の読み込み
         self.background_image = None
@@ -206,7 +208,7 @@ class GameScene(Scene):
         self.audio_system.play_bgm("residential_bgm")
         
         # UIに初期状態を設定
-        self.game_ui.add_notification("ペットを探しましょう！", NotificationType.INFO)
+        self.game_ui.add_notification(get_text("find_pets"), NotificationType.INFO)
         self._update_ui_stats()
     
     def exit(self) -> None:
@@ -229,10 +231,10 @@ class GameScene(Scene):
                 self.paused = not self.paused
                 if self.paused:
                     self.timer_system.pause()
-                    self.game_ui.add_notification("ゲーム一時停止", NotificationType.INFO)
+                    self.game_ui.add_notification(get_text("game_paused"), NotificationType.INFO)
                 else:
                     self.timer_system.start()
-                    self.game_ui.add_notification("ゲーム再開", NotificationType.INFO)
+                    self.game_ui.add_notification(get_text("game_resumed"), NotificationType.INFO)
             
             elif event.key == pygame.K_c:
                 # デモではCキーでペット図鑑切り替えはなし
@@ -371,7 +373,7 @@ class GameScene(Scene):
             time_bonus = self.timer_system.calculate_time_bonus()
             bonus_message = f"タイムボーナス: {time_bonus}点"
             
-            self.game_ui.add_notification("全てのペットを救出しました！", NotificationType.SUCCESS)
+            self.game_ui.add_notification(get_text("all_pets_rescued"), NotificationType.SUCCESS)
             self.game_ui.add_notification(bonus_message, NotificationType.INFO)
             print("🎉 勝利条件達成！")
             
@@ -629,7 +631,7 @@ class GameScene(Scene):
     def start_game(self):
         """ゲーム開始（タイマー開始）"""
         self.timer_system.start()
-        self.game_ui.add_notification("ペットを探しましょう！", NotificationType.INFO)
+        self.game_ui.add_notification(get_text("find_pets"), NotificationType.INFO)
     def _draw_victory_screen(self, surface: pygame.Surface):
         """勝利画面を描画"""
         # 半透明オーバーレイ

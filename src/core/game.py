@@ -107,8 +107,8 @@ class Game:
         # 謎解きUI初期化（削除済み）
         # self.puzzle_ui = PuzzleUI(self.screen, self.puzzle_system)
         
-        # マップ読み込み
-        self.map_system.load_map("default_map.json")
+        # マップ読み込み（現在は使用されていない - scenes/game.pyで管理）
+        # self.map_system.load_map("realistic_city_v1.json")
         
         # プレイヤー位置をスポーン地点に設定
         spawn_point = self.map_system.get_spawn_point("player")

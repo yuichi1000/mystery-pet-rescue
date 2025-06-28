@@ -317,6 +317,9 @@ class MenuScene(Scene):
             
             # 言語選択ボックス
             self.language_selector.draw(surface, font)
+            print(f"🎨 言語選択ボックス描画完了: {self.language_selector.rect}")
+        else:
+            print("❌ 言語選択ボックスが存在しません")
     
     def _draw_title(self, surface: pygame.Surface):
         """タイトルを描画"""

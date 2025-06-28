@@ -478,7 +478,8 @@ class MapSystem:
             screen.blit(self.map_surface, (0, 0), source_rect)
         
         # 建物を描画
-        self.building_system.draw_buildings(screen, (int(camera_x), int(camera_y)))
+        debug_collision = getattr(self, 'debug_collision', False)
+        self.building_system.draw_buildings(screen, (int(camera_x), int(camera_y)), debug_collision)
     
     def get_tile_at_position(self, world_x: float, world_y: float) -> Optional[TileType]:
         """ワールド座標のタイルタイプを取得"""
@@ -494,20 +495,24 @@ class MapSystem:
         
         return None
     
-    def is_walkable(self, world_x: float, world_y: float) -> bool:
+    def is_walkable(self, world_x: float, world_y: float, debug: bool = False) -> bool:
         """指定位置が歩行可能かチェック"""
         tile_type = self.get_tile_at_position(world_x, world_y)
         if tile_type is None:
+            if debug:
+                print(f"🚫 マップ境界外: ({world_x:.1f}, {world_y:.1f})")
             return False
         
         tile_data = self.tile_definitions.get(tile_type)
         if not (tile_data.walkable if tile_data else True):
+            if debug:
+                print(f"🚫 タイル衝突: {tile_type.value} at ({world_x:.1f}, {world_y:.1f})")
             return False
         
         # 建物による衝突もチェック
         tile_x = int(world_x // self.tile_size)
         tile_y = int(world_y // self.tile_size)
-        if self.building_system.is_position_blocked_by_building(tile_x, tile_y):
+        if self.building_system.is_position_blocked_by_building(tile_x, tile_y, debug):
             return False
         
         return True
@@ -533,12 +538,14 @@ class MapSystem:
         if self._check_building_collision(rect):
             return True
         
-        # タイル衝突チェック（マップ内の場合のみ）
+        # タイル衝突チェック（プレイヤーの足元を重点的にチェック）
+        # プレイヤーの足元（下半分）の4つの角をチェック
+        foot_top = rect.centery  # プレイヤーの中央から下を足元とする
         corners = [
-            (rect.left, rect.top),
-            (rect.right - 1, rect.top),
-            (rect.left, rect.bottom - 1),
-            (rect.right - 1, rect.bottom - 1)
+            (rect.left + 2, foot_top),      # 左足
+            (rect.right - 3, foot_top),     # 右足  
+            (rect.left + 2, rect.bottom - 2),   # 左足先
+            (rect.right - 3, rect.bottom - 2)   # 右足先
         ]
         
         for x, y in corners:

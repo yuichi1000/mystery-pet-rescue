@@ -237,6 +237,30 @@ class GameScene(Scene):
             elif event.key == pygame.K_c:
                 # デモではCキーでペット図鑑切り替えはなし
                 pass
+            
+            elif event.key == pygame.K_F5:
+                # デバッグ: 衝突判定情報を表示
+                player_tile_x = int(self.player.x // 64)
+                player_tile_y = int(self.player.y // 64)
+                print(f"🔍 プレイヤー位置: ピクセル({self.player.x:.1f}, {self.player.y:.1f}) タイル({player_tile_x}, {player_tile_y})")
+                
+                # 周辺の衝突判定をチェック
+                for dy in range(-2, 3):
+                    for dx in range(-2, 3):
+                        check_x = player_tile_x + dx
+                        check_y = player_tile_y + dy
+                        is_blocked = self.map_system.building_system.is_position_blocked_by_building(check_x, check_y, debug=True)
+                        tile_type = self.map_system.get_tile_at_position(check_x * 64, check_y * 64)
+                        print(f"  タイル({check_x}, {check_y}): {'🚫' if is_blocked else '✅'} {tile_type.value if tile_type else 'None'}")
+                
+                self.game_ui.add_notification("衝突判定情報をコンソールに出力", NotificationType.INFO)
+            
+            elif event.key == pygame.K_F6:
+                # デバッグ: 衝突判定の視覚表示を切り替え
+                self.map_system.debug_collision = not getattr(self.map_system, 'debug_collision', False)
+                status = "ON" if self.map_system.debug_collision else "OFF"
+                self.game_ui.add_notification(f"衝突判定表示: {status}", NotificationType.INFO)
+                print(f"🔍 衝突判定表示: {status}")
         
         elif event.type == pygame.USEREVENT + 1:
             # ゲーム完了タイマー（旧）

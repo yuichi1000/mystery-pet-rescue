@@ -56,11 +56,8 @@ class BuildingSystem:
         }
         
         for building_type, path in building_paths.items():
-            # 建物は大きいので、基本サイズの2-3倍で読み込み
-            sprite = self.asset_manager.load_image(
-                path,
-                (self.tile_size * 4, self.tile_size * 3)  # 4x3タイルサイズ
-            )
+            # 建物画像を元のサイズで読み込み（描画時にスケール）
+            sprite = self.asset_manager.load_image(path)
             if sprite:
                 self.building_sprites[building_type] = sprite
                 print(f"✅ 建物画像読み込み: {building_type.value}")
@@ -92,7 +89,7 @@ class BuildingSystem:
         
         print(f"✅ 建物読み込み完了: {len(self.buildings)}軒")
     
-    def draw_buildings(self, screen: pygame.Surface, camera_offset: Tuple[int, int]):
+    def draw_buildings(self, screen: pygame.Surface, camera_offset: Tuple[int, int], debug_collision: bool = False):
         """建物を描画"""
         for building in self.buildings:
             sprite = self.building_sprites.get(building.building_type)
@@ -116,6 +113,15 @@ class BuildingSystem:
                         (building.size[0] * self.tile_size, building.size[1] * self.tile_size)
                     )
                     screen.blit(scaled_sprite, (pixel_x, pixel_y))
+                    
+                    # デバッグ: 衝突判定エリアを表示
+                    if debug_collision:
+                        collision_rect = pygame.Rect(
+                            pixel_x, pixel_y,
+                            building.size[0] * self.tile_size,
+                            building.size[1] * self.tile_size
+                        )
+                        pygame.draw.rect(screen, (255, 0, 0, 100), collision_rect, 2)  # 赤い枠
     
     def get_building_at_position(self, tile_x: int, tile_y: int) -> Optional[Building]:
         """指定位置の建物を取得"""
@@ -147,9 +153,27 @@ class BuildingSystem:
         
         return nearby_buildings
     
-    def is_position_blocked_by_building(self, tile_x: int, tile_y: int) -> bool:
+    def is_position_blocked_by_building(self, tile_x: int, tile_y: int, debug: bool = False) -> bool:
         """指定位置が建物によってブロックされているかチェック"""
-        return self.get_building_at_position(tile_x, tile_y) is not None
+        for building in self.buildings:
+            bx, by = building.position
+            bw, bh = building.size
+            
+            # 建物の全エリア + 周辺1タイルを衝突判定とする
+            # これにより建物画像と重ならず、適切な距離を保てる
+            buffer = 0  # 周辺バッファ（建物に密着して歩けるように0に設定）
+            
+            collision_x1 = bx - buffer
+            collision_y1 = by - buffer  
+            collision_x2 = bx + bw + buffer
+            collision_y2 = by + bh + buffer
+            
+            if collision_x1 <= tile_x < collision_x2 and collision_y1 <= tile_y < collision_y2:
+                if debug:
+                    print(f"🏠 建物衝突: {building.name} at ({tile_x}, {tile_y}) - 建物エリア: ({collision_x1}, {collision_y1}) to ({collision_x2}, {collision_y2})")
+                return True
+        
+        return False
     
     def get_building_info(self, building_id: str) -> Optional[Dict[str, Any]]:
         """建物情報を取得"""

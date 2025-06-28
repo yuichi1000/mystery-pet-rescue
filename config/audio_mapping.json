@@ -1,0 +1,120 @@
+{
+  "bgm": {
+    "menu_bgm": {
+      "file": "music/menu_bgm.mp3",
+      "duration": 45,
+      "loop": true,
+      "volume": 0.7,
+      "description": "メニュー画面用の落ち着いたBGM"
+    },
+    "residential_bgm": {
+      "file": "music/residential_bgm.mp3",
+      "duration": 60,
+      "loop": true,
+      "volume": 0.7,
+      "description": "住宅街探索用の平和なBGM"
+    },
+    "tension_bgm": {
+      "file": "music/tension_bgm.mp3",
+      "duration": 30,
+      "loop": true,
+      "volume": 0.7,
+      "description": "時間切迫時の緊張感あるBGM"
+    },
+    "victory_bgm": {
+      "file": "music/victory_bgm.mp3",
+      "duration": 20,
+      "loop": false,
+      "volume": 0.7,
+      "description": "ゲームクリア時の勝利BGM"
+    },
+    "gameover_bgm": {
+      "file": "music/gameover_bgm.mp3",
+      "duration": 15,
+      "loop": false,
+      "volume": 0.7,
+      "description": "ゲームオーバー時のBGM"
+    }
+  },
+  "sfx": {
+    "menu_select": {
+      "file": "sounds/menu_select.mp3",
+      "duration": 0.3,
+      "volume": 0.8,
+      "description": "メニュー選択音"
+    },
+    "menu_confirm": {
+      "file": "sounds/menu_confirm.mp3",
+      "duration": 0.5,
+      "volume": 0.8,
+      "description": "メニュー決定音"
+    },
+    "menu_cancel": {
+      "file": "sounds/menu_cancel.mp3",
+      "duration": 0.4,
+      "volume": 0.8,
+      "description": "メニューキャンセル音"
+    },
+    "footstep": {
+      "file": "sounds/footstep.mp3",
+      "duration": 0.2,
+      "volume": 0.8,
+      "description": "足音"
+    },
+    "pet_found": {
+      "file": "sounds/pet_found.mp3",
+      "duration": 1.0,
+      "volume": 0.8,
+      "description": "ペット発見音"
+    },
+    "pet_rescued": {
+      "file": "sounds/pet_rescued.mp3",
+      "duration": 1.5,
+      "volume": 0.8,
+      "description": "ペット救出音"
+    },
+    "item_pickup": {
+      "file": "sounds/item_pickup.mp3",
+      "duration": 0.3,
+      "volume": 0.8,
+      "description": "アイテム取得音"
+    },
+    "puzzle_solve": {
+      "file": "sounds/puzzle_solve.mp3",
+      "duration": 1.0,
+      "volume": 0.8,
+      "description": "パズル解決音"
+    },
+    "notification": {
+      "file": "sounds/notification.mp3",
+      "duration": 0.5,
+      "volume": 0.8,
+      "description": "通知音"
+    },
+    "timer_warning": {
+      "file": "sounds/timer_warning.mp3",
+      "duration": 0.8,
+      "volume": 0.8,
+      "description": "時間警告音"
+    },
+    "timer_critical": {
+      "file": "sounds/timer_critical.mp3",
+      "duration": 1.0,
+      "volume": 0.8,
+      "description": "時間切迫警告音"
+    },
+    "ambient_birds": {
+      "file": "sounds/ambient_birds.mp3",
+      "duration": 3.0,
+      "volume": 0.8,
+      "description": "鳥のさえずり環境音"
+    }
+  },
+  "settings": {
+    "master_volume": 0.8,
+    "bgm_volume": 0.7,
+    "sfx_volume": 0.8,
+    "loop_bgm": true,
+    "fade_duration": 1.0
+  }
+}

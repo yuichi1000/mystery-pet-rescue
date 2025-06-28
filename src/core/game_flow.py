@@ -10,6 +10,7 @@ from src.core.scene import Scene
 from src.scenes.menu import MenuScene
 from src.scenes.game import GameScene
 from src.scenes.result import ResultScene
+from src.systems.audio_system import AudioSystem
 
 class GameFlowManager:
     """ゲームフロー管理クラス"""
@@ -19,6 +20,9 @@ class GameFlowManager:
         self.current_scene: Optional[Scene] = None
         self.scenes: Dict[str, Scene] = {}
         self.running = True
+        
+        # 音楽システム初期化
+        self.audio_system = AudioSystem()
         
         # ゲーム状態
         self.game_start_time = 0
@@ -55,6 +59,7 @@ class GameFlowManager:
         """
         if scene_name == "quit":
             self.running = False
+            self.audio_system.stop_bgm()
             return True
         
         # 現在のシーンを終了
@@ -72,6 +77,8 @@ class GameFlowManager:
                 'score': 0
             }
             self.scenes["game"] = GameScene(self.screen, self)
+            # ゲームBGM再生
+            self.audio_system.play_bgm("residential_bgm")
             
         elif scene_name == "result":
             # ゲーム終了時の処理
@@ -80,13 +87,22 @@ class GameFlowManager:
                 self.game_result = self._collect_game_result(game_scene)
             self.scenes["result"] = ResultScene(self.screen, self.game_result)
             
+            # 結果に応じてBGM再生
+            if self.game_result.get('pets_rescued', 0) >= self.game_result.get('total_pets', 4):
+                # 勝利BGM
+                self.audio_system.play_bgm("victory_bgm")
+            else:
+                # ゲームオーバーBGM
+                self.audio_system.play_bgm("gameover_bgm")
+            
         elif scene_name == "menu":
-            # メニューシーンは既に作成済み
-            pass
+            # メニューBGM再生
+            self.audio_system.play_bgm("menu_bgm")
         
         # シーンが存在しない場合はメニューに戻る
         if scene_name not in self.scenes:
             scene_name = "menu"
+            self.audio_system.play_bgm("menu_bgm")
         
         # 新しいシーンを設定
         self.current_scene = self.scenes[scene_name]

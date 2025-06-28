@@ -1,0 +1,15 @@
+{
+  "params": {
+    "scene_type": "defeat",
+    "mood": "sad",
+    "duration": 15,
+    "style": "ambient",
+    "tempo": "medium",
+    "instruments": [
+      "piano",
+      "strings"
+    ]
+  },
+  "generated_at": 1751115925.366674,
+  "file_size": 320827
+}

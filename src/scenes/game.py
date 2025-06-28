@@ -16,7 +16,6 @@ from src.systems.timer_system import TimerSystem
 from src.systems.map_data_loader import get_map_data_loader
 from src.systems.pet_data_loader import get_pet_data_loader
 from src.ui.game_ui import GameUI, NotificationType, QuickSlotItem
-from src.ui.puzzle_ui import PuzzleUI
 from src.utils.asset_manager import get_asset_manager
 from src.utils.font_manager import get_font_manager
 
@@ -87,7 +86,6 @@ class GameScene(Scene):
         
         # パズルシステム初期化
         self.puzzle_system = PuzzleSystem()
-        self.puzzle_ui = PuzzleUI(self.screen, self.puzzle_system)
         self.current_puzzle = None
         
         # UI初期化
@@ -216,7 +214,6 @@ class GameScene(Scene):
                 if self.current_puzzle:
                     # パズル中の場合はパズルを終了
                     self.current_puzzle = None
-                    self.puzzle_ui.hide()
                 else:
                     # ゲームを一時停止してメニューに戻る
                     return "menu"
@@ -254,14 +251,8 @@ class GameScene(Scene):
         
         # パズル中の場合はパズルUIにイベントを渡す
         if self.current_puzzle:
-            puzzle_result = self.puzzle_ui.handle_event(event)
-            if puzzle_result == "solved":
-                self._handle_puzzle_solved()
-            elif puzzle_result == "failed":
-                self._handle_puzzle_failed()
-            elif puzzle_result == "cancelled":
-                self.current_puzzle = None
-                self.puzzle_ui.hide()
+            # パズル機能削除済み - 何もしない
+            pass
         else:
             # 通常のゲームイベント処理
             self.player.handle_event(event)
@@ -298,9 +289,9 @@ class GameScene(Scene):
         # ペットとの衝突判定
         self._check_pet_interactions()
         
-        # パズル更新
-        if self.current_puzzle:
-            self.puzzle_ui.update(time_delta, [])
+        # パズル更新（削除済み）
+        # if self.current_puzzle:
+        #     self.puzzle_ui.update(time_delta, [])
         
         # UI更新
         self.game_ui.update(time_delta)
@@ -360,18 +351,18 @@ class GameScene(Scene):
         # if self.background_image:
         #     surface.blit(self.background_image, (0, 0))
         
-        # ペット描画
+        # ペット描画（救出済みは非表示）
         for pet in self.pets:
-            if pet.data.pet_id not in self.pets_rescued:
+            if pet.data.pet_id not in self.pets_rescued and not getattr(pet, 'rescued', False):
                 pet.draw(surface, (self.camera_x, self.camera_y))
         
         # プレイヤー描画
         camera_offset = (self.camera_x, self.camera_y)
         self.player.draw(surface, camera_offset)
         
-        # パズルUI描画
-        if self.current_puzzle:
-            self.puzzle_ui.draw()
+        # パズルUI描画（削除済み）
+        # if self.current_puzzle:
+        #     self.puzzle_ui.draw()
         
         # ゲームUI描画
         player_stats = {
@@ -434,61 +425,27 @@ class GameScene(Scene):
             pet_rect = pygame.Rect(pet.x - 20, pet.y - 20, 40, 40)
             
             if player_rect.colliderect(pet_rect):
-                # ペットとの接触時にパズル開始
-                if not self.current_puzzle:
-                    self._start_pet_puzzle(pet)
-    
-    def _start_pet_puzzle(self, pet: Pet):
-        """ペットパズルを開始"""
-        # 既存の謎解きIDを使用（ペットタイプに関係なく順番に割り当て）
-        pet_type_to_puzzle = {
-            "dog": "puzzle_001",
-            "cat": "puzzle_002", 
-            "rabbit": "puzzle_003",
-            "bird": "puzzle_001"  # 鳥は最初の謎解きを再利用
-        }
-        
-        puzzle_id = pet_type_to_puzzle.get(pet.data.pet_type.value, "puzzle_001")
-        puzzle_data = self.puzzle_system.get_puzzle_data(puzzle_id)
-        
-        if puzzle_data:
-            puzzle_data['pet_id'] = pet.data.pet_id  # ペットIDを追加
-            self.current_puzzle = puzzle_data
-            self.puzzle_ui.start_puzzle(puzzle_id)  # 正しいメソッド名を使用
-        else:
-            # パズルが見つからない場合は簡単な相互作用
-            self.game_ui.add_notification(f"{pet.data.name}と仲良くなりました！", NotificationType.SUCCESS)
-            # ペットを救出リストに追加
-            if pet.data.pet_id not in self.pets_rescued:
-                self.pets_rescued.append(pet.data.pet_id)
-                self.game_ui.add_notification("ペットを救出しました！", NotificationType.SUCCESS)
-                # 効果音再生
-                self.audio_system.play_sfx("pet_rescued")
-        
-        # ペット発見効果音
-        self.audio_system.play_sfx("pet_found")
-        self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
-    
-    def _handle_puzzle_solved(self):
-        """パズル解決時の処理"""
-        if self.current_puzzle:
-            pet_id = self.current_puzzle.get('pet_id')
-            if pet_id:
-                self.pets_rescued.append(pet_id)
-                self.game_ui.add_notification("ペットを救出しました！", NotificationType.SUCCESS)
+                # ペット発見通知（1回のみ）
+                if not hasattr(pet, 'discovered'):
+                    pet.discovered = True
+                    self.audio_system.play_sfx("pet_found")
+                    self.game_ui.add_notification(f"{pet.data.name}を見つけました！", NotificationType.INFO)
+                    self.game_ui.add_notification("Eキーで救出できます", NotificationType.INFO)
                 
-                # フローマネージャーに通知
-                if self.flow_manager:
-                    self.flow_manager.notify_pet_rescued(pet_id)
-        
-        self.current_puzzle = None
-        self.puzzle_ui.hide()
+                # Eキーで救出
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_e]:
+                    self._rescue_pet(pet)
     
-    def _handle_puzzle_failed(self):
-        """パズル失敗時の処理"""
-        self.game_ui.add_notification("もう一度挑戦してみましょう", NotificationType.WARNING)
-        self.current_puzzle = None
-        self.puzzle_ui.hide()
+    def _rescue_pet(self, pet: Pet):
+        """ペットを救出（パズルなし）"""
+        if pet.data.pet_id not in self.pets_rescued:
+            self.pets_rescued.append(pet.data.pet_id)
+            self.game_ui.add_notification(f"{pet.data.name}を救出しました！", NotificationType.SUCCESS)
+            self.audio_system.play_sfx("pet_rescued")
+            
+            # ペットを非表示にする
+            pet.rescued = True
     
     def _calculate_final_score(self) -> int:
         """最終スコアを計算"""

@@ -16,7 +16,6 @@ from src.entities.player import Player
 from src.entities.pet import Pet, PetData, PetType
 from src.systems.puzzle_system import PuzzleSystem
 from src.systems.map_system import MapSystem
-from src.ui.puzzle_ui import PuzzleUI
 from src.utils.asset_manager import get_asset_manager
 from src.utils.font_manager import get_font_manager
 
@@ -106,8 +105,8 @@ class Game:
         # ペット作成
         self._create_pets()
         
-        # 謎解きUI初期化
-        self.puzzle_ui = PuzzleUI(self.screen, self.puzzle_system)
+        # 謎解きUI初期化（削除済み）
+        # self.puzzle_ui = PuzzleUI(self.screen, self.puzzle_system)
         
         # マップ読み込み
         self.map_system.load_map("default_map.json")

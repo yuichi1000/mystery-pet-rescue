@@ -86,7 +86,7 @@
       "id": "house_01",
       "type": "house_residential",
       "position": {"x": 3, "y": 2},
-      "size": {"width": 4, "height": 2},
+      "size": {"width": 3, "height": 2},
       "name": "田中さんの家",
       "name_en": "Tanaka House",
       "interactable": true,
@@ -96,7 +96,7 @@
       "id": "house_02", 
       "type": "house_residential",
       "position": {"x": 12, "y": 2},
-      "size": {"width": 4, "height": 2},
+      "size": {"width": 3, "height": 2},
       "name": "佐藤さんの家",
       "name_en": "Sato House",
       "interactable": true,
@@ -105,94 +105,171 @@
     {
       "id": "house_03",
       "type": "house_residential",
+      "position": {"x": 18, "y": 2},
+      "size": {"width": 3, "height": 2},
+      "name": "鈴木さんの家",
+      "name_en": "Suzuki House",
+      "interactable": true,
+      "description": "コンパクトな家"
+    },
+    {
+      "id": "house_04",
+      "type": "house_residential",
       "position": {"x": 3, "y": 7},
-      "size": {"width": 4, "height": 2},
+      "size": {"width": 3, "height": 2},
       "name": "山田さんの家",
       "name_en": "Yamada House", 
       "interactable": true,
       "description": "ペットを飼っている家"
     },
     {
-      "id": "house_04",
+      "id": "house_05",
       "type": "house_residential",
       "position": {"x": 12, "y": 7},
-      "size": {"width": 4, "height": 2},
+      "size": {"width": 3, "height": 2},
       "name": "高橋さんの家",
       "name_en": "Takahashi House",
       "interactable": true,
       "description": "赤い屋根の家"
     },
     {
+      "id": "house_06",
+      "type": "house_residential",
+      "position": {"x": 18, "y": 7},
+      "size": {"width": 3, "height": 2},
+      "name": "伊藤さんの家",
+      "name_en": "Ito House",
+      "interactable": true,
+      "description": "角地の家"
+    },
+    {
       "id": "petshop_01",
       "type": "house_petshop",
-      "position": {"x": 9, "y": 11},
-      "size": {"width": 4, "height": 2},
+      "position": {"x": 8, "y": 11},
+      "size": {"width": 3, "height": 2},
       "name": "ハッピーペットショップ",
       "name_en": "Happy Pet Shop",
       "interactable": true,
-      "description": "街で唯一のペットショップ",
+      "description": "街で人気のペットショップ",
+      "special": true
+    },
+    {
+      "id": "petshop_02",
+      "type": "house_petshop",
+      "position": {"x": 14, "y": 11},
+      "size": {"width": 3, "height": 2},
+      "name": "アニマルフレンズ",
+      "name_en": "Animal Friends",
+      "interactable": true,
+      "description": "小さなペット用品店",
       "special": true
     },
     {
       "id": "park_01",
       "type": "park_facility",
       "position": {"x": 19, "y": 12},
-      "size": {"width": 4, "height": 3},
+      "size": {"width": 3, "height": 2},
       "name": "みどり公園",
       "name_en": "Midori Park",
       "interactable": true,
       "description": "池がある小さな公園"
     },
     {
-      "id": "house_05",
+      "id": "park_02",
+      "type": "park_facility",
+      "position": {"x": 2, "y": 12},
+      "size": {"width": 3, "height": 2},
+      "name": "ちびっこ広場",
+      "name_en": "Kids Plaza",
+      "interactable": true,
+      "description": "子供たちの遊び場"
+    },
+    {
+      "id": "house_07",
       "type": "house_residential",
       "position": {"x": 3, "y": 17},
-      "size": {"width": 4, "height": 2},
+      "size": {"width": 3, "height": 2},
       "name": "松本さんの家",
       "name_en": "Matsumoto House",
       "interactable": true,
       "description": "南側住宅街の家"
     },
     {
-      "id": "house_06",
+      "id": "house_08",
       "type": "house_residential",
       "position": {"x": 12, "y": 17},
-      "size": {"width": 4, "height": 2},
+      "size": {"width": 3, "height": 2},
       "name": "井上さんの家",
       "name_en": "Inoue House",
       "interactable": true,
       "description": "庭が広い家"
+    },
+    {
+      "id": "house_09",
+      "type": "house_residential",
+      "position": {"x": 18, "y": 17},
+      "size": {"width": 3, "height": 2},
+      "name": "木村さんの家",
+      "name_en": "Kimura House",
+      "interactable": true,
+      "description": "新築の家"
+    },
+    {
+      "id": "house_10",
+      "type": "house_residential",
+      "position": {"x": 8, "y": 5},
+      "size": {"width": 3, "height": 2},
+      "name": "小川さんの家",
+      "name_en": "Ogawa House",
+      "interactable": true,
+      "description": "中央の家"
+    },
+    {
+      "id": "house_11",
+      "type": "house_residential",
+      "position": {"x": 8, "y": 15},
+      "size": {"width": 3, "height": 2},
+      "name": "中村さんの家",
+      "name_en": "Nakamura House",
+      "interactable": true,
+      "description": "南中央の家"
     }
   ],
   "decorations": [
     {
       "type": "tree",
       "positions": [
-        {"x": 2, "y": 5}, {"x": 8, "y": 5}, {"x": 17, "y": 5},
-        {"x": 2, "y": 10}, {"x": 8, "y": 10}, {"x": 17, "y": 10},
-        {"x": 19, "y": 9}, {"x": 20, "y": 11}, {"x": 22, "y": 13}, {"x": 21, "y": 15}
+        {"x": 2, "y": 5}, {"x": 7, "y": 5}, {"x": 11, "y": 5}, {"x": 17, "y": 5}, {"x": 22, "y": 5},
+        {"x": 2, "y": 10}, {"x": 7, "y": 10}, {"x": 17, "y": 10}, {"x": 22, "y": 10},
+        {"x": 19, "y": 9}, {"x": 20, "y": 11}, {"x": 22, "y": 13}, {"x": 21, "y": 15},
+        {"x": 2, "y": 14}, {"x": 6, "y": 14}, {"x": 2, "y": 16}, {"x": 7, "y": 16},
+        {"x": 1, "y": 1}, {"x": 23, "y": 1}, {"x": 1, "y": 18}, {"x": 23, "y": 18}
       ]
     },
     {
       "type": "bush",
       "positions": [
-        {"x": 7, "y": 4}, {"x": 16, "y": 4},
-        {"x": 7, "y": 9}, {"x": 16, "y": 9},
-        {"x": 18, "y": 10}, {"x": 23, "y": 12}
+        {"x": 7, "y": 4}, {"x": 16, "y": 4}, {"x": 21, "y": 4},
+        {"x": 7, "y": 9}, {"x": 16, "y": 9}, {"x": 21, "y": 9},
+        {"x": 18, "y": 10}, {"x": 23, "y": 12}, {"x": 1, "y": 13},
+        {"x": 5, "y": 13}, {"x": 1, "y": 15}, {"x": 6, "y": 15},
+        {"x": 17, "y": 16}, {"x": 22, "y": 16}
       ]
     },
     {
       "type": "flower_bed",
       "positions": [
-        {"x": 11, "y": 3}, {"x": 15, "y": 3},
-        {"x": 11, "y": 8}, {"x": 15, "y": 8},
-        {"x": 8, "y": 13}, {"x": 14, "y": 13}
+        {"x": 11, "y": 3}, {"x": 15, "y": 3}, {"x": 17, "y": 3},
+        {"x": 11, "y": 8}, {"x": 15, "y": 8}, {"x": 17, "y": 8},
+        {"x": 8, "y": 13}, {"x": 13, "y": 13}, {"x": 18, "y": 13},
+        {"x": 11, "y": 18}, {"x": 15, "y": 18}, {"x": 17, "y": 18},
+        {"x": 2, "y": 12}, {"x": 4, "y": 12}
       ]
     },
     {
       "type": "rock",
       "positions": [
-        {"x": 20, "y": 10}, {"x": 22, "y": 14}
+        {"x": 20, "y": 10}, {"x": 22, "y": 14}, {"x": 3, "y": 13}, {"x": 4, "y": 14}
       ]
     },
     {
@@ -212,7 +289,7 @@
       "spawn_position": {"x": 5, "y": 4},
       "hiding_spots": [
         {"x": 5, "y": 4, "description": "田中さんの家の庭"},
-        {"x": 8, "y": 6, "description": "街路樹の陰"},
+        {"x": 9, "y": 6, "description": "小川さんの家の前"},
         {"x": 14, "y": 9, "description": "佐藤さんの家の裏"}
       ],
       "personality": "friendly",
@@ -224,10 +301,10 @@
       "type": "cat",
       "name": "ミケ",
       "name_en": "Mike",
-      "spawn_position": {"x": 14, "y": 8},
+      "spawn_position": {"x": 19, "y": 8},
       "hiding_spots": [
-        {"x": 14, "y": 8, "description": "高橋さんの家の屋根"},
-        {"x": 11, "y": 12, "description": "商店街の路地"},
+        {"x": 19, "y": 8, "description": "伊藤さんの家の屋根"},
+        {"x": 15, "y": 12, "description": "アニマルフレンズの看板"},
         {"x": 16, "y": 6, "description": "高い塀の上"}
       ],
       "personality": "cautious",
@@ -241,8 +318,8 @@
       "name_en": "Usata",
       "spawn_position": {"x": 21, "y": 14},
       "hiding_spots": [
-        {"x": 21, "y": 14, "description": "公園の茂みの中"},
-        {"x": 20, "y": 12, "description": "池の近くの草むら"},
+        {"x": 21, "y": 14, "description": "みどり公園の茂みの中"},
+        {"x": 3, "y": 13, "description": "ちびっこ広場の草むら"},
         {"x": 22, "y": 10, "description": "大きな木の根元"}
       ],
       "personality": "timid",
@@ -254,11 +331,11 @@
       "type": "bird",
       "name": "ピーちゃん",
       "name_en": "Pii-chan", 
-      "spawn_position": {"x": 11, "y": 12},
+      "spawn_position": {"x": 10, "y": 12},
       "hiding_spots": [
-        {"x": 11, "y": 12, "description": "ペットショップの看板"},
-        {"x": 19, "y": 9, "description": "公園の高い木"},
-        {"x": 8, "y": 10, "description": "街路樹の枝"}
+        {"x": 10, "y": 12, "description": "ハッピーペットショップの看板"},
+        {"x": 19, "y": 9, "description": "みどり公園の高い木"},
+        {"x": 7, "y": 10, "description": "街路樹の枝"}
       ],
       "personality": "energetic",
       "required_item": "bird_seed",
@@ -270,37 +347,44 @@
       "id": "dog_treat",
       "name": "犬のおやつ",
       "name_en": "Dog Treat",
-      "position": {"x": 10, "y": 12},
-      "description": "ペットショップで売っている犬用おやつ"
+      "position": {"x": 9, "y": 12},
+      "description": "ハッピーペットショップで売っている犬用おやつ"
     },
     {
       "id": "cat_food",
       "name": "キャットフード",
       "name_en": "Cat Food", 
-      "position": {"x": 9, "y": 12},
-      "description": "猫の好物の缶詰"
+      "position": {"x": 15, "y": 12},
+      "description": "アニマルフレンズの猫の好物の缶詰"
     },
     {
       "id": "carrot",
       "name": "ニンジン",
       "name_en": "Carrot",
-      "position": {"x": 11, "y": 3},
-      "description": "田中さんの家の花壇で育てているニンジン"
+      "position": {"x": 13, "y": 3},
+      "description": "佐藤さんの家の花壇で育てているニンジン"
     },
     {
       "id": "bird_seed",
       "name": "鳥の餌",
       "name_en": "Bird Seed",
-      "position": {"x": 12, "y": 12},
+      "position": {"x": 10, "y": 12},
       "description": "小鳥用の種のミックス"
+    },
+    {
+      "id": "extra_treat",
+      "name": "特製おやつ",
+      "name_en": "Special Treat",
+      "position": {"x": 3, "y": 13},
+      "description": "ちびっこ広場で見つけた特別なおやつ"
     }
   ],
   "npcs": [
     {
-      "id": "shop_owner",
+      "id": "shop_owner_01",
       "name": "ペットショップ店長",
       "name_en": "Pet Shop Owner",
-      "position": {"x": 11, "y": 11},
+      "position": {"x": 9, "y": 11},
       "dialogue": {
         "initial": "いらっしゃいませ！迷子のペットをお探しですか？",
         "initial_en": "Welcome! Are you looking for lost pets?",
@@ -309,7 +393,19 @@
       }
     },
     {
-      "id": "park_visitor",
+      "id": "shop_owner_02",
+      "name": "アニマルフレンズ店員",
+      "name_en": "Animal Friends Staff",
+      "position": {"x": 15, "y": 11},
+      "dialogue": {
+        "initial": "こんにちは！ペット用品をお探しですか？",
+        "initial_en": "Hello! Looking for pet supplies?",
+        "hint": "猫ちゃんなら、うちの缶詰がおすすめですよ。",
+        "hint_en": "For cats, I recommend our canned food."
+      }
+    },
+    {
+      "id": "park_visitor_01",
       "name": "公園の散歩者",
       "name_en": "Park Visitor",
       "position": {"x": 20, "y": 13},
@@ -319,17 +415,38 @@
         "hint": "さっき、池の近くで小さな動物を見ましたよ。",
         "hint_en": "I saw a small animal near the pond earlier."
       }
+    },
+    {
+      "id": "park_visitor_02",
+      "name": "ちびっこ広場の管理人",
+      "name_en": "Plaza Caretaker",
+      "position": {"x": 3, "y": 12},
+      "dialogue": {
+        "initial": "子供たちが安全に遊べるよう見守っています。",
+        "initial_en": "I'm watching to keep the children safe.",
+        "hint": "動物たちもここで遊んでいることがありますね。",
+        "hint_en": "Animals sometimes play here too."
+      }
     }
   ],
   "interactive_objects": [
     {
-      "id": "park_bench",
+      "id": "park_bench_01",
       "type": "bench",
-      "position": {"x": 19, "y": 15},
-      "name": "公園のベンチ",
-      "name_en": "Park Bench",
+      "position": {"x": 20, "y": 14},
+      "name": "みどり公園のベンチ",
+      "name_en": "Midori Park Bench",
       "action": "rest",
       "description": "疲れた時に休憩できるベンチ"
+    },
+    {
+      "id": "park_bench_02",
+      "type": "bench",
+      "position": {"x": 3, "y": 13},
+      "name": "ちびっこ広場のベンチ",
+      "name_en": "Plaza Bench",
+      "action": "rest",
+      "description": "子供たちを見守るベンチ"
     },
     {
       "id": "water_fountain",
@@ -339,23 +456,32 @@
       "name_en": "Water Fountain",
       "action": "examine",
       "description": "公園の中央にある美しい噴水"
+    },
+    {
+      "id": "playground_equipment",
+      "type": "playground",
+      "position": {"x": 4, "y": 13},
+      "name": "遊具",
+      "name_en": "Playground Equipment",
+      "action": "examine",
+      "description": "子供たちが遊ぶ滑り台とブランコ"
     }
   ],
   "hints": [
     {
       "trigger_time": 120,
-      "message": "ペットたちは人懐っこい場所に隠れているかもしれません。",
-      "message_en": "The pets might be hiding in friendly places."
+      "message": "ペットたちは住宅街や公園の近くに隠れているかもしれません。",
+      "message_en": "The pets might be hiding near residential areas or parks."
     },
     {
       "trigger_time": 180,
-      "message": "ペットショップで必要なアイテムが見つかるかもしれません。",
-      "message_en": "You might find necessary items at the pet shop."
+      "message": "2つのペットショップで必要なアイテムが見つかるかもしれません。",
+      "message_en": "You might find necessary items at the two pet shops."
     },
     {
       "trigger_time": 240,
-      "message": "公園は動物たちが好む場所です。よく探してみましょう。",
-      "message_en": "The park is a place animals love. Search carefully."
+      "message": "みどり公園とちびっこ広場は動物たちが好む場所です。",
+      "message_en": "Midori Park and Kids Plaza are places animals love."
     }
   ]
 }

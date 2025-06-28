@@ -342,9 +342,6 @@ class MenuScene(Scene):
             # 背景画像がない場合はグラデーション背景
             self._draw_gradient_background(surface)
         
-        # タイトル描画
-        self._draw_title(surface)
-        
         # メニューアイテムを描画
         self._draw_menu_items(surface)
         
@@ -365,16 +362,6 @@ class MenuScene(Scene):
             print(f"🎨 言語選択ボックス描画完了: {self.language_selector.rect}")
         else:
             print("❌ 言語選択ボックスが存在しません")
-    
-    def _draw_title(self, surface: pygame.Surface):
-        """タイトルを描画"""
-        title_font = self.font_manager.get_font("default", 48)
-        title_text = get_text("game_title")
-        title_surface = title_font.render(title_text, True, (255, 255, 255))
-        title_rect = title_surface.get_rect()
-        title_rect.centerx = surface.get_width() // 2
-        title_rect.y = 100
-        surface.blit(title_surface, title_rect)
     
     def _draw_menu_items(self, surface: pygame.Surface):
         """メニューアイテムを描画"""

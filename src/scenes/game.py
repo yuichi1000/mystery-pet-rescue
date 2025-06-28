@@ -198,6 +198,15 @@ class GameScene(Scene):
         self.victory = False
         self.paused = False
         
+        # 言語マネージャーを再取得（メニューでの言語変更を反映）
+        self.language_manager = get_language_manager()
+        current_lang = self.language_manager.get_current_language()
+        print(f"🌐 ゲーム開始時の言語: {current_lang.value}")
+        
+        # GameUIの言語も更新
+        if hasattr(self, 'game_ui') and self.game_ui:
+            self.game_ui.update_language()
+        
         # 救出ペットUIをクリア
         self.game_ui.clear_rescued_pets()
         

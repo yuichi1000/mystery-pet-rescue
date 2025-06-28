@@ -12,6 +12,7 @@ from enum import Enum
 
 from src.utils.font_manager import get_font_manager
 from src.utils.asset_manager import get_asset_manager
+from src.utils.language_manager import get_language_manager, get_text
 from src.utils.exceptions import UIError
 from src.utils.error_handler import handle_error, safe_execute
 
@@ -68,6 +69,7 @@ class GameUI:
         
         # フォント・アセット管理
         self.font_manager = get_font_manager()
+        self.language_manager = get_language_manager()
         
         # マップシステム参照（ミニマップ用）
         self.map_system = None
@@ -518,6 +520,12 @@ class GameUI:
         }
         self.rescued_pets.append(rescued_pet)
         print(f"🎉 救出ペット追加: {pet_name} ({pet_type})")
+    
+    def update_language(self):
+        """言語設定を更新"""
+        self.language_manager = get_language_manager()
+        current_lang = self.language_manager.get_current_language()
+        print(f"🌐 GameUI言語更新: {current_lang.value}")
     
     def clear_rescued_pets(self):
         """救出されたペットリストをクリア"""

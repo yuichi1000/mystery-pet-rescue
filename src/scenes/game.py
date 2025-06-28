@@ -138,7 +138,7 @@ class GameScene(Scene):
         # 犬
         dog_data = PetData(
             pet_id="dog_001",
-            name="ポチ",
+            name="dog",  # 動物名に変更
             pet_type=PetType.DOG,
             personality="friendly",
             rarity="common",
@@ -150,7 +150,7 @@ class GameScene(Scene):
         # 猫
         cat_data = PetData(
             pet_id="cat_001", 
-            name="ミケ",
+            name="cat",  # 動物名に変更
             pet_type=PetType.CAT,
             personality="shy",
             rarity="common",
@@ -162,7 +162,7 @@ class GameScene(Scene):
         # うさぎ
         rabbit_data = PetData(
             pet_id="rabbit_001",
-            name="ミミ",
+            name="rabbit",  # 動物名に変更
             pet_type=PetType.RABBIT,
             personality="gentle",
             rarity="uncommon",
@@ -174,7 +174,7 @@ class GameScene(Scene):
         # 鳥
         bird_data = PetData(
             pet_id="bird_001",
-            name="ピーちゃん",
+            name="bird",  # 動物名に変更
             pet_type=PetType.BIRD,
             personality="active",
             rarity="rare",
@@ -493,7 +493,7 @@ class GameScene(Scene):
                 if not hasattr(pet, 'discovered'):
                     pet.discovered = True
                     # self.audio_system.play_sfx("pet_found", loops=0)  # 音を出さない
-                    self.game_ui.add_notification(f"{pet.data.name}{get_text('pet_found')}", NotificationType.INFO)
+                    self.game_ui.add_notification(f"{pet.get_display_name()}{get_text('pet_found')}", NotificationType.INFO)
                     self.game_ui.add_notification(get_text("rescue_instruction"), NotificationType.INFO)
                 
                 # Eキーで救出
@@ -505,13 +505,13 @@ class GameScene(Scene):
         """ペットを救出（パズルなし）"""
         if pet.data.pet_id not in self.pets_rescued:
             self.pets_rescued.append(pet.data.pet_id)
-            self.game_ui.add_notification(f"{pet.data.name}{get_text('pet_rescued')}", NotificationType.SUCCESS)
+            self.game_ui.add_notification(f"{pet.get_display_name()}{get_text('pet_rescued')}", NotificationType.SUCCESS)
             
             # ペットタイプを文字列に変換
             pet_type_str = str(pet.data.pet_type).lower().replace('pettype.', '')
             
             # 救出されたペットをUIに追加
-            self.game_ui.add_rescued_pet(pet.data.name, pet_type_str)
+            self.game_ui.add_rescued_pet(pet.get_display_name(), pet_type_str)
             
             # 短い効果音を1回のみ再生
             self.audio_system.play_sfx("pet_rescued")
@@ -668,7 +668,7 @@ class GameScene(Scene):
         stats_y = surface.get_height() // 2 + 20
         
         # 救出ペット数
-        pets_text = font_small.render(f"救出したペット: {len(self.pets_rescued)}/{self.total_pets}匹", True, (255, 255, 255))
+        pets_text = font_small.render(f"{get_text('pets_found')}: {len(self.pets_rescued)}/{self.total_pets}匹", True, (255, 255, 255))
         pets_rect = pets_text.get_rect(center=(surface.get_width() // 2, stats_y))
         surface.blit(pets_text, pets_rect)
         

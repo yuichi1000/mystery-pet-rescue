@@ -21,12 +21,13 @@ class MenuItem:
 
 class LanguageSelector:
     """言語選択セレクトボックス"""
-    def __init__(self, rect: pygame.Rect):
+    def __init__(self, rect: pygame.Rect, on_language_change=None):
         self.rect = rect
         self.expanded = False
         self.hovered = False
         self.languages = [Language.ENGLISH, Language.JAPANESE]
         self.language_manager = get_language_manager()
+        self.on_language_change = on_language_change  # コールバック関数
         
         print(f"🔧 言語選択ボックス初期化:")
         print(f"  位置: {rect}")
@@ -60,6 +61,10 @@ class LanguageSelector:
                     self.language_manager.set_language(lang)
                     new_lang = self.language_manager.get_current_language()
                     print(f"🔄 言語変更: {old_lang.value} → {new_lang.value}")
+                    
+                    # コールバック関数を呼び出し（メニューアイテムを再作成）
+                    if self.on_language_change:
+                        self.on_language_change()
                     self.expanded = False
                     return True
             
@@ -200,6 +205,7 @@ class MenuScene(Scene):
             y = start_y + i * spacing
             rect = pygame.Rect(x, y, item_width, item_height)
             self.menu_items.append(MenuItem(text, action, rect))
+            print(f"📝 メニューアイテム更新: {action} -> '{text}'")
         
         # 言語選択セレクトボックスを作成（既存のものがあれば展開状態を保持）
         lang_width = 200
@@ -214,7 +220,7 @@ class MenuScene(Scene):
             was_expanded = self.language_selector.expanded
             print(f"🔄 既存の言語選択ボックスの展開状態を保持: {was_expanded}")
         
-        self.language_selector = LanguageSelector(lang_rect)
+        self.language_selector = LanguageSelector(lang_rect, self._on_language_change)
         
         # 展開状態を復元
         if was_expanded:
@@ -225,6 +231,11 @@ class MenuScene(Scene):
         if self.menu_items:
             self.menu_items[self.selected_index].selected = True
             self.menu_items[self.selected_index].selected = True
+    
+    def _on_language_change(self):
+        """言語変更時のコールバック"""
+        print("🌐 言語変更検出、メニューテキストを更新中...")
+        self._create_menu_items()
     
     def enter(self) -> None:
         """シーンに入る時の処理"""
@@ -345,6 +356,9 @@ class MenuScene(Scene):
         # メニューアイテムを描画
         self._draw_menu_items(surface)
         
+        # ゲームタイトルを描画
+        self._draw_game_title(surface)
+        
         # 言語選択を描画
         if self.language_selector:
             font = self.font_manager.get_font("default", 24)
@@ -387,6 +401,25 @@ class MenuScene(Scene):
             text_surface = button_font.render(item.text, True, text_color)
             text_rect = text_surface.get_rect(center=item.rect.center)
             surface.blit(text_surface, text_rect)
+    
+    def _draw_game_title(self, surface: pygame.Surface):
+        """ゲームタイトルを描画"""
+        title_font = self.font_manager.get_font("default", 48)
+        title_text = get_text("game_title")
+        
+        # タイトルの影を描画
+        shadow_surface = title_font.render(title_text, True, (0, 0, 0))
+        shadow_rect = shadow_surface.get_rect()
+        shadow_rect.centerx = surface.get_width() // 2 + 3
+        shadow_rect.y = 80 + 3
+        surface.blit(shadow_surface, shadow_rect)
+        
+        # タイトル本体を描画
+        title_surface = title_font.render(title_text, True, (255, 255, 255))
+        title_rect = title_surface.get_rect()
+        title_rect.centerx = surface.get_width() // 2
+        title_rect.y = 80
+        surface.blit(title_surface, title_rect)
     
     def _draw_gradient_background(self, surface: pygame.Surface):
         """グラデーション背景を描画"""

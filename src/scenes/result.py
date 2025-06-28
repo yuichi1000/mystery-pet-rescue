@@ -7,6 +7,7 @@ import pygame
 from typing import Optional, Dict, Any, List
 from src.core.scene import Scene
 from src.utils.font_manager import get_font_manager
+from src.utils.language_manager import get_language_manager, get_text
 from src.utils.asset_manager import get_asset_manager
 
 class ResultButton:
@@ -63,9 +64,9 @@ class ResultScene(Scene):
         
         # ボタンデータ
         button_data = [
-            ("もう一度", "game"),
-            ("メニュー", "menu"),
-            ("終了", "quit")
+            (get_text("play_again"), "game"),
+            (get_text("return_to_menu"), "menu"),
+            (get_text("quit"), "quit")
         ]
         
         for i, (text, action) in enumerate(button_data):
@@ -269,7 +270,7 @@ class ResultScene(Scene):
     
     def _draw_congratulations(self, surface: pygame.Surface):
         """おめでとうメッセージを描画"""
-        congrats_text = "おめでとうございます！全てのペットを救出しました！"
+        congrats_text = get_text("congratulations") + "！" + get_text("all_pets_rescued")
         congrats_font = self.font_manager.get_font("default", 36)
         congrats_surface = congrats_font.render(congrats_text, True, (255, 215, 0))
         congrats_rect = congrats_surface.get_rect(center=(surface.get_width()//2, 450))

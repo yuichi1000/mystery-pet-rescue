@@ -352,7 +352,7 @@ class GameUI:
         pygame.draw.rect(self.screen, self.colors['ui_border'], self.minimap_rect, 2)
         
         # ミニマップタイトル
-        minimap_title = "ミニマップ"
+        minimap_title = get_text("minimap")
         title_surface = self.font_manager.render_text(
             minimap_title, "default", int(12 * self.ui_scale), self.colors['text']
         )
@@ -383,7 +383,7 @@ class GameUI:
         
         # 目標タイトル
         title_surface = self.font_manager.render_text(
-            "現在の目標", "default", int(14 * self.ui_scale), self.colors['text']
+            get_text("current_objective"), "default", int(14 * self.ui_scale), self.colors['text']
         )
         self.screen.blit(title_surface, (self.objective_rect.x + 10, self.objective_rect.y + 5))
         
@@ -507,7 +507,7 @@ class GameUI:
         
         # "残り時間" ラベル
         label_font = self.font_manager.get_font('default', 18)
-        label_text = label_font.render("残り時間", True, text_color)
+        label_text = label_font.render(get_text("time_remaining"), True, text_color)
         label_rect = label_text.get_rect(centerx=timer_bg_rect.centerx, bottom=timer_bg_rect.top - 5)
         self.screen.blit(label_text, label_rect)
     
@@ -669,7 +669,7 @@ class GameUI:
         
         # "残り時間" ラベル
         label_font = self.font_manager.get_font('default', 18)
-        label_text = label_font.render("残り時間", True, text_color)
+        label_text = label_font.render(get_text("time_remaining"), True, text_color)
         label_rect = label_text.get_rect(centerx=timer_bg_rect.centerx, bottom=timer_bg_rect.top - 5)
         self.screen.blit(label_text, label_rect)
     def _draw_rescued_pets(self):

@@ -33,9 +33,11 @@ class LanguageManager:
                 "japanese": "日本語",
                 "game_title": "Mystery Pet Rescue",
                 
-                # ゲーム内
+                # ゲーム内UI
                 "pets_found": "Pets Found",
                 "time_remaining": "Time Remaining",
+                "minimap": "Minimap",
+                "current_objective": "Current Objective",
                 "game_paused": "Game Paused",
                 "game_resumed": "Game Resumed",
                 "pet_rescued": " rescued!",
@@ -46,16 +48,31 @@ class LanguageManager:
                 "pet_found": "found!",
                 "rescue_instruction": "Press E to rescue",
                 
+                # ペット名（動物名）
+                "pet_cat": "Cat",
+                "pet_dog": "Dog", 
+                "pet_rabbit": "Rabbit",
+                "pet_bird": "Bird",
+                
                 # 結果画面
                 "congratulations": "Congratulations!",
                 "time_bonus": "Time Bonus",
                 "total_score": "Total Score",
                 "return_to_menu": "Return to Menu",
+                "play_again": "Play Again",
+                "quit": "Quit",
                 
                 # ヒント
                 "pets_hiding_hint": "The pets might be hiding near residential areas or parks.",
                 "search_buildings_hint": "Try searching around buildings and near trees.",
-                "parks_hint": "Midori Park and Kids Plaza are places animals love."
+                "parks_hint": "Midori Park and Kids Plaza are places animals love.",
+                
+                # 操作説明
+                "controls_move": "WASD/Arrow Keys: Move",
+                "controls_run": "Shift: Run",
+                "controls_interact": "E: Interact",
+                "controls_pause": "ESC: Pause",
+                "controls_minimap": "M: Toggle Minimap"
             },
             Language.JAPANESE.value: {
                 # メニュー
@@ -66,9 +83,11 @@ class LanguageManager:
                 "japanese": "日本語",
                 "game_title": "ミステリー・ペット・レスキュー",
                 
-                # ゲーム内
+                # ゲーム内UI
                 "pets_found": "救出したペット",
                 "time_remaining": "残り時間",
+                "minimap": "ミニマップ",
+                "current_objective": "現在の目標",
                 "game_paused": "ゲーム一時停止",
                 "game_resumed": "ゲーム再開",
                 "pet_rescued": "を救出しました！",
@@ -79,16 +98,31 @@ class LanguageManager:
                 "pet_found": "を見つけました！",
                 "rescue_instruction": "Eキーで救出できます",
                 
+                # ペット名（動物名）
+                "pet_cat": "ねこ",
+                "pet_dog": "いぬ",
+                "pet_rabbit": "うさぎ",
+                "pet_bird": "とり",
+                
                 # 結果画面
                 "congratulations": "おめでとうございます！",
                 "time_bonus": "タイムボーナス",
                 "total_score": "総合スコア",
                 "return_to_menu": "メニューに戻る",
+                "play_again": "もう一度",
+                "quit": "終了",
                 
                 # ヒント
                 "pets_hiding_hint": "ペットたちは住宅街や公園の近くに隠れているかもしれません。",
                 "search_buildings_hint": "建物の周りや木の近くを探してみましょう。",
-                "parks_hint": "みどり公園とちびっこ広場は動物たちが好む場所です。"
+                "parks_hint": "みどり公園とちびっこ広場は動物たちが好む場所です。",
+                
+                # 操作説明
+                "controls_move": "WASD/矢印キー: 移動",
+                "controls_run": "Shift: 走る",
+                "controls_interact": "E: 相互作用",
+                "controls_pause": "ESC: 一時停止",
+                "controls_minimap": "M: ミニマップ切り替え"
             }
         }
     
@@ -119,6 +153,11 @@ class LanguageManager:
         
         # 最終フォールバック: キー名をそのまま返す
         return key
+    
+    def get_pet_name(self, pet_type: str) -> str:
+        """ペットタイプから動物名を取得"""
+        pet_key = f"pet_{pet_type.lower()}"
+        return self.get_text(pet_key)
     
     def get_language_display_name(self, language: Language) -> str:
         """言語の表示名を取得"""

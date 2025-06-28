@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from src.utils.asset_manager import get_asset_manager
+from src.utils.language_manager import get_language_manager
 
 class PetState(Enum):
     """ペット状態"""
@@ -67,13 +68,18 @@ class Pet:
         
         # スプライト
         self.asset_manager = get_asset_manager()
+        self.language_manager = get_language_manager()
         self.sprites = self._load_sprites()
         
         # エフェクト
         self.emotion_timer = 0.0
         self.current_emotion = None
         
-        print(f"🐾 ペット生成: {self.data.name} ({self.data.pet_type.value})")
+        print(f"🐾 ペット生成: {self.get_display_name()} ({self.data.pet_type.value})")
+    
+    def get_display_name(self) -> str:
+        """表示用の動物名を取得"""
+        return self.language_manager.get_pet_name(self.data.pet_type.value)
     
     def _load_sprites(self) -> Dict[str, pygame.Surface]:
         """ペットスプライトを読み込み"""
@@ -234,7 +240,7 @@ class Pet:
         """恐怖状態に入る"""
         if self.state != PetState.SCARED:
             self.state = PetState.SCARED
-            print(f"😨 {self.data.name}が怖がっています")
+            print(f"😨 {self.get_display_name()}が怖がっています")
     
     def _set_random_direction(self):
         """ランダムな方向に移動開始"""
@@ -313,11 +319,11 @@ class Pet:
         if distance < 60.0:  # 相互作用可能距離
             if self.state == PetState.SCARED:
                 # 恐怖状態では相互作用失敗
-                print(f"😰 {self.data.name}は怖がっています")
+                print(f"😰 {self.get_display_name()}は怖がっています")
                 return False
             else:
                 # 相互作用成功
-                print(f"😊 {self.data.name}と仲良くなりました")
+                print(f"😊 {self.get_display_name()}と仲良くなりました")
                 
                 # エモーション表示
                 self.current_emotion = "happy"
@@ -326,7 +332,7 @@ class Pet:
                 # 追従開始
                 if self.state != PetState.FOLLOWING:
                     self.state = PetState.FOLLOWING
-                    print(f"💕 {self.data.name}があなたについてきます")
+                    print(f"💕 {self.get_display_name()}があなたについてきます")
                 
                 # 救出可能（簡素化版では常に可能）
                 return True
@@ -336,7 +342,7 @@ class Pet:
     def rescue(self) -> bool:
         """ペットを救出（簡素化版）"""
         self.state = PetState.RESCUED
-        print(f"🎉 {self.data.name}を救出しました！")
+        print(f"🎉 {self.get_display_name()}を救出しました！")
         return True
     
     def draw(self, screen: pygame.Surface, camera_offset: Tuple[int, int] = (0, 0)):
@@ -361,7 +367,7 @@ class Pet:
             
             # ペット名表示
             font = pygame.font.Font(None, 16)
-            name_surface = font.render(self.data.name, True, (255, 255, 255))
+            name_surface = font.render(self.get_display_name(), True, (255, 255, 255))
             screen.blit(name_surface, (draw_x, draw_y - 20))
         
         # エモーション表示

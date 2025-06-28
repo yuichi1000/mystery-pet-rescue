@@ -233,24 +233,33 @@ class GameUI:
             if i < len(self.rescued_pets):
                 pet = self.rescued_pets[i]
                 
-                # ペットタイプに応じた色
+                # ペット画像を読み込んで表示
                 pet_type_str = str(pet['type']).lower().replace('pettype.', '')
-                pet_colors = {
-                    'dog': (139, 69, 19),    # 茶色
-                    'cat': (255, 165, 0),    # オレンジ
-                    'rabbit': (255, 192, 203), # ピンク
-                    'bird': (135, 206, 235)   # 水色
+                
+                # ペットタイプに応じた画像パスを生成
+                sprite_paths = {
+                    'dog': f"pets/pet_dog_001_front.png",
+                    'cat': f"pets/pet_cat_001_front.png", 
+                    'rabbit': f"pets/pet_rabbit_001_front.png",
+                    'bird': f"pets/pet_bird_001_front.png"
                 }
                 
-                color = pet_colors.get(pet_type_str, (128, 128, 128))
-                
-                # ペットアイコン（円）
-                center_x = rect.centerx
-                center_y = rect.centery - 5
-                radius = min(rect.width, rect.height) // 3
-                
-                pygame.draw.circle(self.screen, color, (center_x, center_y), radius)
-                pygame.draw.circle(self.screen, (255, 255, 255), (center_x, center_y), radius, 2)
+                sprite_path = sprite_paths.get(pet_type_str)
+                if sprite_path:
+                    # 画像を枠サイズに合わせて読み込み
+                    pet_image = self.asset_manager.load_image(sprite_path, (rect.width - 10, rect.height - 20))
+                    
+                    if pet_image:
+                        # 画像を中央に配置
+                        image_x = rect.x + 5
+                        image_y = rect.y + 5
+                        self.screen.blit(pet_image, (image_x, image_y))
+                    else:
+                        # 画像読み込み失敗時はフォールバック（円）
+                        self._draw_pet_fallback_icon(rect, pet_type_str)
+                else:
+                    # 未知のペットタイプの場合もフォールバック
+                    self._draw_pet_fallback_icon(rect, pet_type_str)
                 
                 # ペット名（小さく表示）
                 name_font = self.font_manager.get_font('default', 10)
@@ -264,11 +273,25 @@ class GameUI:
                 str(i + 1), "default", int(12 * self.ui_scale), (200, 200, 200)
             )
             self.screen.blit(num_surface, (rect.x + 2, rect.y + 2))
-            slot_num = str(i + 1)
-            num_surface = self.font_manager.render_text(
-                slot_num, "default", int(10 * self.ui_scale), self.colors['text']
-            )
-            self.screen.blit(num_surface, (rect.x + 2, rect.y + 2))
+    
+    def _draw_pet_fallback_icon(self, rect: pygame.Rect, pet_type_str: str):
+        """ペット画像のフォールバック表示（円アイコン）"""
+        pet_colors = {
+            'dog': (139, 69, 19),    # 茶色
+            'cat': (255, 165, 0),    # オレンジ
+            'rabbit': (255, 192, 203), # ピンク
+            'bird': (135, 206, 235)   # 水色
+        }
+        
+        color = pet_colors.get(pet_type_str, (128, 128, 128))
+        
+        # ペットアイコン（円）
+        center_x = rect.centerx
+        center_y = rect.centery - 5
+        radius = min(rect.width, rect.height) // 3
+        
+        pygame.draw.circle(self.screen, color, (center_x, center_y), radius)
+        pygame.draw.circle(self.screen, (255, 255, 255), (center_x, center_y), radius, 2)
     
     def _draw_minimap(self, world_objects: List[Any], player_pos: Tuple[float, float], map_system=None):
         """ミニマップを描画"""

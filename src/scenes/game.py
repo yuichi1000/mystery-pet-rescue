@@ -9,7 +9,6 @@ from typing import Optional, List, Dict, Any
 from src.core.scene import Scene
 from src.entities.player import Player
 from src.entities.pet import Pet, PetData, PetType
-from src.systems.puzzle_system import PuzzleSystem
 from src.systems.map_system import MapSystem
 from src.systems.audio_system import get_audio_system
 from src.systems.timer_system import TimerSystem
@@ -84,8 +83,8 @@ class GameScene(Scene):
         # ペット初期化
         self.pets = self._create_pets()
         
-        # パズルシステム初期化
-        self.puzzle_system = PuzzleSystem()
+        # パズルシステム初期化（削除済み）
+        # self.puzzle_system = PuzzleSystem()
         self.current_puzzle = None
         
         # UI初期化

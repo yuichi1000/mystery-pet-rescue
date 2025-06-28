@@ -14,7 +14,6 @@ from src.core.menu_system import MenuSystem, MenuState
 from src.ui.game_ui import GameUI, NotificationType, QuickSlotItem
 from src.entities.player import Player
 from src.entities.pet import Pet, PetData, PetType
-from src.systems.puzzle_system import PuzzleSystem
 from src.systems.map_system import MapSystem
 from src.utils.asset_manager import get_asset_manager
 from src.utils.font_manager import get_font_manager
@@ -66,8 +65,8 @@ class Game:
         self.pets: List[Pet] = []
         self.rescued_pets: List[Pet] = []
         
-        # 謎解きシステム
-        self.puzzle_system = PuzzleSystem()
+        # 謎解きシステム（削除済み）
+        # self.puzzle_system = PuzzleSystem()
         self.puzzle_ui = None
         
         # マップシステム

@@ -105,36 +105,76 @@ class Game:
         if not self.game_flow:
             return
         
-        while self.running:
+        while self.running and self.game_flow.is_running():
             # イベント処理
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    print("🔴 QUIT イベント受信 (main.py)")
                     self.running = False
+                    self.game_flow.running = False
+                    break
                 else:
                     try:
                         result = self.game_flow.handle_event(event)
                         if result == "quit":
+                            print("🔴 ゲーム終了シグナル受信 (main.py)")
                             self.running = False
-                    except:
-                        pass
+                            self.game_flow.running = False
+                            break
+                    except Exception as e:
+                        print(f"⚠️ イベント処理エラー: {e}")
+            
+            # 終了処理が要求されている場合はループを抜ける
+            if not self.running or not self.game_flow.is_running():
+                break
             
             # 更新
             time_delta = self.clock.tick(self.fps) / 1000.0
             try:
                 result = self.game_flow.update(time_delta)
                 if result == "quit":
+                    print("🔴 更新処理で終了シグナル受信 (main.py)")
                     self.running = False
-            except:
-                pass
+                    self.game_flow.running = False
+                    break
+            except Exception as e:
+                print(f"⚠️ 更新処理エラー: {e}")
             
             # 描画
             self.screen.fill((40, 40, 40))
             try:
                 self.game_flow.draw(self.screen)
-            except:
-                pass
+            except Exception as e:
+                print(f"⚠️ 描画エラー: {e}")
             
             pygame.display.flip()
+        
+        print("🔴 デスクトップ版ゲーム終了処理開始")
+        self._cleanup()
+    
+    def _cleanup(self):
+        """クリーンアップ処理"""
+        print("🧹 main.py クリーンアップ開始...")
+        
+        try:
+            # ゲームフローの音声システムを停止
+            if self.game_flow and hasattr(self.game_flow, 'audio_system'):
+                print("🔇 音声システム停止中...")
+                self.game_flow.audio_system.stop_bgm()
+                self.game_flow.audio_system.stop_all_sfx()
+        except Exception as e:
+            print(f"⚠️ 音声停止エラー: {e}")
+        
+        try:
+            # Pygameを終了
+            print("🎮 Pygame終了中...")
+            pygame.mixer.quit()
+            pygame.quit()
+            print("✅ Pygame終了完了")
+        except Exception as e:
+            print(f"⚠️ Pygame終了エラー: {e}")
+        
+        print("🔴 main.py アプリケーション終了")
     
     async def show_error(self):
         """エラー表示"""
@@ -163,6 +203,7 @@ async def main():
     print("🎮 ミステリー・ペット・レスキュー")
     print("=" * 50)
     
+    game = None
     try:
         game = Game()
         
@@ -177,15 +218,42 @@ async def main():
         print(f"❌ エラー: {e}")
         import traceback
         traceback.print_exc()
+    finally:
+        # 確実にクリーンアップを実行
+        if game:
+            try:
+                game._cleanup()
+            except:
+                pass
+        try:
+            pygame.quit()
+        except:
+            pass
 
 if __name__ == "__main__":
-    if is_web_environment():
-        asyncio.run(main())
-    else:
-        # デスクトップ版では従来のGameMainを使用
-        try:
-            from src.core.game_main import GameMain
-            game = GameMain()
-            game.run()
-        except:
+    try:
+        if is_web_environment():
             asyncio.run(main())
+        else:
+            # デスクトップ版では従来のGameMainを使用
+            try:
+                from src.core.game_main import GameMain
+                game = GameMain()
+                game.run()
+            except Exception as e:
+                print(f"❌ GameMain エラー: {e}")
+                print("🔄 フォールバック版で実行...")
+                asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n🔴 ユーザーによる中断")
+    except Exception as e:
+        print(f"❌ 致命的エラー: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
+        # 最終的なクリーンアップ
+        try:
+            pygame.quit()
+            print("🔴 最終終了処理完了")
+        except:
+            pass

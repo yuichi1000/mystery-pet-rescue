@@ -163,15 +163,30 @@ class GameMain:
             # イベント処理
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    print("🔴 QUIT イベント受信")
                     self.game_flow.running = False
+                    break
                 elif event.type == pygame.VIDEORESIZE:
                     self._handle_resize(event)
                 else:
-                    self.game_flow.handle_event(event)
+                    result = self.game_flow.handle_event(event)
+                    if result == "quit":
+                        print("🔴 ゲーム終了シグナル受信")
+                        self.game_flow.running = False
+                        break
+            
+            # 終了処理が要求されている場合はループを抜ける
+            if not self.game_flow.is_running():
+                break
             
             # 更新処理（最適化付き）
             self.optimizer.begin_update()
-            self.game_flow.update(time_delta)
+            result = self.game_flow.update(time_delta)
+            if result == "quit":
+                print("🔴 更新処理で終了シグナル受信")
+                self.game_flow.running = False
+                self.optimizer.end_update()
+                break
             self.optimizer.end_update()
             
             # フレームスキップ判定
@@ -191,7 +206,7 @@ class GameMain:
         # パフォーマンスレポート表示
         print(self.optimizer.get_performance_report())
         
-        print("ゲーム終了")
+        print("🔴 ゲーム終了処理開始")
         self._cleanup()
     
     def _handle_resize(self, event):
@@ -209,8 +224,29 @@ class GameMain:
     
     def _cleanup(self):
         """クリーンアップ処理"""
-        pygame.quit()
-        sys.exit()
+        print("🧹 クリーンアップ開始...")
+        
+        try:
+            # ゲームフローの音声システムを停止
+            if hasattr(self, 'flow_manager') and self.flow_manager:
+                if hasattr(self.flow_manager, 'audio_system'):
+                    print("🔇 音声システム停止中...")
+                    self.flow_manager.audio_system.stop_bgm()
+                    self.flow_manager.audio_system.stop_all_sfx()
+        except Exception as e:
+            print(f"⚠️ 音声停止エラー: {e}")
+        
+        try:
+            # Pygameを終了
+            print("🎮 Pygame終了中...")
+            pygame.mixer.quit()
+            pygame.quit()
+            print("✅ Pygame終了完了")
+        except Exception as e:
+            print(f"⚠️ Pygame終了エラー: {e}")
+        
+        print("🔴 アプリケーション終了")
+        sys.exit(0)
 
 def main():
     """メイン関数"""

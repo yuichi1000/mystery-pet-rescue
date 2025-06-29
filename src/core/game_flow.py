@@ -237,3 +237,24 @@ class GameFlowManager:
             'time_elapsed': current_time,
             'score': self.game_result['score']
         }
+    
+    def game_over(self, reason: str = "unknown"):
+        """
+        ゲームオーバー処理
+        
+        Args:
+            reason: 敗北理由 ("time_up", "no_lives", "other")
+        """
+        print(f"💀 ゲームオーバー: {reason}")
+        
+        # 現在のゲームシーンから結果を収集
+        if hasattr(self.current_scene, 'get_game_result'):
+            result_data = self.current_scene.get_game_result()
+            result_data['defeat_reason'] = reason
+            
+            # 結果画面に遷移（ただし、新しい実装では直接メニューに戻る）
+            print("🏠 ゲームオーバー後、メニューに戻ります")
+            # 実際の処理はGameSceneで行われるため、ここでは何もしない
+        else:
+            print("⚠️ ゲーム結果を取得できませんでした")
+            self.change_scene("menu")

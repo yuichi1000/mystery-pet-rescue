@@ -29,9 +29,13 @@ class ResultScene(Scene):
         self.asset_manager = get_asset_manager()
         
         # 結果データ
+        self.victory = game_result.get('victory', False)
+        self.game_over = game_result.get('game_over', False)
+        self.defeat_reason = game_result.get('defeat_reason', None)
         self.pets_rescued = game_result.get('pets_rescued', 0)
         self.total_pets = game_result.get('total_pets', 4)
         self.time_taken = game_result.get('time_taken', 0)
+        self.remaining_time = game_result.get('remaining_time', 0)
         self.score = game_result.get('score', 0)
         self.completion_rate = (self.pets_rescued / self.total_pets) * 100 if self.total_pets > 0 else 0
         
@@ -89,19 +93,19 @@ class ResultScene(Scene):
     
     def _get_rank(self) -> str:
         """ランクを取得"""
-        if self.completion_rate == 100:
-            if self.time_taken < 180:  # 3分以内
-                return "S"
-            elif self.time_taken < 300:  # 5分以内
-                return "A"
+        if self.victory and self.completion_rate == 100:
+            if self.remaining_time > 120:  # 2分以上残り
+                return get_text("perfect")
+            elif self.remaining_time > 60:  # 1分以上残り
+                return get_text("excellent")
             else:
-                return "B"
+                return get_text("good")
         elif self.completion_rate >= 75:
-            return "C"
+            return get_text("good")
         elif self.completion_rate >= 50:
-            return "D"
+            return get_text("try_again")
         else:
-            return "E"
+            return get_text("try_again")
     
     def _load_background(self):
         """背景画像を読み込み"""
@@ -223,7 +227,7 @@ class ResultScene(Scene):
         self._draw_rank(surface)
         
         # 完全クリア時の特別メッセージ
-        if self.pets_rescued == self.total_pets:
+        if self.victory and self.pets_rescued == self.total_pets:
             self._draw_congratulations(surface)
         
         # ボタン描画
@@ -234,9 +238,22 @@ class ResultScene(Scene):
     
     def _draw_title(self, surface: pygame.Surface):
         """タイトルを描画"""
-        title_text = "ゲーム結果" if self.pets_rescued == self.total_pets else "ゲーム終了"
+        # 結果に応じたタイトルと色を決定
+        if self.victory:
+            title_text = get_text("game_complete")
+            title_color = (0, 255, 0)  # 緑色（勝利）
+        elif self.defeat_reason == "time_up":
+            title_text = get_text("time_up")
+            title_color = (255, 165, 0)  # オレンジ色（時間切れ）
+        elif self.game_over:
+            title_text = get_text("mission_failed")
+            title_color = (255, 100, 100)  # 赤色（失敗）
+        else:
+            title_text = get_text("game_result")
+            title_color = (255, 255, 255)  # 白色（デフォルト）
+        
         title_font = self.font_manager.get_font("default", 72)
-        title_surface = title_font.render(title_text, True, (255, 255, 255))
+        title_surface = title_font.render(title_text, True, title_color)
         title_rect = title_surface.get_rect(center=(surface.get_width()//2, 100))
         surface.blit(title_surface, title_rect)
     
@@ -246,13 +263,18 @@ class ResultScene(Scene):
         stats_y = 180
         stats_spacing = 50
         
-        # 統計データ
+        # 統計データ（言語対応）
         stats_data = [
-            f"救出したペット: {self.pets_rescued} / {self.total_pets}",
-            f"達成率: {self.completion_rate:.1f}%",
-            f"プレイ時間: {int(self.time_taken // 60):02d}:{int(self.time_taken % 60):02d}",
-            f"スコア: {self.score:,}"
+            f"{get_text('pets_rescued')}: {self.pets_rescued} / {self.total_pets}",
+            f"{get_text('completion_rate')}: {self.completion_rate:.1f}%",
+            f"{get_text('time_taken')}: {int(self.time_taken // 60):02d}:{int(self.time_taken % 60):02d}",
+            f"{get_text('total_score')}: {self.score:,}"
         ]
+        
+        # 時間切れでない場合はタイムボーナスを表示
+        if self.victory or (self.remaining_time > 0):
+            time_bonus = int(self.remaining_time * 10)
+            stats_data.insert(-1, f"{get_text('time_bonus')}: {time_bonus:,}")
         
         for i, text in enumerate(stats_data):
             stats_surface = stats_font.render(text, True, (255, 255, 255))
@@ -264,7 +286,7 @@ class ResultScene(Scene):
         rank = self._get_rank()
         rank_color = self._get_rank_color(rank)
         rank_font = self.font_manager.get_font("default", 72)
-        rank_surface = rank_font.render(f"ランク: {rank}", True, rank_color)
+        rank_surface = rank_font.render(f"{get_text('rank')}: {rank}", True, rank_color)
         rank_rect = rank_surface.get_rect(center=(surface.get_width()//2, 400))
         surface.blit(rank_surface, rank_rect)
     
@@ -318,12 +340,13 @@ class ResultScene(Scene):
     
     def _get_rank_color(self, rank: str) -> tuple:
         """ランクに応じた色を取得"""
-        rank_colors = {
-            "S": (255, 215, 0),    # ゴールド
-            "A": (192, 192, 192),  # シルバー
-            "B": (205, 127, 50),   # ブロンズ
-            "C": (0, 255, 0),      # グリーン
-            "D": (255, 165, 0),    # オレンジ
-            "E": (255, 0, 0)       # レッド
-        }
-        return rank_colors.get(rank, (255, 255, 255))
+        if rank == get_text("perfect"):
+            return (255, 215, 0)    # ゴールド
+        elif rank == get_text("excellent"):
+            return (192, 192, 192)  # シルバー
+        elif rank == get_text("good"):
+            return (0, 255, 0)      # グリーン
+        elif rank == get_text("try_again"):
+            return (255, 165, 0)    # オレンジ
+        else:
+            return (255, 255, 255)  # 白（デフォルト）

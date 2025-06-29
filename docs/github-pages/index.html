@@ -316,8 +316,8 @@
                 </a>
             </div>
             
-            <p style="margin-top: 20px; color: #666;">
-                ※ ダウンロードリンクは準備中です
+            <p style="margin-top: 20px; color: #666; font-size: 0.9em;">
+                ※ 最新版は<a href="https://github.com/yuichi1000/mystery-pet-rescue/releases" style="color: #667eea;">GitHub Releases</a>からもダウンロードできます
             </p>
         </section>
         
@@ -345,16 +345,12 @@
     </footer>
     
     <script>
-        // ダウンロードリンクの設定（後でGitHub Releasesのリンクに更新）
-        document.getElementById('windows-download').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Windows版のダウンロードリンクは準備中です。');
-        });
+        // GitHub Releasesのダウンロードリンク
+        const RELEASE_URL = 'https://github.com/yuichi1000/mystery-pet-rescue/releases/latest';
         
-        document.getElementById('mac-download').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Mac版のダウンロードリンクは準備中です。');
-        });
+        // リリースを作成後、以下のURLを実際のダウンロードリンクに更新してください
+        document.getElementById('windows-download').href = RELEASE_URL + '/download/MysteryPetRescue-Windows-v1.0.0.zip';
+        document.getElementById('mac-download').href = RELEASE_URL + '/download/MysteryPetRescue-Mac-v1.0.0.zip';
     </script>
 </body>
 </html>

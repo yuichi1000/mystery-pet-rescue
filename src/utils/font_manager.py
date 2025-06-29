@@ -58,6 +58,7 @@ class FontManager:
         
         # プロジェクト内フォント
         project_fonts = [
+            "assets/fonts/NotoSansJP-VariableFont_wght.ttf",
             "assets/fonts/NotoSansJP-Regular.ttf",
             "assets/fonts/arial.ttf"
         ]

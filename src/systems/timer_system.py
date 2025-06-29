@@ -1,6 +1,6 @@
 """
 時間制限システム
-5分のタイマーとヒントシステムを管理
+3分のタイマーとヒントシステムを管理
 """
 
 import time
@@ -16,17 +16,17 @@ class TimerState(Enum):
 class TimerSystem:
     """時間制限システム"""
     
-    def __init__(self, time_limit: float = 300.0):  # 5分 = 300秒
+    def __init__(self, time_limit: float = 180.0):  # 3分 = 180秒
         self.time_limit = time_limit
         self.remaining_time = time_limit
         self.start_time: Optional[float] = None
         self.pause_time: Optional[float] = None
         self.state = TimerState.PAUSED
         
-        # ヒントフラグ
-        self.hint_2min_shown = False
-        self.hint_3min_shown = False
-        self.hint_4min_shown = False
+        # ヒントフラグ（3分用に調整）
+        self.hint_1min_shown = False  # 1分経過
+        self.hint_2min_shown = False  # 2分経過
+        self.hint_final_shown = False # 最終警告（30秒以下）
         
         # コールバック関数
         self.on_hint_callback: Optional[Callable[[str, int], None]] = None
@@ -89,21 +89,21 @@ class TimerSystem:
                 self.on_time_up_callback()
     
     def _check_hints(self, elapsed_time: float):
-        """ヒント表示チェック"""
-        if elapsed_time >= 120 and not self.hint_2min_shown:  # 2分
+        """ヒント表示チェック（3分用）"""
+        if elapsed_time >= 60 and not self.hint_1min_shown:  # 1分経過
+            self.hint_1min_shown = True
+            if self.on_hint_callback:
+                self.on_hint_callback("ペットの鳴き声が聞こえます", 1)
+        
+        elif elapsed_time >= 120 and not self.hint_2min_shown:  # 2分経過
             self.hint_2min_shown = True
             if self.on_hint_callback:
-                self.on_hint_callback("ペットの鳴き声が聞こえます", 2)
+                self.on_hint_callback("足跡を発見しました", 2)
         
-        elif elapsed_time >= 180 and not self.hint_3min_shown:  # 3分
-            self.hint_3min_shown = True
+        elif self.remaining_time <= 30 and not self.hint_final_shown:  # 残り30秒
+            self.hint_final_shown = True
             if self.on_hint_callback:
-                self.on_hint_callback("足跡を発見しました", 3)
-        
-        elif elapsed_time >= 240 and not self.hint_4min_shown:  # 4分
-            self.hint_4min_shown = True
-            if self.on_hint_callback:
-                self.on_hint_callback("ペットが近くにいます", 4)
+                self.on_hint_callback("ペットが近くにいます", 3)
     
     def get_time_string(self) -> str:
         """時間をMM:SS形式で取得"""

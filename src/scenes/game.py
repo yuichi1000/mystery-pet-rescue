@@ -50,7 +50,7 @@ class GameScene(Scene):
         self.victory_message_shown = False
         
         # ゲーム制限
-        self.time_limit = 300.0  # 5分制限
+        self.time_limit = 180.0  # 3分制限
         self.remaining_time = self.time_limit
         self.player_lives = 3  # プレイヤーのライフ
         
@@ -100,8 +100,8 @@ class GameScene(Scene):
         # 音響システム初期化
         self.audio_system = get_audio_system()
         
-        # タイマーシステム初期化（5分）
-        self.timer_system = TimerSystem(300.0)
+        # タイマーシステム初期化（3分）
+        self.timer_system = TimerSystem(180.0)
         self.timer_system.set_hint_callback(self._on_timer_hint)
         self.timer_system.set_time_warning_callback(self._on_time_warning)
         self.timer_system.set_time_up_callback(self._on_time_up)

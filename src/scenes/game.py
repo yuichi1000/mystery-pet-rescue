@@ -147,126 +147,75 @@ class GameScene(Scene):
             self.background_image = None
     
     def _create_pets(self) -> List[Pet]:
-        """ペットを作成（マップ定義座標を優先使用）"""
+        """ペットを作成（ランダム配置版）"""
         pets = []
         
-        print("🐾 マップ定義座標を使用してペット生成中...")
+        print("🐾 ランダム配置でペット生成中...")
         
-        # マップデータからペット情報を取得
-        map_pets = []
-        if self.map_system.current_map and "pets" in self.map_system.current_map:
-            map_pets = self.map_system.current_map["pets"]
-            print(f"📍 マップファイルに定義されたペット: {len(map_pets)}匹")
+        # 建物情報をデバッグ出力
+        self._debug_building_info()
         
-        # フォールバック用のペット定義
-        fallback_pets = [
-            {"id": "dog_001", "name": "dog", "type": PetType.DOG, "personality": "friendly"},
-            {"id": "cat_001", "name": "cat", "type": PetType.CAT, "personality": "shy"},
-            {"id": "rabbit_001", "name": "rabbit", "type": PetType.RABBIT, "personality": "gentle"},
-            {"id": "bird_001", "name": "bird", "type": PetType.BIRD, "personality": "active"}
+        # ペットデータ定義
+        pet_definitions = [
+            {
+                "id": "dog_001",
+                "name": "dog",
+                "type": PetType.DOG,
+                "personality": "friendly",
+                "rarity": "common",
+                "description": "忠実な柴犬"
+            },
+            {
+                "id": "cat_001", 
+                "name": "cat",
+                "type": PetType.CAT,
+                "personality": "shy",
+                "rarity": "common",
+                "description": "三毛猫の女の子"
+            },
+            {
+                "id": "rabbit_001",
+                "name": "rabbit",
+                "type": PetType.RABBIT,
+                "personality": "gentle",
+                "rarity": "uncommon",
+                "description": "白いうさぎ"
+            },
+            {
+                "id": "bird_001",
+                "name": "bird",
+                "type": PetType.BIRD,
+                "personality": "active",
+                "rarity": "rare",
+                "description": "カラフルな小鳥"
+            }
         ]
         
-        # マップ定義のペットを優先使用
-        if map_pets:
-            for i, map_pet in enumerate(map_pets[:4]):  # 最大4匹
-                # マップ定義の座標を使用
-                spawn_pos = map_pet.get("spawn_position", {})
-                tile_x = spawn_pos.get("x", 0)
-                tile_y = spawn_pos.get("y", 0)
-                
-                # タイル座標をピクセル座標に変換
-                pixel_x = tile_x * self.map_system.tile_size + self.map_system.tile_size // 2
-                pixel_y = tile_y * self.map_system.tile_size + self.map_system.tile_size // 2
-                
-                # 建物との重複チェック
-                if self.map_system.building_system.is_position_blocked_by_building(tile_x, tile_y, debug=True):
-                    print(f"⚠️ マップ定義座標が建物と重複: {map_pet['name']} at ({tile_x}, {tile_y})")
-                    # 近くの安全な場所を探す
-                    safe_pos = self._find_safe_position_near(tile_x, tile_y)
-                    if safe_pos:
-                        pixel_x, pixel_y = safe_pos
-                        print(f"✅ 代替位置を使用: ({pixel_x:.1f}, {pixel_y:.1f})")
-                    else:
-                        print(f"❌ 代替位置が見つかりません、ランダム配置にフォールバック")
-                        continue
-                
-                # ペット作成
-                pet_type = self._get_pet_type_from_string(map_pet.get("type", "dog"))
+        # 各ペットをランダム位置に配置（互いに離れた位置に）
+        placed_positions = []
+        
+        for pet_def in pet_definitions:
+            position = self._find_random_walkable_position(placed_positions)
+            if position:
+                x, y = position
+                placed_positions.append((x, y))  # 配置済み位置を記録
+                x, y = position
                 pet_data = PetData(
-                    pet_id=map_pet.get("id", f"pet_{i:03d}"),
-                    name=map_pet.get("name", "unknown"),
-                    pet_type=pet_type,
-                    personality=map_pet.get("personality", "neutral"),
-                    rarity="common",
-                    description=f"マップ定義ペット: {map_pet.get('name', 'unknown')}"
+                    pet_id=pet_def["id"],
+                    name=pet_def["name"],
+                    pet_type=pet_def["type"],
+                    personality=pet_def["personality"],
+                    rarity=pet_def["rarity"],
+                    description=pet_def["description"]
                 )
-                pet = Pet(pet_data, x=pixel_x, y=pixel_y)
+                pet = Pet(pet_data, x=x, y=y)
                 pets.append(pet)
-                print(f"  🐾 {pet.data.name} ({pet.data.pet_type.value}) at ({pixel_x:.1f}, {pixel_y:.1f}) [マップ定義]")
+                print(f"  🐾 {pet.data.name} ({pet.data.pet_type.value}) at ({x:.1f}, {y:.1f})")
+            else:
+                print(f"  ❌ {pet_def['name']} の配置場所が見つかりませんでした")
         
-        # 不足分はランダム配置で補完
-        if len(pets) < 4:
-            print(f"🎲 不足分をランダム配置で補完: {4 - len(pets)}匹")
-            placed_positions = [(pet.x, pet.y) for pet in pets]
-            
-            for i in range(len(pets), 4):
-                fallback_pet = fallback_pets[i]
-                position = self._find_random_walkable_position(placed_positions)
-                if position:
-                    x, y = position
-                    placed_positions.append((x, y))
-                    pet_data = PetData(
-                        pet_id=fallback_pet["id"],
-                        name=fallback_pet["name"],
-                        pet_type=fallback_pet["type"],
-                        personality=fallback_pet["personality"],
-                        rarity="common",
-                        description="ランダム配置ペット"
-                    )
-                    pet = Pet(pet_data, x=x, y=y)
-                    pets.append(pet)
-                    print(f"  🐾 {pet.data.name} ({pet.data.pet_type.value}) at ({x:.1f}, {y:.1f}) [ランダム]")
-        
-        print(f"✅ ペット生成完了: {len(pets)}匹")
+        print(f"✅ ランダムペット生成完了: {len(pets)}匹")
         return pets
-    
-    def _get_pet_type_from_string(self, type_str: str) -> PetType:
-        """文字列からPetTypeを取得"""
-        type_mapping = {
-            "dog": PetType.DOG,
-            "cat": PetType.CAT,
-            "rabbit": PetType.RABBIT,
-            "bird": PetType.BIRD
-        }
-        return type_mapping.get(type_str.lower(), PetType.DOG)
-    
-    def _find_safe_position_near(self, tile_x: int, tile_y: int, radius: int = 3) -> Optional[Tuple[float, float]]:
-        """指定タイル座標の近くで安全な位置を探す"""
-        for distance in range(1, radius + 1):
-            for dx in range(-distance, distance + 1):
-                for dy in range(-distance, distance + 1):
-                    if abs(dx) != distance and abs(dy) != distance:
-                        continue  # 境界のみチェック
-                    
-                    check_x = tile_x + dx
-                    check_y = tile_y + dy
-                    
-                    # 境界チェック
-                    if (check_x < 0 or check_y < 0 or 
-                        check_x >= self.map_system.map_width_tiles or 
-                        check_y >= self.map_system.map_height_tiles):
-                        continue
-                    
-                    # 建物との重複チェック
-                    if not self.map_system.building_system.is_position_blocked_by_building(check_x, check_y):
-                        # 通行可能かチェック
-                        pixel_x = check_x * self.map_system.tile_size + self.map_system.tile_size // 2
-                        pixel_y = check_y * self.map_system.tile_size + self.map_system.tile_size // 2
-                        
-                        if self.map_system.is_walkable(pixel_x, pixel_y):
-                            return (pixel_x, pixel_y)
-        
-        return None
     
     def _find_random_walkable_position(self, existing_positions: List[Tuple[float, float]] = None, max_attempts: int = 500) -> Optional[Tuple[float, float]]:
         """通過可能なランダム位置を見つける（建物から適度に離れた場所）"""
@@ -314,37 +263,20 @@ class GameScene(Scene):
                     print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 通過不可")
                 continue
             
-            # 建物との衝突をチェック（常に厳格に）
-            tile_x = int(x // self.map_system.tile_size)
-            tile_y = int(y // self.map_system.tile_size)
-            
-            if self.map_system.building_system.is_position_blocked_by_building(tile_x, tile_y):
-                if attempt % 100 == 0:
-                    print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 建物と重複")
-                continue
-            
-            # 追加の安全チェック：ペット周辺も建物と重複しないか確認
-            pet_safe = True
-            pet_radius_tiles = 1  # 1タイル分の余裕
-            for check_dx in range(-pet_radius_tiles, pet_radius_tiles + 1):
-                for check_dy in range(-pet_radius_tiles, pet_radius_tiles + 1):
-                    check_tile_x = tile_x + check_dx
-                    check_tile_y = tile_y + check_dy
-                    
-                    # マップ境界チェック
-                    if (check_tile_x < 0 or check_tile_y < 0 or 
-                        check_tile_x >= self.map_system.map_width_tiles or 
-                        check_tile_y >= self.map_system.map_height_tiles):
-                        continue
-                    
-                    if self.map_system.building_system.is_position_blocked_by_building(check_tile_x, check_tile_y):
-                        pet_safe = False
-                        break
-                if not pet_safe:
-                    break
-            
-            if not pet_safe:
-                continue
+            # 建物との衝突もチェック（後半は緩い条件）
+            if attempt < max_attempts * 2 // 3:
+                if self._is_position_blocked_by_building(x, y):
+                    if attempt % 100 == 0:
+                        print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 建物と重複")
+                    continue
+            else:
+                # 後半は直接的な重複のみチェック
+                tile_x = int(x // self.map_system.tile_size)
+                tile_y = int(y // self.map_system.tile_size)
+                if (hasattr(self.map_system, 'building_system') and 
+                    hasattr(self.map_system.building_system, 'is_position_blocked_by_building') and
+                    self.map_system.building_system.is_position_blocked_by_building(tile_x, tile_y)):
+                    continue
             
             # プレイヤーの初期位置から離れているかチェック
             player_x, player_y = self.player.x, self.player.y

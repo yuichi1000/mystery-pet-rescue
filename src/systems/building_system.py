@@ -159,9 +159,9 @@ class BuildingSystem:
             bx, by = building.position
             bw, bh = building.size
             
-            # 建物の全エリア + 周辺バッファを衝突判定とする
-            # ペットが建物内部に配置されるのを防ぐため適切なマージンを設定
-            buffer = 1  # 周辺バッファ（ペット配置の安全性を確保）
+            # 建物の全エリア + 周辺1タイルを衝突判定とする
+            # これにより建物画像と重ならず、適切な距離を保てる
+            buffer = 0  # 周辺バッファ（建物に密着して歩けるように0に設定）
             
             collision_x1 = bx - buffer
             collision_y1 = by - buffer  

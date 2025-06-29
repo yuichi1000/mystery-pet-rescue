@@ -13,40 +13,106 @@ class GameMain:
     """メインゲームクラス"""
     
     def __init__(self):
-        # Pygame初期化
-        pygame.init()
-        pygame.mixer.init()
+        print("🎮 GameMain 初期化開始")
         
-        # 日本語入力（IME）を無効化
         try:
-            # テキスト入力を停止してIMEを無効化
-            pygame.key.stop_text_input()
+            # Web環境チェック
+            self.is_web = self._check_web_environment()
             
-            # 追加の無効化設定
-            import os
-            os.environ['SDL_IME_SHOW_UI'] = '0'  # IME UIを非表示
+            # Pygame初期化
+            print("🔧 Pygame 初期化中...")
+            pygame.init()
             
-            print("✅ 日本語入力（IME）を無効化しました")
+            # Web環境では軽量な音声初期化
+            if self.is_web:
+                print("🌐 Web環境用音声初期化")
+                try:
+                    pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=1024)
+                except Exception as e:
+                    print(f"⚠️ Web音声初期化失敗: {e}")
+            else:
+                print("🖥️ デスクトップ環境用音声初期化")
+                pygame.mixer.init()
+            
+            # 日本語入力（IME）を無効化
+            try:
+                # テキスト入力を停止してIMEを無効化
+                pygame.key.stop_text_input()
+                
+                # 追加の無効化設定
+                import os
+                os.environ['SDL_IME_SHOW_UI'] = '0'  # IME UIを非表示
+                
+                print("✅ 日本語入力（IME）を無効化しました")
+            except Exception as e:
+                print(f"⚠️ IME無効化に失敗: {e}")
+            
+            # 画面設定
+            self.screen_width = 1280
+            self.screen_height = 720
+            
+            # Web環境では異なる画面設定
+            if self.is_web:
+                print("🌐 Web環境用画面設定")
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            else:
+                print("🖥️ デスクトップ環境用画面設定")
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
+            
+            # 言語管理システム
+            print("🌐 言語管理システム初期化中...")
+            try:
+                from src.utils.language_manager import get_language_manager
+                self.language_manager = get_language_manager()
+                self.update_window_title()
+                print("✅ 言語管理システム初期化完了")
+            except Exception as e:
+                print(f"⚠️ 言語管理システム初期化エラー: {e}")
+                self.language_manager = None
+            
+            # パフォーマンス最適化
+            print("⚡ パフォーマンス最適化システム初期化中...")
+            try:
+                from src.utils.performance_optimizer import get_performance_optimizer
+                self.optimizer = get_performance_optimizer()
+                print("✅ パフォーマンス最適化システム初期化完了")
+            except Exception as e:
+                print(f"⚠️ パフォーマンス最適化システム初期化エラー: {e}")
+                self.optimizer = None
+            
+            # ゲームフロー管理
+            print("🎮 ゲームフロー管理初期化中...")
+            try:
+                from src.core.game_flow import GameFlowManager
+                self.flow_manager = GameFlowManager(self.screen)
+                print("✅ ゲームフロー管理初期化完了")
+            except Exception as e:
+                print(f"❌ ゲームフロー管理初期化エラー: {e}")
+                raise
+            
+            # 初期ウィンドウタイトル設定
+            self.update_window_title()
+            
+            # ゲーム設定
+            self.clock = pygame.time.Clock()
+            self.target_fps = 60 if not self.is_web else 30  # Web版はFPSを下げる
+            
+            print("✅ GameMain 初期化完了")
+            
         except Exception as e:
-            print(f"⚠️ IME無効化に失敗: {e}")
-        
-        # 画面設定
-        self.screen_width = 1280
-        self.screen_height = 720
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
-        
-        # 言語管理システム
-        self.language_manager = get_language_manager()
-        self.update_window_title()
-        
-        # パフォーマンス最適化
-        self.optimizer = get_performance_optimizer()
-        
-        # ゲームフロー管理
-        self.flow_manager = GameFlowManager(self.screen)
-        
-        # 初期ウィンドウタイトル設定
-        self.update_window_title()
+            print(f"❌ GameMain 初期化エラー: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
+    
+    def _check_web_environment(self) -> bool:
+        """Web環境かチェック"""
+        try:
+            from src.utils.web_utils import is_web_environment
+            return is_web_environment()
+        except ImportError:
+            import os
+            return os.environ.get('WEB_VERSION') == '1'
         
         # ゲーム設定
         self.clock = pygame.time.Clock()

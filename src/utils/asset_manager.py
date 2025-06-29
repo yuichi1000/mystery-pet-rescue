@@ -16,15 +16,29 @@ class AssetManager:
     """アセット管理クラス"""
     
     def __init__(self):
+        print("🎨 アセットマネージャー初期化開始")
+        
         self.images: Dict[str, pygame.Surface] = {}
         self.sounds: Dict[str, pygame.mixer.Sound] = {}
         self.fonts: Dict[str, pygame.font.Font] = {}
         
-        # アセットパス
-        self.assets_root = Path("assets")
-        self.images_path = self.assets_root / "images"
-        self.sounds_path = self.assets_root / "sounds"
-        self.fonts_path = self.assets_root / "fonts"
+        # Web環境チェック
+        self.is_web = self._check_web_environment()
+        
+        # アセットパス（Web対応）
+        if self.is_web:
+            print("🌐 Web環境用パス設定")
+            from src.utils.web_utils import get_web_safe_path
+            self.assets_root = Path(get_web_safe_path("assets"))
+            self.images_path = Path(get_web_safe_path("assets/images"))
+            self.sounds_path = Path(get_web_safe_path("assets/sounds"))
+            self.fonts_path = Path(get_web_safe_path("assets/fonts"))
+        else:
+            print("🖥️ デスクトップ環境用パス設定")
+            self.assets_root = Path("assets")
+            self.images_path = self.assets_root / "images"
+            self.sounds_path = self.assets_root / "sounds"
+            self.fonts_path = self.assets_root / "fonts"
         
         # 画像スケール設定
         self.default_scale = (64, 64)
@@ -32,7 +46,52 @@ class AssetManager:
         self.character_scale = (64, 64)
         self.pet_scale = (48, 48)
         
-        print("🎨 アセットマネージャー初期化完了")
+        # Web環境では品質を下げる
+        if self.is_web:
+            print("🌐 Web環境用品質設定")
+            self.default_scale = (48, 48)  # サイズを小さく
+            self.tile_scale = (48, 48)
+            self.character_scale = (48, 48)
+            self.pet_scale = (32, 32)
+        
+        # アセット存在確認
+        self._check_asset_directories()
+        
+        print("✅ アセットマネージャー初期化完了")
+    
+    def _check_web_environment(self) -> bool:
+        """Web環境かチェック"""
+        try:
+            from src.utils.web_utils import is_web_environment
+            return is_web_environment()
+        except ImportError:
+            import os
+            return os.environ.get('WEB_VERSION') == '1'
+    
+    def _check_asset_directories(self):
+        """アセットディレクトリの存在確認"""
+        print("🔍 アセットディレクトリ確認:")
+        
+        directories = [
+            ("images", self.images_path),
+            ("sounds", self.sounds_path),
+            ("fonts", self.fonts_path)
+        ]
+        
+        for name, path in directories:
+            exists = path.exists()
+            status = "✅" if exists else "❌"
+            print(f"  {status} {name}: {path}")
+            
+            if not exists:
+                print(f"⚠️ {name} ディレクトリが見つかりません: {path}")
+                # Web環境では警告のみ、デスクトップ環境では作成
+                if not self.is_web:
+                    try:
+                        path.mkdir(parents=True, exist_ok=True)
+                        print(f"✅ {name} ディレクトリを作成しました")
+                    except Exception as e:
+                        print(f"❌ {name} ディレクトリ作成失敗: {e}")
     
     def load_image(self, path: str, scale: Optional[Tuple[int, int]] = None) -> Optional[pygame.Surface]:
         """画像を読み込み（エラーハンドリング強化版）"""

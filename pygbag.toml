@@ -1,51 +1,45 @@
 [pygbag]
 # Pygbag設定ファイル
 
-# ゲーム情報
-name = "Mystery Pet Rescue"
-author = "Game Developer"
-version = "1.0.0"
-description = "迷子のペットを探して救出するアドベンチャーゲーム"
-
 # ウィンドウ設定
 width = 1280
 height = 720
-title = "ミステリー・ペット・レスキュー"
+title = "Mystery Pet Rescue"
 
-# アセット設定
-icon = "assets/icons/game_icon.png"
+# ビルド設定
 archive = true
 cdn = "https://cdn.jsdelivr.net/pyodide/"
 
 # パフォーマンス設定
-fps = 60
-vsync = true
+fps = 30  # Web版は30fpsに下げる
+optimize = true
 
-# Web固有設定
+# 非同期設定
+async_main = true
+
+# CORS設定
+# Web環境でのリソース読み込み問題を解決
 template = "custom"
-loading_text = "ゲーム読み込み中..."
-fullscreen = false
 
-# 除外ファイル
+# 除外ファイル（ビルドに含めない）
 exclude = [
     "*.pyc",
-    "__pycache__",
-    ".git",
-    ".pytest_cache",
+    "__pycache__/",
+    ".git/",
+    ".pytest_cache/",
     "tests/",
     "examples/",
     "docs/",
     "logs/",
     ".env",
-    "requirements-dev.txt"
+    "requirements-dev.txt",
+    "build_web.py",
+    "serve_web.py"
 ]
 
 # 含めるアセット
 include = [
-    "assets/images/",
-    "assets/sounds/",
-    "assets/music/",
-    "assets/icons/",
+    "assets/",
     "data/",
     "config/",
     "locales/"

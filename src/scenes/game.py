@@ -138,6 +138,9 @@ class GameScene(Scene):
         
         print("🐾 ランダム配置でペット生成中...")
         
+        # 建物情報をデバッグ出力
+        self._debug_building_info()
+        
         # ペットデータ定義
         pet_definitions = [
             {
@@ -174,10 +177,14 @@ class GameScene(Scene):
             }
         ]
         
-        # 各ペットをランダム位置に配置
+        # 各ペットをランダム位置に配置（互いに離れた位置に）
+        placed_positions = []
+        
         for pet_def in pet_definitions:
-            position = self._find_random_walkable_position()
+            position = self._find_random_walkable_position(placed_positions)
             if position:
+                x, y = position
+                placed_positions.append((x, y))  # 配置済み位置を記録
                 x, y = position
                 pet_data = PetData(
                     pet_id=pet_def["id"],
@@ -196,9 +203,12 @@ class GameScene(Scene):
         print(f"✅ ランダムペット生成完了: {len(pets)}匹")
         return pets
     
-    def _find_random_walkable_position(self, max_attempts: int = 100) -> Optional[Tuple[float, float]]:
+    def _find_random_walkable_position(self, existing_positions: List[Tuple[float, float]] = None, max_attempts: int = 200) -> Optional[Tuple[float, float]]:
         """通過可能なランダム位置を見つける"""
         import random
+        
+        if existing_positions is None:
+            existing_positions = []
         
         # マップサイズを取得
         if self.map_system.current_map:
@@ -211,6 +221,9 @@ class GameScene(Scene):
         
         # マージンを設定（端から離す）
         margin = 100
+        min_pet_distance = 200  # ペット同士の最小距離
+        
+        print(f"🔍 ペット配置場所を探索中... (マップサイズ: {map_width}x{map_height})")
         
         for attempt in range(max_attempts):
             # ランダム位置を生成
@@ -218,32 +231,107 @@ class GameScene(Scene):
             y = random.uniform(margin, map_height - margin)
             
             # 通過可能かチェック
-            if self.map_system.is_walkable(x, y):
-                # 建物との衝突もチェック
-                if not self._is_position_blocked_by_building(x, y):
-                    # プレイヤーの初期位置から離れているかチェック
-                    player_x, player_y = self.player.x, self.player.y
-                    distance = ((x - player_x) ** 2 + (y - player_y) ** 2) ** 0.5
-                    if distance > 150:  # プレイヤーから150ピクセル以上離す
-                        return (x, y)
+            if not self.map_system.is_walkable(x, y):
+                if attempt % 50 == 0:  # 50回ごとにログ出力
+                    print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 通過不可")
+                continue
+            
+            # 建物との衝突もチェック
+            if self._is_position_blocked_by_building(x, y):
+                if attempt % 50 == 0:
+                    print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 建物と重複")
+                continue
+            
+            # プレイヤーの初期位置から離れているかチェック
+            player_x, player_y = self.player.x, self.player.y
+            distance_to_player = ((x - player_x) ** 2 + (y - player_y) ** 2) ** 0.5
+            if distance_to_player <= 150:  # プレイヤーから150ピクセル以上離す
+                if attempt % 50 == 0:
+                    print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - プレイヤーに近すぎる (距離: {distance_to_player:.1f})")
+                continue
+            
+            # 他のペットから離れているかチェック
+            too_close_to_other_pet = False
+            for existing_x, existing_y in existing_positions:
+                distance_to_pet = ((x - existing_x) ** 2 + (y - existing_y) ** 2) ** 0.5
+                if distance_to_pet < min_pet_distance:
+                    too_close_to_other_pet = True
+                    if attempt % 50 == 0:
+                        print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 他のペットに近すぎる (距離: {distance_to_pet:.1f})")
+                    break
+            
+            if too_close_to_other_pet:
+                continue
+            
+            print(f"  ✅ 適切な位置発見: ({x:.1f}, {y:.1f}) - 試行回数: {attempt + 1}")
+            return (x, y)
         
         print(f"⚠️ {max_attempts}回試行しても適切な位置が見つかりませんでした")
         return None
     
     def _is_position_blocked_by_building(self, x: float, y: float) -> bool:
         """位置が建物によってブロックされているかチェック"""
-        # 建物システムがある場合のチェック
-        if hasattr(self, 'building_system') and self.building_system:
-            # ペットのサイズを考慮したマージン
-            margin = 32  # ペットのサイズの半分程度
-            
-            # 建物との衝突をチェック
-            for building in self.building_system.buildings:
-                if (building.x - margin < x < building.x + building.width + margin and
-                    building.y - margin < y < building.y + building.height + margin):
+        # ペットのサイズを考慮したマージン
+        margin = 40  # ペットのサイズ + 余裕
+        
+        # MapSystemの建物情報をチェック
+        if hasattr(self.map_system, 'buildings') and self.map_system.buildings:
+            for building in self.map_system.buildings:
+                # 建物の位置とサイズを取得
+                pos = building.get('position', {})
+                size = building.get('size', {})
+                
+                building_x = pos.get('x', 0) * self.map_system.tile_size
+                building_y = pos.get('y', 0) * self.map_system.tile_size
+                building_width = size.get('width', 1) * self.map_system.tile_size
+                building_height = size.get('height', 1) * self.map_system.tile_size
+                
+                # マージンを含めた建物の範囲をチェック
+                if (building_x - margin < x < building_x + building_width + margin and
+                    building_y - margin < y < building_y + building_height + margin):
                     return True
         
+        # BuildingSystemの建物情報もチェック（フォールバック）
+        if hasattr(self.map_system, 'building_system') and self.map_system.building_system:
+            if hasattr(self.map_system.building_system, 'buildings'):
+                for building in self.map_system.building_system.buildings:
+                    # BuildingSystemの建物オブジェクトの場合
+                    if hasattr(building, 'x') and hasattr(building, 'y'):
+                        building_width = getattr(building, 'width', 64)
+                        building_height = getattr(building, 'height', 64)
+                        
+                        if (building.x - margin < x < building.x + building_width + margin and
+                            building.y - margin < y < building.y + building_height + margin):
+                            return True
+        
         return False
+    
+    def _debug_building_info(self):
+        """建物情報をデバッグ出力"""
+        print("🏠 建物情報デバッグ:")
+        
+        # MapSystemの建物情報
+        if hasattr(self.map_system, 'buildings') and self.map_system.buildings:
+            print(f"  MapSystem.buildings: {len(self.map_system.buildings)}個")
+            for i, building in enumerate(self.map_system.buildings[:3]):  # 最初の3個のみ表示
+                pos = building.get('position', {})
+                size = building.get('size', {})
+                building_x = pos.get('x', 0) * self.map_system.tile_size
+                building_y = pos.get('y', 0) * self.map_system.tile_size
+                building_width = size.get('width', 1) * self.map_system.tile_size
+                building_height = size.get('height', 1) * self.map_system.tile_size
+                print(f"    建物{i}: ({building_x}, {building_y}) サイズ({building_width}x{building_height})")
+        
+        # BuildingSystemの建物情報
+        if hasattr(self.map_system, 'building_system') and self.map_system.building_system:
+            if hasattr(self.map_system.building_system, 'buildings'):
+                buildings = self.map_system.building_system.buildings
+                print(f"  BuildingSystem.buildings: {len(buildings)}個")
+                for i, building in enumerate(buildings[:3]):  # 最初の3個のみ表示
+                    if hasattr(building, 'x') and hasattr(building, 'y'):
+                        width = getattr(building, 'width', 64)
+                        height = getattr(building, 'height', 64)
+                        print(f"    建物{i}: ({building.x}, {building.y}) サイズ({width}x{height})")
     
     
     def enter(self) -> None:
@@ -743,7 +831,7 @@ class GameScene(Scene):
         surface.blit(clear_text, clear_rect)
         
         # サブタイトル
-        subtitle_text = font_medium.render("全てのペットを救出しました！", True, (255, 255, 255))
+        subtitle_text = font_medium.render(get_text("all_pets_rescued_subtitle"), True, (255, 255, 255))
         subtitle_rect = subtitle_text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2 - 40))
         surface.blit(subtitle_text, subtitle_rect)
         
@@ -751,12 +839,18 @@ class GameScene(Scene):
         stats_y = surface.get_height() // 2 + 20
         
         # 救出ペット数
-        pets_text = font_small.render(f"{get_text('pets_found')}: {len(self.pets_rescued)}/{self.total_pets}匹", True, (255, 255, 255))
+        pets_text = font_small.render(
+            get_text("pets_found_count").format(count=len(self.pets_rescued), total=self.total_pets), 
+            True, (255, 255, 255)
+        )
         pets_rect = pets_text.get_rect(center=(surface.get_width() // 2, stats_y))
         surface.blit(pets_text, pets_rect)
         
         # 残り時間
-        time_text = font_small.render(f"残り時間: {self.timer_system.get_time_string()}", True, (255, 255, 255))
+        time_text = font_small.render(
+            get_text("remaining_time_display").format(time=self.timer_system.get_time_string()), 
+            True, (255, 255, 255)
+        )
         time_rect = time_text.get_rect(center=(surface.get_width() // 2, stats_y + 30))
         surface.blit(time_text, time_rect)
         
@@ -785,7 +879,10 @@ class GameScene(Scene):
         surface.blit(defeat_text, defeat_rect)
         
         # サブタイトル
-        subtitle_text = font_medium.render(f"{len(self.pets_rescued)}/{self.total_pets}匹のペットを救出しました", True, (255, 255, 255))
+        subtitle_text = font_medium.render(
+            get_text("pets_rescued_subtitle").format(count=len(self.pets_rescued), total=self.total_pets), 
+            True, (255, 255, 255)
+        )
         subtitle_rect = subtitle_text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2 - 40))
         surface.blit(subtitle_text, subtitle_rect)
         
@@ -793,7 +890,10 @@ class GameScene(Scene):
         stats_y = surface.get_height() // 2 + 20
         
         # 救出ペット数のみ表示
-        pets_text = font_small.render(f"{get_text('pets_rescued')}: {len(self.pets_rescued)}/{self.total_pets}匹", True, (255, 255, 255))
+        pets_text = font_small.render(
+            get_text("pets_rescued_count").format(count=len(self.pets_rescued), total=self.total_pets), 
+            True, (255, 255, 255)
+        )
         pets_rect = pets_text.get_rect(center=(surface.get_width() // 2, stats_y))
         surface.blit(pets_text, pets_rect)
         

@@ -94,7 +94,17 @@ class LanguageManager:
                 "collision_debug_output": "Collision info output to console",
                 "collision_display_on": "Collision Display: ON",
                 "collision_display_off": "Collision Display: OFF",
-                "objective_completed": "Objective Completed!"
+                "objective_completed": "Objective Completed!",
+                
+                # 敗北画面用
+                "pets_rescued_subtitle": "You rescued {count}/{total} pets",
+                "pets_rescued_count": "Pets Rescued: {count}/{total}",
+                "pet_unit": "",  # 英語では単位なし
+                
+                # 勝利画面用
+                "all_pets_rescued_subtitle": "All pets have been rescued!",
+                "pets_found_count": "Pets Found: {count}/{total}",
+                "remaining_time_display": "Remaining Time: {time}"
             },
             Language.JAPANESE.value: {
                 # メニュー
@@ -166,7 +176,17 @@ class LanguageManager:
                 "collision_debug_output": "衝突判定情報をコンソールに出力",
                 "collision_display_on": "衝突判定表示: ON",
                 "collision_display_off": "衝突判定表示: OFF",
-                "objective_completed": "目標達成！"
+                "objective_completed": "目標達成！",
+                
+                # 敗北画面用
+                "pets_rescued_subtitle": "{count}/{total}匹のペットを救出しました",
+                "pets_rescued_count": "救出したペット: {count}/{total}匹",
+                "pet_unit": "匹",
+                
+                # 勝利画面用
+                "all_pets_rescued_subtitle": "全てのペットを救出しました！",
+                "pets_found_count": "発見したペット: {count}/{total}匹",
+                "remaining_time_display": "残り時間: {time}"
             }
         }
     

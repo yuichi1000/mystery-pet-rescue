@@ -541,40 +541,6 @@ class GameUI:
         
         print(f"🖥️ UI解像度変更: {new_width}x{new_height} (スケール: {self.ui_scale:.2f})")
     
-    def draw_timer(self, time_string: str, is_warning: bool = False):
-        """タイマー表示"""
-        # タイマー背景
-        timer_bg_rect = pygame.Rect(
-            self.screen_width // 2 - 80,
-            20,
-            160,
-            50
-        )
-        
-        # 警告時は赤色、通常時は黒色
-        bg_color = (200, 50, 50, 180) if is_warning else (0, 0, 0, 180)
-        timer_surface = pygame.Surface((160, 50), pygame.SRCALPHA)
-        timer_surface.fill(bg_color)
-        self.screen.blit(timer_surface, timer_bg_rect.topleft)
-        
-        # 枠線
-        border_color = (255, 100, 100) if is_warning else (255, 255, 255)
-        pygame.draw.rect(self.screen, border_color, timer_bg_rect, 2)
-        
-        # タイマーテキスト
-        text_color = (255, 255, 255) if not is_warning else (255, 255, 100)
-        timer_font = self.font_manager.get_font('default', 32)
-        timer_text = timer_font.render(time_string, True, text_color)
-        
-        # 中央配置
-        text_rect = timer_text.get_rect(center=timer_bg_rect.center)
-        self.screen.blit(timer_text, text_rect)
-        
-        # "残り時間" ラベル
-        label_font = self.font_manager.get_font('default', 18)
-        label_text = label_font.render(get_text("time_remaining"), True, text_color)
-        label_rect = label_text.get_rect(centerx=timer_bg_rect.centerx, bottom=timer_bg_rect.top - 5)
-        self.screen.blit(label_text, label_rect)
     def _draw_rescued_pets(self):
         """救出されたペットを描画"""
         if not self.rescued_pets:

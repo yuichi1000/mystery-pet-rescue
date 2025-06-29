@@ -610,11 +610,6 @@ class GameScene(Scene):
         }
         self.game_ui.draw(player_stats, [], (self.player.x, self.player.y))
         
-        # タイマー表示
-        time_string = self.timer_system.get_time_string()
-        is_warning = self.timer_system.is_warning_time()
-        self.game_ui.draw_timer(time_string, is_warning)
-        
         # 勝利画面描画
         if self.victory:
             self._draw_victory_screen(surface)

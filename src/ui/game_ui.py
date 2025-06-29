@@ -635,7 +635,7 @@ class GameUI:
             
             if self.current_objective.progress >= self.current_objective.max_progress:
                 self.current_objective.completed = True
-                self.add_notification("目標達成！", NotificationType.SUCCESS)
+                self.add_notification(get_text("objective_completed"), NotificationType.SUCCESS)
                 print(f"🎉 目標達成: {self.current_objective.title}")
     
     def clear_objective(self):

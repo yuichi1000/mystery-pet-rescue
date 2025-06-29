@@ -85,7 +85,16 @@ class LanguageManager:
                 "controls_run": "Shift: Run",
                 "controls_interact": "E: Interact",
                 "controls_pause": "ESC: Pause",
-                "controls_minimap": "M: Toggle Minimap"
+                "controls_minimap": "M: Toggle Minimap",
+                
+                # 通知メッセージ
+                "time_warning": "Time is running out!",
+                "no_lives": "No lives remaining!",
+                "time_bonus_message": "Time Bonus: {bonus} points",
+                "collision_debug_output": "Collision info output to console",
+                "collision_display_on": "Collision Display: ON",
+                "collision_display_off": "Collision Display: OFF",
+                "objective_completed": "Objective Completed!"
             },
             Language.JAPANESE.value: {
                 # メニュー
@@ -148,7 +157,16 @@ class LanguageManager:
                 "controls_run": "Shift: 走る",
                 "controls_interact": "E: 相互作用",
                 "controls_pause": "ESC: 一時停止",
-                "controls_minimap": "M: ミニマップ切り替え"
+                "controls_minimap": "M: ミニマップ切り替え",
+                
+                # 通知メッセージ
+                "time_warning": "残り時間が少なくなりました！",
+                "no_lives": "ライフが尽きました！",
+                "time_bonus_message": "タイムボーナス: {bonus}点",
+                "collision_debug_output": "衝突判定情報をコンソールに出力",
+                "collision_display_on": "衝突判定表示: ON",
+                "collision_display_off": "衝突判定表示: OFF",
+                "objective_completed": "目標達成！"
             }
         }
     

@@ -320,14 +320,14 @@ class GameScene(Scene):
                         tile_type = self.map_system.get_tile_at_position(check_x * 64, check_y * 64)
                         print(f"  タイル({check_x}, {check_y}): {'🚫' if is_blocked else '✅'} {tile_type.value if tile_type else 'None'}")
                 
-                self.game_ui.add_notification("衝突判定情報をコンソールに出力", NotificationType.INFO)
+                self.game_ui.add_notification(get_text("collision_debug_output"), NotificationType.INFO)
             
             elif event.key == pygame.K_F6:
                 # デバッグ: 衝突判定の視覚表示を切り替え
                 self.map_system.debug_collision = not getattr(self.map_system, 'debug_collision', False)
-                status = "ON" if self.map_system.debug_collision else "OFF"
-                self.game_ui.add_notification(f"衝突判定表示: {status}", NotificationType.INFO)
-                print(f"🔍 衝突判定表示: {status}")
+                status_key = "collision_display_on" if self.map_system.debug_collision else "collision_display_off"
+                self.game_ui.add_notification(get_text(status_key), NotificationType.INFO)
+                print(f"🔍 衝突判定表示: {'ON' if self.map_system.debug_collision else 'OFF'}")
         
         elif event.type == pygame.USEREVENT + 1:
             # ゲーム完了タイマー（旧）
@@ -444,7 +444,7 @@ class GameScene(Scene):
                 
             elif self.player_lives <= 0:
                 self.game_over = True
-                self.game_ui.add_notification("ライフが尽きました！", NotificationType.ERROR)
+                self.game_ui.add_notification(get_text("no_lives"), NotificationType.ERROR)
                 print("💔 ライフ切れで敗北")
                 pygame.time.set_timer(pygame.USEREVENT + 4, 2000)  # 敗北画面へ
         
@@ -458,7 +458,7 @@ class GameScene(Scene):
             
             # タイムボーナス計算
             time_bonus = self.timer_system.calculate_time_bonus()
-            bonus_message = f"タイムボーナス: {time_bonus}点"
+            bonus_message = get_text("time_bonus_message").format(bonus=time_bonus)
             
             self.game_ui.add_notification(get_text("all_pets_rescued"), NotificationType.SUCCESS)
             self.game_ui.add_notification(bonus_message, NotificationType.INFO)
@@ -703,7 +703,7 @@ class GameScene(Scene):
         """時間警告コールバック"""
         # 警告は一度だけ表示
         if not hasattr(self, '_warning_shown'):
-            self.game_ui.add_notification("残り時間が少なくなりました！", NotificationType.WARNING)
+            self.game_ui.add_notification(get_text("time_warning"), NotificationType.WARNING)
             self._warning_shown = True
             
             # 警告効果音再生

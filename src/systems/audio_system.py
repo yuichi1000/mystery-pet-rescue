@@ -15,33 +15,56 @@ class AudioSystem:
     """音響システムクラス"""
     
     def __init__(self):
-        # Pygameミキサーの初期化
+        # Web環境チェック
+        self.is_web = self._check_web_environment()
+        
+        # Pygameミキサーの初期化（Web対応）
         if not pygame.mixer.get_init():
-            pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+            if self.is_web:
+                # Web環境では軽量設定
+                pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=1024)
+                print("🌐 Web環境用音声初期化")
+            else:
+                pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+                print("🖥️ デスクトップ環境用音声初期化")
         
         # 音量設定
         self.master_volume = 1.0
-        self.bgm_volume = 0.7
-        self.sfx_volume = 0.8
+        self.bgm_volume = 0.7 if not self.is_web else 0.5  # Web版は音量を下げる
+        self.sfx_volume = 0.8 if not self.is_web else 0.6
         
         # BGMトラック管理
         self.bgm_tracks: Dict[str, str] = {}
         self.current_bgm: Optional[str] = None
-        self.bgm_fade_duration = 1000  # ミリ秒
+        self.bgm_fade_duration = 1000 if not self.is_web else 500  # Web版は短縮
         
         # 効果音管理
         self.sound_effects: Dict[str, pygame.mixer.Sound] = {}
         self.sound_channels: List[pygame.mixer.Channel] = []
         
-        # アセットパス
-        self.music_path = Path("assets/music")
-        self.sfx_path = Path("assets/sounds")
+        # アセットパス（Web対応）
+        if self.is_web:
+            from src.utils.web_utils import get_web_safe_path
+            self.music_path = Path(get_web_safe_path("assets/music"))
+            self.sfx_path = Path(get_web_safe_path("assets/sounds"))
+        else:
+            self.music_path = Path("assets/music")
+            self.sfx_path = Path("assets/sounds")
         
         # 初期化
         self._load_audio_assets()
         self._setup_channels()
         
-        logger.info("AudioSystem初期化完了")
+        logger.info(f"AudioSystem初期化完了 ({'Web版' if self.is_web else 'デスクトップ版'})")
+    
+    def _check_web_environment(self) -> bool:
+        """Web環境かチェック"""
+        try:
+            from src.utils.web_utils import is_web_environment
+            return is_web_environment()
+        except ImportError:
+            import os
+            return os.environ.get('WEB_VERSION') == '1'
     
     def _setup_channels(self):
         """音声チャンネルを設定"""

@@ -58,11 +58,36 @@ class GameMain:
         pygame.display.set_caption(title)
         print(f"🪟 ウィンドウタイトル更新: '{title}'")
     
+    def initialize(self) -> bool:
+        """ゲーム初期化（Web版対応）"""
+        try:
+            print("🎮 ゲーム初期化中...")
+            
+            # ゲームフロー初期化
+            if hasattr(self, 'flow_manager'):
+                self.game_flow = self.flow_manager
+            else:
+                from src.core.game_flow import GameFlowManager
+                self.game_flow = GameFlowManager(self.screen)
+            
+            print("✅ ゲーム初期化完了")
+            return True
+            
+        except Exception as e:
+            print(f"❌ ゲーム初期化エラー: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
     def run(self):
-        """メインゲームループ"""
-        print("ゲーム開始")
+        """従来のメインゲームループ（デスクトップ版）"""
+        print("🖥️ デスクトップ版ゲーム開始")
         
-        while self.flow_manager.is_running():
+        # 初期化
+        if not self.initialize():
+            return
+        
+        while self.game_flow.is_running():
             # パフォーマンス最適化：フレーム開始
             self.optimizer.begin_frame()
             
@@ -72,15 +97,15 @@ class GameMain:
             # イベント処理
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.flow_manager.running = False
+                    self.game_flow.running = False
                 elif event.type == pygame.VIDEORESIZE:
                     self._handle_resize(event)
                 else:
-                    self.flow_manager.handle_event(event)
+                    self.game_flow.handle_event(event)
             
             # 更新処理（最適化付き）
             self.optimizer.begin_update()
-            self.flow_manager.update(time_delta)
+            self.game_flow.update(time_delta)
             self.optimizer.end_update()
             
             # フレームスキップ判定
@@ -91,7 +116,7 @@ class GameMain:
             # 描画処理（最適化付き）
             self.optimizer.begin_draw()
             self.screen.fill((0, 0, 0))  # 背景クリア
-            self.flow_manager.draw(self.screen)
+            self.game_flow.draw(self.screen)
             self.optimizer.end_draw()
             
             # 画面更新

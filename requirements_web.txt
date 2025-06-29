@@ -1,0 +1,17 @@
+# Web版（Pygbag）用の依存関係
+# 最小限の依存関係のみ
+
+# ゲームエンジン
+pygame>=2.0.0
+
+# Web版では以下は不要/使用不可
+# pygame-gui>=0.6.0  # Web版では軽量化のため除外
+# python-dotenv>=1.0.0  # Web版では環境変数使用不可
+# requests>=2.31.0  # Web版ではAPI呼び出し制限
+# cryptography>=41.0.0  # Web版では暗号化機能制限
+
+# 開発・テスト用（Web版では除外）
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# flake8>=3.8.0
+# black>=21.0.0

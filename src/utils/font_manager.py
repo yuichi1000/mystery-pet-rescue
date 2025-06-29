@@ -16,7 +16,25 @@ class FontManager:
         self._find_japanese_font()
     
     def _find_japanese_font(self):
-        """日本語フォントを検索"""
+        """日本語フォントを検索（Web対応）"""
+        # Web環境チェック
+        try:
+            from src.utils.web_utils import is_web_environment, get_web_safe_font_path
+            
+            if is_web_environment():
+                print("🌐 Web環境でのフォント検索")
+                web_font = get_web_safe_font_path()
+                if web_font:
+                    self.japanese_font_path = web_font
+                    print(f"✅ Web用フォント: {web_font}")
+                    return
+                else:
+                    print("🌐 Web環境ではシステムデフォルトフォントを使用")
+                    return
+        except ImportError:
+            pass
+        
+        # デスクトップ環境でのフォント検索
         # macOS用の日本語フォントパス
         macos_fonts = [
             "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",
@@ -38,7 +56,13 @@ class FontManager:
             "C:/Windows/Fonts/YuGothM.ttc"
         ]
         
-        all_fonts = macos_fonts + linux_fonts + windows_fonts
+        # プロジェクト内フォント
+        project_fonts = [
+            "assets/fonts/NotoSansJP-Regular.ttf",
+            "assets/fonts/arial.ttf"
+        ]
+        
+        all_fonts = project_fonts + macos_fonts + linux_fonts + windows_fonts
         
         for font_path in all_fonts:
             if os.path.exists(font_path):

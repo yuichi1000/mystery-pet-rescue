@@ -46,13 +46,13 @@ def build_web():
     
     # 現在のディレクトリ確認
     current_dir = Path.cwd()
-    main_web_path = current_dir / "main_web.py"
+    main_path = current_dir / "main.py"
     
-    if not main_web_path.exists():
-        print(f"❌ main_web.py が見つかりません: {main_web_path}")
+    if not main_path.exists():
+        print(f"❌ main.py が見つかりません: {main_path}")
         return False
     
-    print(f"📁 ビルド対象: {main_web_path}")
+    print(f"📁 ビルド対象: {main_path}")
     
     # 基本的なpygbagコマンド（最小限のオプション）
     build_cmd = [
@@ -60,7 +60,7 @@ def build_web():
         '--width', '1280',
         '--height', '720',
         '--archive',
-        'main_web.py'
+        'main.py'
     ]
     
     print("🔨 ビルドコマンド実行中...")
@@ -114,7 +114,7 @@ def build_web_alternative():
     # より基本的なコマンド
     build_cmd = [
         sys.executable, '-m', 'pygbag',
-        'main_web.py'
+        'main.py'
     ]
     
     print(f"コマンド: {' '.join(build_cmd)}")
@@ -146,10 +146,10 @@ def main():
     current_dir = Path.cwd()
     print(f"📁 作業ディレクトリ: {current_dir}")
     
-    # main_web.pyの存在確認
-    main_web_path = current_dir / "main_web.py"
-    if not main_web_path.exists():
-        print("❌ main_web.py が見つかりません")
+    # main.pyの存在確認
+    main_path = current_dir / "main.py"
+    if not main_path.exists():
+        print("❌ main.py が見つかりません")
         return
     
     # Pygbagチェック・インストール
@@ -185,7 +185,7 @@ def main():
         print("\n❌ Web版ビルド失敗")
         print("🔧 トラブルシューティング:")
         print("  1. pygbag --help で利用可能なオプションを確認")
-        print("  2. main_web.py の構文エラーがないか確認")
+        print("  2. main.py の構文エラーがないか確認")
         print("  3. 必要な依存関係がインストールされているか確認")
 
 if __name__ == "__main__":

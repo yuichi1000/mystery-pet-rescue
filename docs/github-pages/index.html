@@ -287,24 +287,21 @@
         </section>
         
         <section class="section download-section">
-            <h2>Download</h2>
-            <p>Download the game for your operating system.</p>
+            <h2>Play Now</h2>
+            <p>Play the game directly in your web browser!</p>
             
             <div class="requirements">
                 <h3>System Requirements</h3>
                 <ul style="text-align: left; display: inline-block;">
-                    <li>Windows 10 or later / macOS 10.14 or later</li>
-                    <li>Memory: 512MB or more</li>
-                    <li>Storage: 100MB or more free space</li>
+                    <li>Modern web browser (Chrome, Firefox, Safari, Edge)</li>
+                    <li>JavaScript enabled</li>
+                    <li>Internet connection (for initial loading)</li>
                 </ul>
             </div>
             
             <div class="download-buttons">
-                <a href="#" class="download-btn windows-btn" id="windows-download">
-                    🪟 Download for Windows
-                </a>
-                <a href="#" class="download-btn mac-btn" id="mac-download">
-                    🍎 Download for Mac
+                <a href="../index.html" class="download-btn windows-btn">
+                    🎮 Play Web Version
                 </a>
                 <a href="https://github.com/yuichi1000/mystery-pet-rescue" class="download-btn github-btn">
                     📦 Source Code (GitHub)
@@ -312,25 +309,25 @@
             </div>
             
             <p style="margin-top: 20px; color: #666; font-size: 0.9em;">
-                ※ Latest version also available on <a href="https://github.com/yuichi1000/mystery-pet-rescue/releases" style="color: #667eea;">GitHub Releases</a>
+                ※ The web version works on all platforms with a modern browser
             </p>
         </section>
         
         <section class="section">
-            <h2>Installation Guide</h2>
-            <h3>Windows</h3>
+            <h2>How to Play</h2>
+            <h3>Web Version</h3>
             <ol style="margin-left: 20px; margin-bottom: 20px;">
-                <li>Download the Windows version from the button above</li>
-                <li>Extract the downloaded ZIP file</li>
-                <li>Double-click "MysteryPetRescue.exe" in the extracted folder to run</li>
+                <li>Click "Play Web Version" above</li>
+                <li>Wait for the game to load in your browser</li>
+                <li>Click on the game screen when prompted</li>
+                <li>Enjoy the game!</li>
             </ol>
             
-            <h3>Mac</h3>
+            <h3>Local Installation</h3>
             <ol style="margin-left: 20px;">
-                <li>Download the Mac version from the button above</li>
-                <li>Extract the downloaded ZIP file</li>
-                <li>Move the extracted application to your Applications folder</li>
-                <li>For first launch, right-click and select "Open"</li>
+                <li>Clone or download the source code from GitHub</li>
+                <li>Install Python 3.8+ and required dependencies</li>
+                <li>Run <code>python main.py</code></li>
             </ol>
         </section>
     </div>
@@ -339,13 +336,5 @@
         <p>&copy; 2024 Mystery Pet Rescue. Created with 💖 by <a href="https://github.com/yuichi1000">yuichi1000</a></p>
     </footer>
     
-    <script>
-        // GitHub Releases download links
-        const RELEASE_URL = 'https://github.com/yuichi1000/mystery-pet-rescue/releases/latest';
-        
-        // Update these URLs after creating the release
-        document.getElementById('windows-download').href = RELEASE_URL + '/download/MysteryPetRescue-Windows-v1.0.0.zip';
-        document.getElementById('mac-download').href = RELEASE_URL + '/download/MysteryPetRescue-Mac-v1.0.0.zip';
-    </script>
 </body>
 </html>

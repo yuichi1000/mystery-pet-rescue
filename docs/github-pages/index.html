@@ -1,489 +1,317 @@
-<html lang="en-us"><script src="https://pygame-web.github.io/archives/0.9/pythons.js" type=module id=site data-LINES=57 data-CONSOLE=25 data-python=python3.12 data-os=vtx,fs,snd,gui async defer>#<!--
-
-print("""
-Loading mystery-pet-rescue from mystery-pet-rescue.apk
-    Pygbag Version : 0.9.2
-    Template Version : 0.9.0
-    Python  : 3.12
-    CDN URL : https://pygame-web.github.io/archives/0.9/
-    Screen  : 1280x720
-    Title   : mystery-pet-rescue
-    Folder  : mystery-pet-rescue
-    Authors : pgw
-    SPDX-License-Identifier: cookiecutter.spdx
-
-""")
-
-
-# screen pixels (real, hardware)
-WIDTH=1024  # 1280
-HEIGHT=600  # 720
-
-# reference/idealized screen pixels
-REFX = 1980
-REFY = 1080
-
-def u(real, ref, v):
-    if abs(v)<0.9999999:
-        result = int( (float(real)/100.0) * (v*1000))
-        if v<0:
-            return real-result
-        return result
-    return int( (real/ref) * v )
-
-def ux(*argv):
-    global WIDTH, REFX
-    acc = 0
-    for v in argv:
-        acc += u(WIDTH, REFX, v)
-    return acc
-
-def uy(*argv):
-    global HEIGHT, REFY
-    acc = 0
-    for v in argv:
-        acc += u(HEIGHT, REFY, v)
-    return acc
-
-
-
-
-# do not rename
-async def custom_site():
-
-    import sys
-    import asyncio
-    import platform
-    import json
-    from pathlib import Path
-
-
-
-    import embed
-
-
-    platform.document.body.style.background = "#7f7f7f"
-
-    import pygame
-
-    def compose():
-        pygame.display.update()
-        window.chromakey(None, *screen.get_colorkey(), 40)
-
-    pygame.init()
-    pygame.font.init()
-
-    screen = pygame.display.set_mode([ux(.100),uy(.100)], pygame.SRCALPHA, 32)
-    screen.set_colorkey( (0,0,0,0), pygame.RLEACCEL )
-    screen.fill( (0,0,0,0) )
-
-    compose()
-
-    platform.window.transfer.hidden = true
-    platform.window.canvas.style.visibility = "visible"
-
-
-
-    apk = "mystery-pet-rescue.apk"
-
-    bundle = "mystery-pet-rescue"
-
-    # the C or js loader could do that but be explicit.
-    appdir = Path(f"/data/data/{bundle}") # /data/data/mystery-pet-rescue
-    appdir.mkdir()
-
-
-    # mount apk
-
-    cfg = {
-        "io": "url",
-        "type":"mount",
-        "mount" : {
-            "point" : appdir.as_posix(),
-            "path" : "/",
-        },
-        "path" : f"/ => {appdir.as_posix()}",
-    }
-
-
-    track = platform.window.MM.prepare(apk, json.dumps(cfg))
-
-    marginx = ux(.020) # 20%
-    marginy = uy(.045) # 45%
-
-
-    def pg_bar(pos):
-        nonlocal marginx, marginy
-        # resolution of progress bar, recalculate since it may not be know yet.
-        total = track.len or 10  # avoid div0
-        slot = ux(.060)/ total # 60%
-
-        pygame.draw.rect(screen,(10,10,10),( marginx-ux(10), marginy-uy(10), (total*slot)+ux(20), uy(110) ) )
-        pygame.draw.rect(screen,(0,255,0), ( marginx, marginy, track.pos*slot, uy(90)) )
-
-    # wait until zip mount + overlayfs is complete
-    while not track.ready:
-        pg_bar(track.pos)
-        compose()
-        await asyncio.sleep(.1)
-
-    # fill it up in case it was cached and instant download
-    pg_bar(track.len)
-    compose()
-
-
-    # preloader will change dir and prepend it to sys.path
-    platform.run_main(PyConfig, loaderhome= appdir / "assets", loadermain=None)
-
-
-    # wait preloading complete
-    # that includes images and wasm compilation of bundled modules
-    while embed.counter()<0:
-        await asyncio.sleep(.1)
-
-    main = appdir / "assets" / "main.py"
-
-    # start async top level machinery and add a console.
-    await TopLevel_async_handler.start_toplevel(platform.shell, console=window.python.config.debug)
-
-    # now that apk is mounted we have access to font cache
-    # but we need to fill __file__ that is not yet set
-    __import__(__name__).__file__ = str(main)
-
-
-    # now make a prompt
-    fnt = pygame.sysfont.SysFont("freesans",  uy(80) )
-
-    def ui_callback(pkg, error=None):
-        nonlocal fnt
-        if error:
-            prompt = fnt.render(f"{error}", True, "black")
-        else:
-            prompt = fnt.render(f"Setting [{pkg}] up", True, "black")
-        pg_bar(track.len)
-        screen.blit(prompt, ( marginx+ ux(80), marginy - uy(10) ) )
-        compose()
-
-    # test/wait if user media interaction required
-    if not platform.window.MM.UME:
-
-        # now make a prompt
-        fnt = pygame.sysfont.SysFont("freesans",  uy(80) )
-        prompt = fnt.render("Ready to start !", True, "blue")
-        pg_bar(track.len)
-        screen.blit(prompt, ( marginx+ ux(80), marginy - uy(10) ) )
-        compose()
-        print("""
-        * Waiting for media user engagement : please click/touch page *
-    """)
-        while not platform.window.MM.UME:
-            await asyncio.sleep(.1)
-
-    # cleanup
-    screen.fill( (0,0,0,0) )
-    pygame.display.flip()
-
-    await shell.runpy(main, callback=ui_callback)
-
-
-
-import asyncio
-
-asyncio.run( custom_site() )
-
-
-
-
-
-
-
-
-
-
-
-
-# BEGIN BLOCK
-#
-# now this is the html part you can (and should) customize
-# It is not mandatory : pygame-script when it reads the first line (also called
-# shebang ) of above code create absolute minimal widget set
-# required for running with default rules
-#
-# do not alter that comment block it is separating python code from html code
-# =============================================================================
-# --></script><head><!--
-//=============================================================================
-//
-//
-//
-//
-//
-//
-//
-
-    {%- if cookiecutter.comment != "" -%}
-{{cookiecutter.comment}}
-    {% endif %}
-
---><script type="application/javascript">
-// END BLOCK
-
-
-
-// this dict is available under PyConfig.config from __main__
-
-config = {
-    xtermjs : "1" ,
-    _sdl2 : "canvas",
-    user_canvas : 0,
-    user_canvas_managed : 0,
-    ume_block : 1,
-    can_close : 0,
-    archive : "mystery-pet-rescue",
-    gui_debug : 3,
-    cdn : "https://pygame-web.github.io/archives/0.9/",
-    autorun : 0,
-    PYBUILD : "3.12"
-}
-
-</script>
-
-    <title>mystery-pet-rescue</title>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" content="height=device-height, initial-scale=1.0">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-
-    <link rel="prefetch" href="https://pygame-web.github.io/archives/0.9/pythonrc.py">
-    <link rel="prefetch" href="https://pygame-web.github.io/archives/0.9/vt/xterm.js">
-    <link rel="prefetch" href="https://pygame-web.github.io/archives/0.9/vt/xterm-addon-image.js">
-    <link rel="prefetch" href="https://pygame-web.github.io/archives/0.9/vt/xterm-addon-image.js">
-
-
+    <title>ミステリー・ペット・レスキュー | Mystery Pet Rescue</title>
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
-
     <style>
-        #status {
-            display: inline-block;
-            vertical-align: top;
-            margin-top: 20px;
-            margin-left: 30px;
-            font-weight: bold;
-            color: rgb(120, 120, 120);
-        }
-
-        #progress {
-            height: 20px;
-            width: 300px;
-        }
-
-        div.emscripten { text-align: center; }
-        div.emscripten_border { border: 1px solid black; }
-        div.thick_border { border: 4px solid black; }
-
-        /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-        /* average size of droid screen 470dp x 320dp  */
-        canvas.emscripten {
-            border: 0px none;
-            background-color: transparent;
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-
-            padding: 0;
-            margin: 0 auto;
-
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
-
         body {
-            font-family: arial;
+            font-family: 'Arial', 'Helvetica Neue', sans-serif;
             margin: 0;
-            padding: none;
-            background-color:powderblue;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
         }
-
-        .topright{
-           position:absolute;
-           top:0px;
-           right:0px;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-
-        .bottomright {
-            position:absolute;
-            top: 40%;
-            right: 0px;
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
         }
-
-        .center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        
+        h1 {
+            font-size: 3.5em;
+            margin: 0;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-
-        .trinfo{
-           position:relative;
-           right:0px;
-           border: 1px solid black;
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #f0f0f0;
+            margin-top: 10px;
         }
-
-        .framed{
-           position:relative;
-           top:150px;
-           right:10px;
-           border: 1px solid black;
+        
+        .game-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .info-card h2 {
+            color: #4a90e2;
+            border-bottom: 3px solid #4a90e2;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .features {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "🐾";
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+        
+        .play-section {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .play-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            margin: 10px;
+        }
+        
+        .play-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .controls h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .control-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .control-key {
+            font-weight: bold;
+            color: #4a90e2;
+        }
+        
+        @media (max-width: 768px) {
+            .game-info {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #fff;
+            margin-top: 40px;
+        }
+        
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
         }
     </style>
-
-    <script src="https://pygame-web.github.io/archives/0.9//browserfs.min.js"></script>
-
 </head>
-
 <body>
-
-    <div id="transfer" align=center>
-<!--        <div class="spinner" id='spinner'></div> -->
-        <div class="emscripten" id="status">Downloading...</div>
-        <div class="emscripten">
-            <progress value="0" max="100" id="progress"></progress>
-        </div>
-    </div>
-
-
-    <canvas class="emscripten" id="canvas"
-width="1px"
-height="1px"
-    oncontextmenu="event.preventDefault()" tabindex=1>
-    </canvas>
-
-    <div id=html></div>
-
-    <div id=crt  class=bottomright >
-
-        <div id="system" hidden>
-            <div class="button-container">
-                <button id="aiostop" disabled>AIO ⏏︎</button>
-                <button id="aiopaused_true" disabled>AIO ■</button>
-                <button id="aiopaused_false" disabled>AIO ▶</button>
-                <button id="pygame_mixer_music_pause" disabled>Music ■</button>
+    <button class="language-toggle" onclick="toggleLanguage()">🌐 EN</button>
+    
+    <div class="container">
+        <header>
+            <h1 id="title">ミステリー・ペット・レスキュー</h1>
+            <p class="subtitle" id="subtitle">住宅街で迷子になったペットたちを5分以内に救出しよう！</p>
+        </header>
+        
+        <div class="game-info">
+            <div class="info-card">
+                <h2 id="about-title">ゲームについて</h2>
+                <p id="about-desc">このゲームは、住宅街で迷子になった4匹のペット（犬・猫・うさぎ・鳥）を制限時間内に見つけて救出するアドベンチャーゲームです。</p>
+                <ul class="features">
+                    <li id="feature1">制限時間：5分間</li>
+                    <li id="feature2">4種類のペット（犬・猫・うさぎ・鳥）</li>
+                    <li id="feature3">リアルな住宅街マップ</li>
+                    <li id="feature4">多言語対応（日本語・英語）</li>
+                    <li id="feature5">時間経過でヒント表示</li>
+                </ul>
             </div>
-
-            <div class="button-container">
-                <div id=load_min>min</div>
-                <div id=load_avg>avg</div>
-                <div id=load_max>max</div>
-              <button id="load_rst" disabled>RESET</button>
+            
+            <div class="info-card">
+                <h2 id="tech-title">技術仕様</h2>
+                <ul class="features">
+                    <li id="tech1">Python + Pygame製</li>
+                    <li id="tech2">Pygbag でWeb対応</li>
+                    <li id="tech3">解像度：1280×720</li>
+                    <li id="tech4">60FPS動作</li>
+                    <li id="tech5">日本語フォント完全対応</li>
+                </ul>
             </div>
-
-            <div id="level">(battery level unknown)</div>
-            <div id="stateBattery">(charging state unknown)</div>
-
         </div>
-
-        <div id=box class="emscripten_border" hidden=true>
-
-            <div id="info" class="trinfo"></div>
-
-            <iframe id="iframe" class="framed" name="iframe"
-width="470px" height="90%"
-allowtransparency="true"
-style="z-index: 10;"
-style="background: #FFFFFF;"
-frameborder="1"
-                allowfullscreen="true"
-                webkitallowfullscreen="true"
-                msallowfullscreen="true"
-                mozallowfullscreen="true"
-                sandbox="allow-same-origin allow-top-navigation allow-scripts allow-pointer-lock"
-                allow="autoplay; fullscreen *; geolocation; microphone; camera; midi; monetization; xr-spatial-tracking; gamepad; gyroscope; accelerometer; xr; cross-origin-isolated"
-                src="https://pygame-web.github.io/archives/0.9/empty.html"
-                scrolling="yes">
-            </iframe>
+        
+        <div class="play-section">
+            <h2 id="play-title">ゲームを開始</h2>
+            <p id="play-desc">ブラウザで直接プレイできます！</p>
+            <a href="game.html" class="play-btn">🎮 <span id="play-btn-text">今すぐプレイ</span></a>
+            
+            <div class="controls">
+                <h3 id="controls-title">操作方法</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <div class="control-key">WASD / ↑↓←→</div>
+                        <div id="control-move">移動</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">E</div>
+                        <div id="control-interact">ペット救出</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">P</div>
+                        <div id="control-pause">一時停止</div>
+                    </div>
+                    <div class="control-item">
+                        <div class="control-key">ESC</div>
+                        <div id="control-menu">メニュー</div>
+                    </div>
+                </div>
+            </div>
         </div>
-
     </div>
+    
+    <footer>
+        <p id="footer-text">© 2024 Mystery Pet Rescue - Powered by Python & Pygame</p>
+    </footer>
 
-
-    <div id="dlg" hidden>
-        <input type="file" id="dlg_multifile" multiple accept="image/*">
-        <label for="dlg_multifile">Select files</label>
-    </div>
-
-    <div id="pyconsole">
-        <div id="terminal" tabIndex=1 align="left"></div>
-    </div>
-
-    <script type="application/javascript">
-
-    async function custom_onload(debug_hidden) {
-        // this is called before anything python is loaded
-        // make your js customization here
-        console.log(__FILE__, "custom_onload")
-
-        pyconsole.hidden = debug_hidden
-        system.hidden = debug_hidden
-        transfer.hidden = debug_hidden
-        info.hidden = debug_hidden
-        box.hidden =  debug_hidden
-
-    }
-
-    function custom_prerun(){
-        // no python main and no (MEMFS + VFS) yet.
-        console.log(__FILE__, "custom_prerun")
-
-    }
-
-    function custom_postrun(){
-        // python main and no VFS filesystem yet.
-        console.log(__FILE__, "custom_postrun")
-
-        // prevent ff horizontal scroll
-        window.addEventListener("keydown", function(e) {
-            if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
-                if (!python.config.debug)
-                    e.preventDefault();
+    <script>
+        let isJapanese = true;
+        
+        const translations = {
+            ja: {
+                title: "ミステリー・ペット・レスキュー",
+                subtitle: "住宅街で迷子になったペットたちを5分以内に救出しよう！",
+                "about-title": "ゲームについて", 
+                "about-desc": "このゲームは、住宅街で迷子になった4匹のペット（犬・猫・うさぎ・鳥）を制限時間内に見つけて救出するアドベンチャーゲームです。",
+                feature1: "制限時間：5分間",
+                feature2: "4種類のペット（犬・猫・うさぎ・鳥）",
+                feature3: "リアルな住宅街マップ",
+                feature4: "多言語対応（日本語・英語）",
+                feature5: "時間経過でヒント表示",
+                "tech-title": "技術仕様",
+                tech1: "Python + Pygame製",
+                tech2: "Pygbag でWeb対応",
+                tech3: "解像度：1280×720",
+                tech4: "60FPS動作",
+                tech5: "日本語フォント完全対応",
+                "play-title": "ゲームを開始",
+                "play-desc": "ブラウザで直接プレイできます！",
+                "play-btn-text": "今すぐプレイ",
+                "controls-title": "操作方法",
+                "control-move": "移動",
+                "control-interact": "ペット救出",
+                "control-pause": "一時停止",
+                "control-menu": "メニュー",
+                "footer-text": "© 2024 Mystery Pet Rescue - Powered by Python & Pygame"
+            },
+            en: {
+                title: "Mystery Pet Rescue",
+                subtitle: "Find and rescue lost pets in the residential area within 5 minutes!",
+                "about-title": "About the Game",
+                "about-desc": "This is an adventure game where you find and rescue 4 lost pets (dog, cat, rabbit, bird) within the time limit in a residential area.",
+                feature1: "Time Limit: 5 minutes",
+                feature2: "4 types of pets (dog, cat, rabbit, bird)", 
+                feature3: "Realistic residential map",
+                feature4: "Multilingual support (Japanese/English)",
+                feature5: "Hints appear over time",
+                "tech-title": "Technical Specs",
+                tech1: "Built with Python + Pygame",
+                tech2: "Web-enabled with Pygbag",
+                tech3: "Resolution: 1280×720",
+                tech4: "60FPS performance",
+                tech5: "Full Japanese font support",
+                "play-title": "Start Game", 
+                "play-desc": "Play directly in your browser!",
+                "play-btn-text": "Play Now",
+                "controls-title": "Controls",
+                "control-move": "Move",
+                "control-interact": "Rescue Pet",
+                "control-pause": "Pause",
+                "control-menu": "Menu",
+                "footer-text": "© 2024 Mystery Pet Rescue - Powered by Python & Pygame"
             }
-        }, false);
-
-    }
-
-    function debug() {
-        // allow to gain access to dev tools from js console
-        // but only on desktop. difficult to reach when in iframe
-        python.config.debug = true
-        custom_onload(false)
-        Module.PyRun_SimpleString("shell.uptime()")
-        window_resize()
-    }
-
-    function info_inline(data){
-        document.getElementById("info").innerHTML = data
-    }
-
-    function info_online(url) {
-        // display info about current APK
-        fetch( url /*, options */)
-            .then((response) => response.text())
-            .then((html) => {
-                info_inline(html);
-        })
-        .catch((error) => {
-            console.warn(error);
-        });
-    }
-
-    function frame_online(url) {
-        window.frames["iframe"].location = url;
-    }
-
+        };
+        
+        function toggleLanguage() {
+            isJapanese = !isJapanese;
+            const lang = isJapanese ? 'ja' : 'en';
+            const buttonText = isJapanese ? '🌐 EN' : '🌐 JA';
+            
+            document.querySelector('.language-toggle').textContent = buttonText;
+            
+            for (const [key, value] of Object.entries(translations[lang])) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+        }
     </script>
-
 </body>
 </html>

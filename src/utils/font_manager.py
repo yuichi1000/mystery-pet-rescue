@@ -73,18 +73,59 @@ class FontManager:
         print("⚠️ 日本語フォントが見つかりません。デフォルトフォントを使用します。")
     
     def get_font(self, font_name: str, size: int, bold: bool = False) -> pygame.font.Font:
-        """フォントを取得"""
+        """フォントを取得（Web環境対応）"""
         font_key = f"{font_name}_{size}_{bold}"
         
         if font_key not in self.fonts:
-            if self.japanese_font_path and font_name == "default":
+            # Web環境での特別処理
+            try:
+                from src.utils.web_utils import is_web_environment
+                is_web = is_web_environment()
+            except ImportError:
+                is_web = False
+            
+            if is_web:
+                print(f"🌐 Web環境でフォント作成: {font_name}, サイズ: {size}")
+                # Web環境では、日本語対応のシステムフォントを試行
                 try:
-                    self.fonts[font_key] = pygame.font.Font(self.japanese_font_path, size)
+                    # 複数のフォント名を試行
+                    font_candidates = [
+                        "DejaVu Sans",  # 多言語対応
+                        "Arial Unicode MS",  # 日本語対応
+                        "Noto Sans CJK JP",  # Google Noto日本語
+                        "Hiragino Sans",  # macOS日本語
+                        None  # システムデフォルト
+                    ]
+                    
+                    for font_candidate in font_candidates:
+                        try:
+                            if font_candidate:
+                                self.fonts[font_key] = pygame.font.SysFont(font_candidate, size, bold)
+                                print(f"✅ Web用フォント使用: {font_candidate}")
+                            else:
+                                self.fonts[font_key] = pygame.font.Font(None, size)
+                                print("✅ Web用デフォルトフォント使用")
+                            break
+                        except:
+                            continue
+                    
+                    if font_key not in self.fonts:
+                        self.fonts[font_key] = pygame.font.Font(None, size)
+                        print("⚠️ Web用フォールバックフォント使用")
+                        
                 except Exception as e:
-                    print(f"⚠️ 日本語フォント読み込み失敗: {self.japanese_font_path} - {e}")
+                    print(f"⚠️ Web環境フォント作成失敗: {e}")
                     self.fonts[font_key] = pygame.font.Font(None, size)
             else:
-                self.fonts[font_key] = pygame.font.Font(None, size)
+                # デスクトップ環境での従来処理
+                if self.japanese_font_path and font_name == "default":
+                    try:
+                        self.fonts[font_key] = pygame.font.Font(self.japanese_font_path, size)
+                    except Exception as e:
+                        print(f"⚠️ 日本語フォント読み込み失敗: {self.japanese_font_path} - {e}")
+                        self.fonts[font_key] = pygame.font.Font(None, size)
+                else:
+                    self.fonts[font_key] = pygame.font.Font(None, size)
         
         return self.fonts[font_key]
     

@@ -258,6 +258,10 @@ class MenuScene(Scene):
     
     def handle_event(self, event: pygame.event.Event) -> Optional[str]:
         """イベント処理"""
+        # テキスト入力イベントを無視（日本語入力対策）
+        if event.type == pygame.TEXTINPUT:
+            return None
+        
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP or event.key == pygame.K_w:
                 self._move_selection(-1)

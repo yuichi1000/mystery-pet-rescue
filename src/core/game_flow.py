@@ -164,6 +164,10 @@ class GameFlowManager:
     
     def handle_event(self, event: pygame.event.Event):
         """イベント処理"""
+        # テキスト入力イベントを無視（日本語入力対策）
+        if event.type == pygame.TEXTINPUT:
+            return
+        
         if not self.current_scene:
             return
         

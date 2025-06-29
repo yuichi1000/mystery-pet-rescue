@@ -8,6 +8,9 @@ import sys
 import os
 from pathlib import Path
 
+# 日本語入力（IME）無効化のための環境変数設定
+os.environ['SDL_IME_SHOW_UI'] = '0'  # IME UIを非表示
+
 # プロジェクトルートをPythonパスに追加
 sys.path.insert(0, str(Path(__file__).parent))
 

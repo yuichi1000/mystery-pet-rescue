@@ -17,6 +17,19 @@ class GameMain:
         pygame.init()
         pygame.mixer.init()
         
+        # 日本語入力（IME）を無効化
+        try:
+            # テキスト入力を停止してIMEを無効化
+            pygame.key.stop_text_input()
+            
+            # 追加の無効化設定
+            import os
+            os.environ['SDL_IME_SHOW_UI'] = '0'  # IME UIを非表示
+            
+            print("✅ 日本語入力（IME）を無効化しました")
+        except Exception as e:
+            print(f"⚠️ IME無効化に失敗: {e}")
+        
         # 画面設定
         self.screen_width = 1280
         self.screen_height = 720

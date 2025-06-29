@@ -26,6 +26,9 @@ class GameScene(Scene):
         super().__init__(screen)
         self.flow_manager = flow_manager
         
+        # キー押下状態の管理
+        self.e_key_pressed = False
+        
         # 新しいデータローダーの初期化
         self.map_loader = get_map_data_loader()
         self.pet_data_loader = get_pet_data_loader()
@@ -381,8 +384,15 @@ class GameScene(Scene):
     
     def handle_event(self, event: pygame.event.Event) -> Optional[str]:
         """イベント処理"""
+        # テキスト入力イベントを無視（日本語入力対策）
+        if event.type == pygame.TEXTINPUT:
+            return None
+        
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_e:
+                # Eキーが押された
+                self.e_key_pressed = True
+            elif event.key == pygame.K_ESCAPE:
                 if self.current_puzzle:
                     # パズル中の場合はパズルを終了
                     self.current_puzzle = None
@@ -427,6 +437,11 @@ class GameScene(Scene):
                 status_key = "collision_display_on" if self.map_system.debug_collision else "collision_display_off"
                 self.game_ui.add_notification(get_text(status_key), NotificationType.INFO)
                 print(f"🔍 衝突判定表示: {'ON' if self.map_system.debug_collision else 'OFF'}")
+        
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_e:
+                # Eキーが離された
+                self.e_key_pressed = False
         
         elif event.type == pygame.USEREVENT + 1:
             # ゲーム完了タイマー（旧）
@@ -672,10 +687,10 @@ class GameScene(Scene):
                     self.game_ui.add_notification(f"{pet.get_display_name()}{get_text('pet_found')}", NotificationType.INFO)
                     self.game_ui.add_notification(get_text("rescue_instruction"), NotificationType.INFO)
                 
-                # Eキーで救出
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_e]:
+                # Eキーで救出（イベントベース）
+                if self.e_key_pressed:
                     self._rescue_pet(pet)
+                    self.e_key_pressed = False  # 1回だけ実行
     
     def _rescue_pet(self, pet: Pet):
         """ペットを救出（パズルなし）"""

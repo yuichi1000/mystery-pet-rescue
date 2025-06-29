@@ -5,7 +5,7 @@
 
 import pygame
 import time
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 from src.core.scene import Scene
 from src.entities.player import Player
 from src.entities.pet import Pet, PetData, PetType
@@ -129,64 +129,117 @@ class GameScene(Scene):
             self.background_image = None
     
     def _create_pets(self) -> List[Pet]:
-        """ペットを作成（フォールバック強制版）"""
+        """ペットを作成（ランダム配置版）"""
         pets = []
         
-        print("🐾 フォールバック強制でペット生成中...")
+        print("🐾 ランダム配置でペット生成中...")
         
-        # 犬
-        dog_data = PetData(
-            pet_id="dog_001",
-            name="dog",  # 動物名に変更
-            pet_type=PetType.DOG,
-            personality="friendly",
-            rarity="common",
-            description="忠実な柴犬"
-        )
-        dog = Pet(dog_data, x=300, y=200)
-        pets.append(dog)
+        # ペットデータ定義
+        pet_definitions = [
+            {
+                "id": "dog_001",
+                "name": "dog",
+                "type": PetType.DOG,
+                "personality": "friendly",
+                "rarity": "common",
+                "description": "忠実な柴犬"
+            },
+            {
+                "id": "cat_001", 
+                "name": "cat",
+                "type": PetType.CAT,
+                "personality": "shy",
+                "rarity": "common",
+                "description": "三毛猫の女の子"
+            },
+            {
+                "id": "rabbit_001",
+                "name": "rabbit",
+                "type": PetType.RABBIT,
+                "personality": "gentle",
+                "rarity": "uncommon",
+                "description": "白いうさぎ"
+            },
+            {
+                "id": "bird_001",
+                "name": "bird",
+                "type": PetType.BIRD,
+                "personality": "active",
+                "rarity": "rare",
+                "description": "カラフルな小鳥"
+            }
+        ]
         
-        # 猫
-        cat_data = PetData(
-            pet_id="cat_001", 
-            name="cat",  # 動物名に変更
-            pet_type=PetType.CAT,
-            personality="shy",
-            rarity="common",
-            description="三毛猫の女の子"
-        )
-        cat = Pet(cat_data, x=500, y=300)
-        pets.append(cat)
+        # 各ペットをランダム位置に配置
+        for pet_def in pet_definitions:
+            position = self._find_random_walkable_position()
+            if position:
+                x, y = position
+                pet_data = PetData(
+                    pet_id=pet_def["id"],
+                    name=pet_def["name"],
+                    pet_type=pet_def["type"],
+                    personality=pet_def["personality"],
+                    rarity=pet_def["rarity"],
+                    description=pet_def["description"]
+                )
+                pet = Pet(pet_data, x=x, y=y)
+                pets.append(pet)
+                print(f"  🐾 {pet.data.name} ({pet.data.pet_type.value}) at ({x:.1f}, {y:.1f})")
+            else:
+                print(f"  ❌ {pet_def['name']} の配置場所が見つかりませんでした")
         
-        # うさぎ
-        rabbit_data = PetData(
-            pet_id="rabbit_001",
-            name="rabbit",  # 動物名に変更
-            pet_type=PetType.RABBIT,
-            personality="gentle",
-            rarity="uncommon",
-            description="白いうさぎ"
-        )
-        rabbit = Pet(rabbit_data, x=700, y=400)
-        pets.append(rabbit)
-        
-        # 鳥
-        bird_data = PetData(
-            pet_id="bird_001",
-            name="bird",  # 動物名に変更
-            pet_type=PetType.BIRD,
-            personality="active",
-            rarity="rare",
-            description="カラフルな小鳥"
-        )
-        bird = Pet(bird_data, x=400, y=150)
-        pets.append(bird)
-        
-        print(f"✅ フォールバックペット生成完了: {len(pets)}匹")
-        for pet in pets:
-            print(f"  🐾 {pet.data.name} ({pet.data.pet_type.value}) at ({pet.x}, {pet.y})")
-        
+        print(f"✅ ランダムペット生成完了: {len(pets)}匹")
         return pets
+    
+    def _find_random_walkable_position(self, max_attempts: int = 100) -> Optional[Tuple[float, float]]:
+        """通過可能なランダム位置を見つける"""
+        import random
+        
+        # マップサイズを取得
+        if self.map_system.current_map:
+            map_width = self.map_system.current_map.width * self.map_system.tile_size
+            map_height = self.map_system.current_map.height * self.map_system.tile_size
+        else:
+            # デフォルトマップサイズ
+            map_width = 1600  # 25 * 64
+            map_height = 1280  # 20 * 64
+        
+        # マージンを設定（端から離す）
+        margin = 100
+        
+        for attempt in range(max_attempts):
+            # ランダム位置を生成
+            x = random.uniform(margin, map_width - margin)
+            y = random.uniform(margin, map_height - margin)
+            
+            # 通過可能かチェック
+            if self.map_system.is_walkable(x, y):
+                # 建物との衝突もチェック
+                if not self._is_position_blocked_by_building(x, y):
+                    # プレイヤーの初期位置から離れているかチェック
+                    player_x, player_y = self.player.x, self.player.y
+                    distance = ((x - player_x) ** 2 + (y - player_y) ** 2) ** 0.5
+                    if distance > 150:  # プレイヤーから150ピクセル以上離す
+                        return (x, y)
+        
+        print(f"⚠️ {max_attempts}回試行しても適切な位置が見つかりませんでした")
+        return None
+    
+    def _is_position_blocked_by_building(self, x: float, y: float) -> bool:
+        """位置が建物によってブロックされているかチェック"""
+        # 建物システムがある場合のチェック
+        if hasattr(self, 'building_system') and self.building_system:
+            # ペットのサイズを考慮したマージン
+            margin = 32  # ペットのサイズの半分程度
+            
+            # 建物との衝突をチェック
+            for building in self.building_system.buildings:
+                if (building.x - margin < x < building.x + building.width + margin and
+                    building.y - margin < y < building.y + building.height + margin):
+                    return True
+        
+        return False
     
     
     def enter(self) -> None:

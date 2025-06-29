@@ -292,7 +292,7 @@ class ResultScene(Scene):
     
     def _draw_congratulations(self, surface: pygame.Surface):
         """おめでとうメッセージを描画"""
-        congrats_text = get_text("congratulations") + "！" + get_text("all_pets_rescued")
+        congrats_text = get_text("congratulations") + get_text("exclamation") + get_text("all_pets_rescued")
         congrats_font = self.font_manager.get_font("default", 36)
         congrats_surface = congrats_font.render(congrats_text, True, (255, 215, 0))
         congrats_rect = congrats_surface.get_rect(center=(surface.get_width()//2, 450))
@@ -327,9 +327,9 @@ class ResultScene(Scene):
         """操作説明を描画"""
         help_font = self.font_manager.get_font("default", 18)
         help_texts = [
-            "←→/AD: 選択移動",
-            "ENTER/SPACE: 決定",
-            "R: もう一度, ESC: メニュー, Q: 終了"
+            get_text("controls_select"),
+            get_text("controls_confirm"),
+            get_text("controls_restart_menu_quit")
         ]
         
         y_offset = surface.get_height() - 80

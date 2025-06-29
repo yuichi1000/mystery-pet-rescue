@@ -102,7 +102,18 @@ class LanguageManager:
                 # 勝利画面用
                 "all_pets_rescued_subtitle": "All pets have been rescued!",
                 "pets_found_count": "Pets Found: {count}/{total}",
-                "remaining_time_display": "Remaining Time: {time}"
+                "remaining_time_display": "Remaining Time: {time}",
+                
+                # 操作説明（リザルト画面用）
+                "controls_select": "←→/AD: Move Selection",
+                "controls_confirm": "ENTER/SPACE: Confirm",
+                "controls_restart_menu_quit": "R: Restart, ESC: Menu, Q: Quit",
+                "exclamation": "! ",
+                
+                # ゲーム中の表示
+                "game_clear": "Game Clear!",
+                "paused": "PAUSED",
+                "pause_instructions": "P: Resume, ESC: Return to Menu"
             },
             Language.JAPANESE.value: {
                 # メニュー
@@ -182,7 +193,18 @@ class LanguageManager:
                 # 勝利画面用
                 "all_pets_rescued_subtitle": "全てのペットを救出しました！",
                 "pets_found_count": "発見したペット: {count}/{total}匹",
-                "remaining_time_display": "残り時間: {time}"
+                "remaining_time_display": "残り時間: {time}",
+                
+                # 操作説明（リザルト画面用）
+                "controls_select": "←→/AD: 選択移動",
+                "controls_confirm": "ENTER/SPACE: 決定",
+                "controls_restart_menu_quit": "R: もう一度, ESC: メニュー, Q: 終了",
+                "exclamation": "！",
+                
+                # ゲーム中の表示
+                "game_clear": "ゲームクリア！",
+                "paused": "一時停止",
+                "pause_instructions": "P: 再開, ESC: メニューに戻る"
             }
         }
     

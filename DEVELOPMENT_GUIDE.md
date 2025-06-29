@@ -1,5 +1,73 @@
 # Mystery Pet Rescue - 開発ガイド
 
+## 🚨 緊急修正事項
+
+### 多言語対応バグ修正（高優先度）
+
+**問題**: ゲームクリア画面で英語モードでも日本語テキストが表示される
+
+**修正箇所**:
+1. **src/scenes/result.py 329-333行**: 操作説明が日本語固定
+   ```python
+   # 現在（問題）
+   help_texts = [
+       "←→/AD: 選択移動",
+       "ENTER/SPACE: 決定", 
+       "R: もう一度, ESC: メニュー, Q: 終了"
+   ]
+   
+   # 修正後
+   help_texts = [
+       get_text("controls_select"),
+       get_text("controls_confirm"),
+       get_text("controls_restart_menu_quit")
+   ]
+   ```
+
+2. **src/scenes/result.py 295行**: 感嘆符が日本語固定
+   ```python
+   # 現在（問題）
+   congrats_text = get_text("congratulations") + "！" + get_text("all_pets_rescued")
+   
+   # 修正後
+   congrats_text = get_text("congratulations") + get_text("exclamation") + get_text("all_pets_rescued")
+   ```
+
+3. **src/scenes/game.py**: ゲーム中の表示も多言語対応
+   ```python
+   # 行953: ゲームクリア表示
+   clear_text = font_large.render(get_text("game_clear"), True, (255, 215, 0))
+   
+   # 行904: ポーズ表示
+   pause_text = font.render(get_text("paused"), True, (255, 255, 255))
+   
+   # 行910: ポーズ時操作説明
+   help_text = help_font.render(get_text("pause_instructions"), True, (200, 200, 200))
+   ```
+
+4. **src/utils/language_manager.py**: 不足している翻訳キーを追加
+   ```python
+   # 英語に追加
+   "controls_select": "←→/AD: Move Selection",
+   "controls_confirm": "ENTER/SPACE: Confirm", 
+   "controls_restart_menu_quit": "R: Restart, ESC: Menu, Q: Quit",
+   "exclamation": "! ",
+   "game_clear": "Game Clear!",
+   "paused": "PAUSED",
+   "pause_instructions": "P: Resume, ESC: Return to Menu",
+   
+   # 日本語に追加
+   "controls_select": "←→/AD: 選択移動",
+   "controls_confirm": "ENTER/SPACE: 決定",
+   "controls_restart_menu_quit": "R: もう一度, ESC: メニュー, Q: 終了", 
+   "exclamation": "！",
+   "game_clear": "ゲームクリア！",
+   "paused": "一時停止",
+   "pause_instructions": "P: 再開, ESC: メニューに戻る",
+   ```
+
+**修正完了後の効果**: 英語モードで完全に英語表示、日本語モードで完全に日本語表示が実現されます。
+
 ## 🎯 プロジェクト概要
 
 住宅街で迷子になったペットを5分以内に救出するアドベンチャーゲーム

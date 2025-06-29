@@ -901,13 +901,13 @@ class GameScene(Scene):
         
         # ポーズテキスト
         font = self.font_manager.get_font("default", 48)
-        pause_text = font.render("PAUSED", True, (255, 255, 255))
+        pause_text = font.render(get_text("paused"), True, (255, 255, 255))
         pause_rect = pause_text.get_rect(center=(surface.get_width()//2, surface.get_height()//2))
         surface.blit(pause_text, pause_rect)
         
         # 操作説明
         help_font = self.font_manager.get_font("default", 24)
-        help_text = help_font.render("P: 再開, ESC: メニューに戻る", True, (200, 200, 200))
+        help_text = help_font.render(get_text("pause_instructions"), True, (200, 200, 200))
         help_rect = help_text.get_rect(center=(surface.get_width()//2, surface.get_height()//2 + 60))
         surface.blit(help_text, help_rect)
     
@@ -950,7 +950,7 @@ class GameScene(Scene):
         font_small = self.font_manager.get_font('default', 24)
         
         # メインタイトル
-        clear_text = font_large.render("ゲームクリア！", True, (255, 215, 0))  # ゴールド色
+        clear_text = font_large.render(get_text("game_clear"), True, (255, 215, 0))  # ゴールド色
         clear_rect = clear_text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2 - 100))
         surface.blit(clear_text, clear_rect)
         

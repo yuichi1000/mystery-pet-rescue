@@ -62,6 +62,17 @@ python main.py
 ```
 
 ### Web版のビルド（開発者向け）
+
+#### 自動ビルド（推奨）
+GitHub Actionsにより、`main`ブランチへのプッシュで自動ビルド・デプロイされます。
+```bash
+git add .
+git commit -m "Update game"
+git push origin main
+# → 1-2分後にhttps://yuichi1000.github.io/mystery-pet-rescue/に反映
+```
+
+#### 手動ビルド
 ```bash
 # Pygbagでブラウザ版をビルド
 python -m pygbag --build main.py

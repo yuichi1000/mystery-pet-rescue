@@ -314,21 +314,7 @@ python main.py
 
 ### ブラウザ版ビルド（Pygbag）
 
-#### 自動ビルド・デプロイ（推奨）
-GitHub Actionsによる完全自動化：
-```yaml
-# .github/workflows/build-web.yml
-on:
-  push:
-    branches: [main]
-jobs:
-  build-and-deploy:
-    - Install Python 3.12 + Pygbag
-    - Build web version: python -m pygbag --build main.py
-    - Deploy to GitHub Pages automatically
-```
-
-#### 手動ビルド
+#### 手動ビルド（現在の方法）
 ```bash
 # Web版をビルド
 python -m pygbag --build main.py

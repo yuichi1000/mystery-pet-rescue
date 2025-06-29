@@ -217,8 +217,8 @@ class GameScene(Scene):
         print(f"✅ ランダムペット生成完了: {len(pets)}匹")
         return pets
     
-    def _find_random_walkable_position(self, existing_positions: List[Tuple[float, float]] = None, max_attempts: int = 200) -> Optional[Tuple[float, float]]:
-        """通過可能なランダム位置を見つける"""
+    def _find_random_walkable_position(self, existing_positions: List[Tuple[float, float]] = None, max_attempts: int = 500) -> Optional[Tuple[float, float]]:
+        """通過可能なランダム位置を見つける（建物から適度に離れた場所）"""
         import random
         
         if existing_positions is None:
@@ -234,43 +234,67 @@ class GameScene(Scene):
             map_height = 1280  # 20 * 64
         
         # マージンを設定（端から離す）
-        margin = 100
+        margin = 120  # 適度なマージン
         min_pet_distance = 200  # ペット同士の最小距離
         
         print(f"🔍 ペット配置場所を探索中... (マップサイズ: {map_width}x{map_height})")
         
+        # 安全な配置エリアを事前に定義
+        safe_areas = self._get_safe_placement_areas(map_width, map_height)
+        
         for attempt in range(max_attempts):
-            # ランダム位置を生成
-            x = random.uniform(margin, map_width - margin)
-            y = random.uniform(margin, map_height - margin)
+            # 安全エリアからランダムに選択（前半）
+            if safe_areas and attempt < max_attempts // 3:  # 前1/3は安全エリアから選択
+                area = random.choice(safe_areas)
+                x = random.uniform(area['x'], area['x'] + area['width'])
+                y = random.uniform(area['y'], area['y'] + area['height'])
+            # 中間は建物チェックを緩くして選択
+            elif attempt < max_attempts * 2 // 3:
+                x = random.uniform(margin, map_width - margin)
+                y = random.uniform(margin, map_height - margin)
+            else:
+                # 後半は建物チェックをさらに緩くして選択
+                x = random.uniform(margin // 2, map_width - margin // 2)
+                y = random.uniform(margin // 2, map_height - margin // 2)
             
             # 通過可能かチェック
             if not self.map_system.is_walkable(x, y):
-                if attempt % 50 == 0:  # 50回ごとにログ出力
+                if attempt % 100 == 0:  # 100回ごとにログ出力
                     print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 通過不可")
                 continue
             
-            # 建物との衝突もチェック
-            if self._is_position_blocked_by_building(x, y):
-                if attempt % 50 == 0:
-                    print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 建物と重複")
-                continue
+            # 建物との衝突もチェック（後半は緩い条件）
+            if attempt < max_attempts * 2 // 3:
+                if self._is_position_blocked_by_building(x, y):
+                    if attempt % 100 == 0:
+                        print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 建物と重複")
+                    continue
+            else:
+                # 後半は直接的な重複のみチェック
+                tile_x = int(x // self.map_system.tile_size)
+                tile_y = int(y // self.map_system.tile_size)
+                if (hasattr(self.map_system, 'building_system') and 
+                    hasattr(self.map_system.building_system, 'is_position_blocked_by_building') and
+                    self.map_system.building_system.is_position_blocked_by_building(tile_x, tile_y)):
+                    continue
             
             # プレイヤーの初期位置から離れているかチェック
             player_x, player_y = self.player.x, self.player.y
             distance_to_player = ((x - player_x) ** 2 + (y - player_y) ** 2) ** 0.5
-            if distance_to_player <= 150:  # プレイヤーから150ピクセル以上離す
-                if attempt % 50 == 0:
+            min_player_distance = 150 if attempt < max_attempts // 2 else 100  # 後半は緩い条件
+            if distance_to_player <= min_player_distance:
+                if attempt % 100 == 0:
                     print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - プレイヤーに近すぎる (距離: {distance_to_player:.1f})")
                 continue
             
             # 他のペットから離れているかチェック
             too_close_to_other_pet = False
+            current_min_distance = min_pet_distance if attempt < max_attempts // 2 else min_pet_distance // 2  # 後半は緩い条件
             for existing_x, existing_y in existing_positions:
                 distance_to_pet = ((x - existing_x) ** 2 + (y - existing_y) ** 2) ** 0.5
-                if distance_to_pet < min_pet_distance:
+                if distance_to_pet < current_min_distance:
                     too_close_to_other_pet = True
-                    if attempt % 50 == 0:
+                    if attempt % 100 == 0:
                         print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 他のペットに近すぎる (距離: {distance_to_pet:.1f})")
                     break
             
@@ -283,10 +307,79 @@ class GameScene(Scene):
         print(f"⚠️ {max_attempts}回試行しても適切な位置が見つかりませんでした")
         return None
     
+    def _get_safe_placement_areas(self, map_width: int, map_height: int) -> List[dict]:
+        """建物から離れた安全な配置エリアを定義"""
+        safe_areas = []
+        
+        # マップを格子状に分割して、建物のない安全なエリアを特定
+        grid_size = 150  # 150x150ピクセルのグリッド（より小さく）
+        
+        print(f"🛡️ 安全エリア検索中... (グリッドサイズ: {grid_size})")
+        
+        for y in range(100, map_height - 100, grid_size // 2):  # オーバーラップを許可
+            for x in range(100, map_width - 100, grid_size // 2):
+                # グリッドの中心点をチェック
+                center_x = x + grid_size // 2
+                center_y = y + grid_size // 2
+                
+                # マップ境界チェック
+                if (center_x < 100 or center_x > map_width - 100 or
+                    center_y < 100 or center_y > map_height - 100):
+                    continue
+                
+                # この領域が安全かチェック
+                if (self.map_system.is_walkable(center_x, center_y) and
+                    not self._is_position_blocked_by_building(center_x, center_y)):
+                    
+                    # 複数のポイントをチェック（より緩い条件）
+                    test_points = [
+                        (center_x, center_y),
+                        (x + 30, y + 30),
+                        (x + grid_size - 30, y + 30),
+                        (x + 30, y + grid_size - 30),
+                        (x + grid_size - 30, y + grid_size - 30)
+                    ]
+                    
+                    safe_points = 0
+                    for test_x, test_y in test_points:
+                        if (test_x >= 0 and test_x < map_width and 
+                            test_y >= 0 and test_y < map_height and
+                            self.map_system.is_walkable(test_x, test_y) and
+                            not self._is_position_blocked_by_building(test_x, test_y)):
+                            safe_points += 1
+                    
+                    # 5点中3点以上が安全なら採用
+                    if safe_points >= 3:
+                        safe_areas.append({
+                            'x': x + 30,
+                            'y': y + 30,
+                            'width': grid_size - 60,
+                            'height': grid_size - 60
+                        })
+        
+        print(f"🛡️ 安全な配置エリア: {len(safe_areas)}個発見")
+        
+        # 安全エリアが少ない場合は、より緩い条件で追加
+        if len(safe_areas) < 10:
+            print("🔍 安全エリアが少ないため、追加検索中...")
+            for y in range(200, map_height - 200, 100):
+                for x in range(200, map_width - 200, 100):
+                    if (self.map_system.is_walkable(x, y) and
+                        not self._is_position_blocked_by_building(x, y)):
+                        safe_areas.append({
+                            'x': x - 50,
+                            'y': y - 50,
+                            'width': 100,
+                            'height': 100
+                        })
+            print(f"🛡️ 追加検索後の安全エリア: {len(safe_areas)}個")
+        
+        return safe_areas
+    
     def _is_position_blocked_by_building(self, x: float, y: float) -> bool:
         """位置が建物によってブロックされているかチェック"""
-        # ペットのサイズを考慮したマージン
-        margin = 40  # ペットのサイズ + 余裕
+        # ペットのサイズを考慮したマージン（適度な距離）
+        margin = 60  # ペットのサイズ + 適度な余裕
         
         # MapSystemの建物情報をチェック
         if hasattr(self.map_system, 'buildings') and self.map_system.buildings:
@@ -317,6 +410,16 @@ class GameScene(Scene):
                         if (building.x - margin < x < building.x + building_width + margin and
                             building.y - margin < y < building.y + building_height + margin):
                             return True
+            
+            # is_position_blocked_by_buildingメソッドも使用（より緩い条件）
+            if hasattr(self.map_system.building_system, 'is_position_blocked_by_building'):
+                # タイル座標に変換してチェック
+                tile_x = int(x // self.map_system.tile_size)
+                tile_y = int(y // self.map_system.tile_size)
+                
+                # 中心のタイルのみチェック（周辺タイルのチェックを削除）
+                if self.map_system.building_system.is_position_blocked_by_building(tile_x, tile_y):
+                    return True
         
         return False
     

@@ -190,21 +190,31 @@ class MenuScene(Scene):
         current_lang = self.language_manager.get_current_language()
         print(f"📝 メニューアイテム作成中 - 現在の言語: {current_lang.value}")
         
+        # Web環境チェック
+        try:
+            from src.utils.web_utils import is_web_environment
+            is_web = is_web_environment()
+        except ImportError:
+            is_web = False
+        
         # メニューアイテムのサイズと位置
         item_width = 300
         item_height = 60
         start_y = screen_height // 2
         spacing = 80
         
-        # メニューアイテムを作成（言語に応じて更新）
+        # メニューアイテムを作成（Web環境では「ゲーム終了」を除く）
         start_text = get_text("start_game")
-        quit_text = get_text("quit_game")
-        print(f"📝 翻訳テキスト: start='{start_text}', quit='{quit_text}'")
+        menu_data = [(start_text, "start_game")]
         
-        menu_data = [
-            (start_text, "start_game"),
-            (quit_text, "quit_game")
-        ]
+        if not is_web:
+            # デスクトップ環境でのみ「ゲーム終了」を追加
+            quit_text = get_text("quit_game")
+            menu_data.append((quit_text, "quit_game"))
+            print(f"📝 翻訳テキスト: start='{start_text}', quit='{quit_text}'")
+        else:
+            print(f"🌐 Web環境: ゲーム終了ボタンを非表示 - start='{start_text}'")
+            print("📝 翻訳テキスト: start='{start_text}'（Web版: ゲーム終了なし）")
         
         self.menu_items = []
         for i, (text, action) in enumerate(menu_data):
@@ -295,10 +305,21 @@ class MenuScene(Scene):
         """メニューアイテムのテキストのみを更新（位置は変更しない）"""
         if not self.menu_items:
             return
+        
+        # Web環境チェック
+        try:
+            from src.utils.web_utils import is_web_environment
+            is_web = is_web_environment()
+        except ImportError:
+            is_web = False
             
-        # 現在の言語でテキストを更新
-        texts = [get_text("start_game"), get_text("quit_game")]
-        actions = ["start_game", "quit_game"]
+        # 現在の言語でテキストを更新（Web環境ではゲーム終了を除く）
+        texts = [get_text("start_game")]
+        actions = ["start_game"]
+        
+        if not is_web:
+            texts.append(get_text("quit_game"))
+            actions.append("quit_game")
         
         for i, (text, action) in enumerate(zip(texts, actions)):
             if i < len(self.menu_items):

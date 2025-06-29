@@ -88,12 +88,14 @@ class FontManager:
                 print(f"🌐 Web環境でフォント作成: {font_name}, サイズ: {size}")
                 # Web環境では、日本語対応のシステムフォントを試行
                 try:
-                    # 複数のフォント名を試行
+                    # 複数のフォント名を試行（Web環境での日本語対応）
                     font_candidates = [
-                        "DejaVu Sans",  # 多言語対応
                         "Arial Unicode MS",  # 日本語対応
+                        "Yu Gothic",  # Windows日本語
+                        "Hiragino Kaku Gothic ProN",  # macOS日本語
                         "Noto Sans CJK JP",  # Google Noto日本語
-                        "Hiragino Sans",  # macOS日本語
+                        "DejaVu Sans",  # 多言語対応
+                        "sans-serif",  # CSS汎用フォント
                         None  # システムデフォルト
                     ]
                     

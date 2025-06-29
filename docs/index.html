@@ -174,62 +174,62 @@
     </style>
 </head>
 <body>
-    <button class="language-toggle" onclick="toggleLanguage()">🌐 EN</button>
+    <button class="language-toggle" onclick="toggleLanguage()">🌐 JA</button>
     
     <div class="container">
         <header>
-            <h1 id="title">ミステリー・ペット・レスキュー</h1>
-            <p class="subtitle" id="subtitle">住宅街で迷子になったペットたちを3分以内に救出しよう！</p>
+            <h1 id="title">Mystery Pet Rescue</h1>
+            <p class="subtitle" id="subtitle">Find and rescue lost pets in the residential area within 3 minutes!</p>
         </header>
         
         <div class="game-info">
             <div class="info-card">
-                <h2 id="about-title">ゲームについて</h2>
-                <p id="about-desc">このゲームは、住宅街で迷子になった4匹のペット（犬・猫・うさぎ・鳥）を3分以内に見つけて救出するアドベンチャーゲームです。</p>
+                <h2 id="about-title">About the Game</h2>
+                <p id="about-desc">This is an adventure game where you find and rescue 4 lost pets (dog, cat, rabbit, bird) within 3 minutes in a residential area.</p>
                 <ul class="features">
-                    <li id="feature1">制限時間：3分間</li>
-                    <li id="feature2">4種類のペット（犬・猫・うさぎ・鳥）</li>
-                    <li id="feature3">リアルな住宅街マップ</li>
-                    <li id="feature4">多言語対応（日本語・英語）</li>
-                    <li id="feature5">時間経過でヒント表示</li>
+                    <li id="feature1">Time Limit: 3 minutes</li>
+                    <li id="feature2">4 types of pets (dog, cat, rabbit, bird)</li>
+                    <li id="feature3">Realistic residential map</li>
+                    <li id="feature4">Multilingual support (Japanese/English)</li>
+                    <li id="feature5">Hints appear over time</li>
                 </ul>
             </div>
             
             <div class="info-card">
-                <h2 id="tech-title">技術仕様</h2>
+                <h2 id="tech-title">Technical Specs</h2>
                 <ul class="features">
-                    <li id="tech1">Python + Pygame製</li>
-                    <li id="tech2">Pygbag でWeb対応</li>
-                    <li id="tech3">解像度：1280×720</li>
-                    <li id="tech4">60FPS動作</li>
-                    <li id="tech5">日本語フォント完全対応</li>
+                    <li id="tech1">Built with Python + Pygame</li>
+                    <li id="tech2">Web-enabled with Pygbag</li>
+                    <li id="tech3">Resolution: 1280×720</li>
+                    <li id="tech4">60FPS performance</li>
+                    <li id="tech5">Full Japanese font support</li>
                 </ul>
             </div>
         </div>
         
         <div class="play-section">
-            <h2 id="play-title">ゲームを開始</h2>
-            <p id="play-desc">ブラウザで直接プレイできます！</p>
-            <a href="game.html" class="play-btn">🎮 <span id="play-btn-text">今すぐプレイ</span></a>
+            <h2 id="play-title">Start Game</h2>
+            <p id="play-desc">Play directly in your browser!</p>
+            <a href="game.html" class="play-btn">🎮 <span id="play-btn-text">Play Now</span></a>
             
             <div class="controls">
-                <h3 id="controls-title">操作方法</h3>
+                <h3 id="controls-title">Controls</h3>
                 <div class="controls-grid">
                     <div class="control-item">
                         <div class="control-key">WASD / ↑↓←→</div>
-                        <div id="control-move">移動</div>
+                        <div id="control-move">Move</div>
                     </div>
                     <div class="control-item">
                         <div class="control-key">E</div>
-                        <div id="control-interact">ペット救出</div>
+                        <div id="control-interact">Rescue Pet</div>
                     </div>
                     <div class="control-item">
                         <div class="control-key">P</div>
-                        <div id="control-pause">一時停止</div>
+                        <div id="control-pause">Pause</div>
                     </div>
                     <div class="control-item">
                         <div class="control-key">ESC</div>
-                        <div id="control-menu">メニュー</div>
+                        <div id="control-menu">Menu</div>
                     </div>
                 </div>
             </div>
@@ -241,7 +241,7 @@
     </footer>
 
     <script>
-        let isJapanese = true;
+        let isJapanese = false;
         
         const translations = {
             ja: {
@@ -312,6 +312,17 @@
                 }
             }
         }
+        
+        // Set initial language to English on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const lang = 'en';
+            for (const [key, value] of Object.entries(translations[lang])) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+        });
     </script>
 </body>
 </html>

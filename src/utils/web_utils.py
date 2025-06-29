@@ -110,24 +110,20 @@ def get_web_safe_font_path() -> Optional[str]:
     """Web環境で安全なフォントパスを取得"""
     if is_web_environment():
         print("🌐 Web環境フォント検索")
-        # Web環境では限定的なフォントのみ使用
+        # Web環境では既存のNotoフォントを優先使用
         web_fonts = [
+            "assets/fonts/NotoSansJP-VariableFont_wght.ttf",  # 既存フォント
             "assets/fonts/NotoSansJP-Regular.ttf",
-            "assets/fonts/arial.ttf",
-            None  # システムデフォルト
+            "assets/fonts/arial.ttf"
         ]
         
         for font_path in web_fonts:
-            if font_path is None:
-                print("🌐 システムデフォルトフォント使用")
-                return None
-            
             if Path(font_path).exists():
                 safe_path = get_web_safe_path(font_path)
                 print(f"✅ Web用フォント発見: {safe_path}")
                 return safe_path
         
-        print("⚠️ Web用フォントが見つかりません")
+        print("⚠️ Web用フォントが見つかりません - デフォルト使用")
         return None
     else:
         # デスクトップ環境では通常のフォント検索

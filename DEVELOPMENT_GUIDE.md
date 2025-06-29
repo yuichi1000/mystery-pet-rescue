@@ -312,6 +312,47 @@ cryptography>=3.4.0    # 暗号化（セーブデータ）
 python main.py
 ```
 
+### ブラウザ版ビルド（Pygbag）
+```bash
+# Web版をビルド
+python -m pygbag --build main.py
+
+# 出力ディレクトリ
+build/web/
+├── index.html          # ゲーム実行ページ
+├── mystery-pet-rescue.apk  # パッケージファイル
+└── favicon.png         # アイコン
+```
+
+#### Pygbag技術について
+**Pygbag**は、Python+PygameゲームをWebAssembly(WASM)に変換する革新的な技術です：
+
+- **変換プロセス**: Python → WebAssembly → ブラウザ実行
+- **Emscripten基盤**: C/C++/Python → WASM変換の実績ある技術
+- **AsyncIO統合**: ブラウザ環境での非同期処理に対応
+- **APK形式**: ゲームファイルを効率的にパッケージング
+- **無修正対応**: 既存Pygameコードをほぼそのまま変換可能
+
+#### Web環境対応の実装
+```python
+# Web環境検出
+def is_web_environment():
+    return (
+        hasattr(sys, 'platform') and 'emscripten' in sys.platform or
+        os.environ.get('WEB_VERSION') == '1' or
+        'pygbag' in sys.modules
+    )
+
+# ブラウザ互換フォント
+if is_web_environment():
+    font_candidates = [
+        "DejaVu Sans",      # 多言語対応
+        "Arial Unicode MS", # 日本語対応
+        "Noto Sans CJK JP", # Google Noto日本語
+        None                # システムデフォルト
+    ]
+```
+
 ### 音楽生成（AI）
 ```bash
 python scripts/generate_real_audio.py

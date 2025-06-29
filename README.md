@@ -2,6 +2,15 @@
 
 住宅街で迷子になったペットたちを時間内に救出するアドベンチャーゲーム
 
+## 🎮 今すぐプレイ！
+
+**ブラウザで直接プレイ可能**（インストール不要）
+
+- **🌐 ゲーム説明ページ**: https://yuichi1000.github.io/mystery-pet-rescue/
+- **🎮 ゲームプレイ**: https://yuichi1000.github.io/mystery-pet-rescue/game.html
+
+> **Pygbag技術**により、Python+PygameゲームをWebAssembly(WASM)に変換してブラウザで実行
+
 ### 主な特徴
 - **探索**: 住宅街マップを歩き回り、隠れているペットを発見
 - **4種類のペット**: 犬・猫・うさぎ・鳥を救出
@@ -16,6 +25,12 @@
 
 ## 動作環境
 
+### ブラウザ版（推奨）
+- **ブラウザ**: Chrome、Firefox、Safari、Edge（最新版）
+- **インターネット接続**: 初回ロード時のみ必要
+- **ストレージ**: 不要（ブラウザキャッシュのみ）
+
+### デスクトップ版（開発者向け）
 - **Python**: 3.8以上
 - **OS**: Windows、macOS、Linux
 - **RAM**: 512MB以上
@@ -28,6 +43,12 @@
 
 ## インストール・実行
 
+### ブラウザ版（最も簡単）
+1. https://yuichi1000.github.io/mystery-pet-rescue/game.html にアクセス
+2. 「Ready to start !」が表示されたらクリック
+3. ゲーム開始！
+
+### デスクトップ版（開発者向け）
 ```bash
 # リポジトリをクローン
 git clone [repository-url]
@@ -38,6 +59,14 @@ pip install -r requirements.txt
 
 # ゲームを実行
 python main.py
+```
+
+### Web版のビルド（開発者向け）
+```bash
+# Pygbagでブラウザ版をビルド
+python -m pygbag --build main.py
+
+# 生成されたファイルはbuild/web/に出力
 ```
 
 ## 操作方法
@@ -92,3 +121,5 @@ mystery-pet-rescue/
 - **フレームレート**: 60FPS
 - **タイルサイズ**: 64×64ピクセル
 - **音声形式**: MP3、OGG、WAV対応
+- **Web変換**: Pygbag (Python→WebAssembly)
+- **ブラウザ互換**: モダンブラウザ対応

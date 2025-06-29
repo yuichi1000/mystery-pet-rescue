@@ -111,3 +111,10 @@ class TimerSystem:
     def is_warning_time(self) -> bool:
         """警告時間（残り30秒以下）かどうかチェック"""
         return self.remaining_time <= 30 and self.remaining_time > 0
+    
+    def calculate_time_bonus(self) -> int:
+        """残り時間に基づくタイムボーナスを計算"""
+        if self.remaining_time <= 0:
+            return 0
+        # 残り秒数 × 10点のボーナス
+        return int(self.remaining_time * 10)

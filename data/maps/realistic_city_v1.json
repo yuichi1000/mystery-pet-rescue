@@ -143,28 +143,6 @@
       "description": "角地の家"
     },
     {
-      "id": "petshop_01",
-      "type": "house_petshop",
-      "position": {"x": 8, "y": 11},
-      "size": {"width": 3, "height": 2},
-      "name": "ハッピーペットショップ",
-      "name_en": "Happy Pet Shop",
-      "interactable": true,
-      "description": "街で人気のペットショップ",
-      "special": true
-    },
-    {
-      "id": "petshop_02",
-      "type": "house_petshop",
-      "position": {"x": 14, "y": 11},
-      "size": {"width": 3, "height": 2},
-      "name": "アニマルフレンズ",
-      "name_en": "Animal Friends",
-      "interactable": true,
-      "description": "小さなペット用品店",
-      "special": true
-    },
-    {
       "id": "park_01",
       "type": "park_facility",
       "position": {"x": 19, "y": 12},
@@ -214,26 +192,6 @@
       "interactable": true,
       "description": "新築の家"
     },
-    {
-      "id": "house_10",
-      "type": "house_residential",
-      "position": {"x": 8, "y": 5},
-      "size": {"width": 3, "height": 2},
-      "name": "小川さんの家",
-      "name_en": "Ogawa House",
-      "interactable": true,
-      "description": "中央の家"
-    },
-    {
-      "id": "house_11",
-      "type": "house_residential",
-      "position": {"x": 8, "y": 15},
-      "size": {"width": 3, "height": 2},
-      "name": "中村さんの家",
-      "name_en": "Nakamura House",
-      "interactable": true,
-      "description": "南中央の家"
-    }
   ],
   "decorations": [
     {
@@ -289,7 +247,7 @@
       "spawn_position": {"x": 5, "y": 4},
       "hiding_spots": [
         {"x": 5, "y": 4, "description": "田中さんの家の庭"},
-        {"x": 9, "y": 6, "description": "小川さんの家の前"},
+        {"x": 7, "y": 6, "description": "街路樹の近く"},
         {"x": 14, "y": 9, "description": "佐藤さんの家の裏"}
       ],
       "personality": "friendly",
@@ -303,7 +261,7 @@
       "spawn_position": {"x": 19, "y": 8},
       "hiding_spots": [
         {"x": 19, "y": 8, "description": "伊藤さんの家の屋根"},
-        {"x": 15, "y": 12, "description": "アニマルフレンズの看板"},
+        {"x": 16, "y": 12, "description": "公園の近くの茂み"},
         {"x": 16, "y": 6, "description": "高い塀の上"}
       ],
       "personality": "cautious",
@@ -330,7 +288,7 @@
       "name_en": "Pii-chan", 
       "spawn_position": {"x": 10, "y": 12},
       "hiding_spots": [
-        {"x": 10, "y": 12, "description": "ハッピーペットショップの看板"},
+        {"x": 11, "y": 12, "description": "公園近くの街路樹"},
         {"x": 19, "y": 9, "description": "みどり公園の高い木"},
         {"x": 7, "y": 10, "description": "街路樹の枝"}
       ],

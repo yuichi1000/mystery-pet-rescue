@@ -154,8 +154,8 @@ class GameScene(Scene):
         
         # マップデータからペット情報を取得
         map_pets = []
-        if self.map_system.current_map and "pets" in self.map_system.current_map:
-            map_pets = self.map_system.current_map["pets"]
+        if self.map_system.current_map and hasattr(self.map_system.current_map, 'pets'):
+            map_pets = self.map_system.current_map.pets
             print(f"📍 マップファイルに定義されたペット: {len(map_pets)}匹")
         
         # フォールバック用のペット定義

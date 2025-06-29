@@ -39,12 +39,16 @@ class LanguageSelector:
             display_name = self.language_manager.get_language_display_name(lang)
             print(f"  {lang.value} -> '{display_name}'")
         
-    def handle_click(self, pos: tuple) -> bool:
-        """クリック処理"""
+    def handle_click(self, pos: tuple) -> str:
+        """クリック処理
+        
+        Returns:
+            str: "toggle" (プルダウン開閉), "changed" (言語変更), "close" (外側クリック), "none" (何もしない)
+        """
         if self.rect.collidepoint(pos):
             self.expanded = not self.expanded
             print(f"🔽 言語選択ボックスクリック: expanded={self.expanded}")
-            return True
+            return "toggle"
         
         if self.expanded:
             # 展開されている場合、各言語オプションをチェック
@@ -58,6 +62,14 @@ class LanguageSelector:
                 if option_rect.collidepoint(pos):
                     print(f"🌐 言語選択: {lang.value}")
                     old_lang = self.language_manager.get_current_language()
+                    
+                    # 同じ言語が選択された場合はプルダウンを閉じるだけ
+                    if lang == old_lang:
+                        print(f"🔄 同じ言語が選択されました: {lang.value}")
+                        self.expanded = False
+                        return "close"
+                    
+                    # 異なる言語が選択された場合は言語を変更
                     self.language_manager.set_language(lang)
                     new_lang = self.language_manager.get_current_language()
                     print(f"🔄 言語変更: {old_lang.value} → {new_lang.value}")
@@ -65,13 +77,16 @@ class LanguageSelector:
                     # コールバック関数を呼び出し（メニューアイテムを再作成）
                     if self.on_language_change:
                         self.on_language_change()
+                    
+                    # プルダウンを閉じる
                     self.expanded = False
-                    return True
+                    return "changed"
             
             # 外側をクリックした場合は閉じる
             self.expanded = False
+            return "close"
         
-        return False
+        return "none"
     
     def update_hover(self, pos: tuple):
         """ホバー状態を更新"""
@@ -231,18 +246,8 @@ class MenuScene(Scene):
         lang_y = start_y + len(menu_data) * spacing + 20
         lang_rect = pygame.Rect(lang_x, lang_y, lang_width, lang_height)
         
-        # 既存の言語選択ボックスがある場合は展開状態を保持
-        was_expanded = False
-        if self.language_selector:
-            was_expanded = self.language_selector.expanded
-            print(f"🔄 既存の言語選択ボックスの展開状態を保持: {was_expanded}")
-        
+        # 新しい言語選択ボックスを作成（常に閉じた状態で開始）
         self.language_selector = LanguageSelector(lang_rect, self._on_language_change)
-        
-        # 展開状態を復元
-        if was_expanded:
-            self.language_selector.expanded = True
-            print(f"✅ 展開状態を復元: {self.language_selector.expanded}")
         
         # 最初のアイテムを選択
         if self.menu_items:
@@ -252,6 +257,11 @@ class MenuScene(Scene):
     def _on_language_change(self):
         """言語変更時のコールバック"""
         print("🌐 言語変更検出、メニューテキストを更新中...")
+        
+        # 言語変更時はプルダウンを閉じる
+        if self.language_selector:
+            self.language_selector.expanded = False
+        
         self._create_menu_items()
         
         # ウィンドウタイトルも更新
@@ -291,11 +301,17 @@ class MenuScene(Scene):
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # 左クリック
                 # 言語選択のクリック処理
-                if self.language_selector and self.language_selector.handle_click(event.pos):
-                    # 言語が変更された場合のみメニューアイテムのテキストを更新
-                    print(f"🌐 言語変更検出、メニューテキストを更新中...")
-                    self._update_menu_item_texts()
-                    return None
+                if self.language_selector:
+                    result = self.language_selector.handle_click(event.pos)
+                    if result == "changed":
+                        # 言語が実際に変更された場合のみメニューアイテムのテキストを更新
+                        print(f"🌐 言語変更検出、メニューテキストを更新中...")
+                        self._update_menu_item_texts()
+                        return None
+                    elif result in ["toggle", "close"]:
+                        # プルダウンの開閉や外側クリックの場合は何もしない
+                        print(f"🔽 言語選択プルダウン操作: {result}")
+                        return None
                 
                 return self._handle_mouse_click(event.pos)
         

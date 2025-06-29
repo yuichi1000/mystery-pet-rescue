@@ -112,6 +112,7 @@ def get_web_safe_font_path() -> Optional[str]:
         print("🌐 Web環境フォント検索")
         # Web環境では限定的なフォントのみ使用
         web_fonts = [
+            "assets/fonts/NotoSansJP-VariableFont_wght.ttf",  # 実際のファイル名
             "assets/fonts/NotoSansJP-Regular.ttf",
             "assets/fonts/arial.ttf",
             None  # システムデフォルト

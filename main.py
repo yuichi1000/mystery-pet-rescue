@@ -23,6 +23,25 @@ def is_web_environment():
 
 import pygame
 
+# Web環境での日本語フォント対応
+if is_web_environment():
+    print("🌐 Web環境での日本語フォント初期化")
+    # フォントファイルを事前読み込み
+    import base64
+    try:
+        # Pygbagのファイルシステムにフォントを登録
+        font_path = "assets/fonts/NotoSansJP-VariableFont_wght.ttf"
+        if os.path.exists(font_path):
+            print(f"✅ 日本語フォントファイル発見: {font_path}")
+            # PygameにカスタムフォントとしてNoto Sans JPを登録
+            try:
+                test_font = pygame.font.Font(font_path, 24)
+                print("✅ 日本語フォント読み込みテスト成功")
+            except Exception as e:
+                print(f"⚠️ フォント読み込みテスト失敗: {e}")
+    except Exception as e:
+        print(f"⚠️ Web環境フォント初期化エラー: {e}")
+
 class Game:
     def __init__(self):
         pygame.init()

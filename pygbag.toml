@@ -44,3 +44,9 @@ include = [
     "config/",
     "locales/"
 ]
+
+# フォント設定
+[fonts]
+# 日本語フォント設定
+preload = ["assets/fonts/NotoSansJP-VariableFont_wght.ttf"]
+default_font = "assets/fonts/NotoSansJP-VariableFont_wght.ttf"

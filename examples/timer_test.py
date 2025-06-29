@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-3分制限タイマーシステムテスト
+3分制限タイマーシステムテスト（ヒントシステムなし）
 """
 
 import sys
@@ -15,12 +15,8 @@ from src.systems.timer_system import TimerSystem
 
 def test_timer_system():
     """3分制限タイマーシステムのテスト"""
-    print("⏰ 3分制限タイマーシステムテスト開始")
+    print("⏰ 3分制限タイマーシステムテスト開始（ヒントなし）")
     print("=" * 50)
-    
-    # ヒントコールバック
-    def on_hint(message, level):
-        print(f"💡 ヒント{level}: {message}")
     
     # 警告コールバック
     def on_warning():
@@ -32,7 +28,6 @@ def test_timer_system():
     
     # タイマーシステム作成（3分 = 180秒）
     timer = TimerSystem(180.0)
-    timer.set_hint_callback(on_hint)
     timer.set_time_warning_callback(on_warning)
     timer.set_time_up_callback(on_time_up)
     

@@ -1,6 +1,6 @@
 """
 時間制限システム
-3分のタイマーとヒントシステムを管理
+3分のタイマーシステムを管理
 """
 
 import time
@@ -23,13 +23,7 @@ class TimerSystem:
         self.pause_time: Optional[float] = None
         self.state = TimerState.PAUSED
         
-        # ヒントフラグ（3分用に調整）
-        self.hint_1min_shown = False  # 1分経過
-        self.hint_2min_shown = False  # 2分経過
-        self.hint_final_shown = False # 最終警告（30秒以下）
-        
         # コールバック関数
-        self.on_hint_callback: Optional[Callable[[str, int], None]] = None
         self.on_time_warning_callback: Optional[Callable[[], None]] = None
         self.on_time_up_callback: Optional[Callable[[], None]] = None
     
@@ -59,11 +53,6 @@ class TimerSystem:
         self.start_time = None
         self.pause_time = None
         self.state = TimerState.PAUSED
-        
-        # ヒントフラグリセット
-        self.hint_2min_shown = False
-        self.hint_3min_shown = False
-        self.hint_4min_shown = False
     
     def update(self):
         """タイマー更新"""
@@ -73,9 +62,6 @@ class TimerSystem:
         current_time = time.time()
         elapsed_time = current_time - self.start_time
         self.remaining_time = max(0, self.time_limit - elapsed_time)
-        
-        # ヒントシステム
-        self._check_hints(elapsed_time)
         
         # 時間警告（30秒以下）
         if self.remaining_time <= 30 and self.remaining_time > 0:
@@ -88,61 +74,40 @@ class TimerSystem:
             if self.on_time_up_callback:
                 self.on_time_up_callback()
     
-    def _check_hints(self, elapsed_time: float):
-        """ヒント表示チェック（3分用）"""
-        if elapsed_time >= 60 and not self.hint_1min_shown:  # 1分経過
-            self.hint_1min_shown = True
-            if self.on_hint_callback:
-                self.on_hint_callback("ペットの鳴き声が聞こえます", 1)
-        
-        elif elapsed_time >= 120 and not self.hint_2min_shown:  # 2分経過
-            self.hint_2min_shown = True
-            if self.on_hint_callback:
-                self.on_hint_callback("足跡を発見しました", 2)
-        
-        elif self.remaining_time <= 30 and not self.hint_final_shown:  # 残り30秒
-            self.hint_final_shown = True
-            if self.on_hint_callback:
-                self.on_hint_callback("ペットが近くにいます", 3)
-    
-    def get_time_string(self) -> str:
-        """時間をMM:SS形式で取得"""
-        minutes = int(self.remaining_time // 60)
-        seconds = int(self.remaining_time % 60)
-        return f"{minutes:02d}:{seconds:02d}"
-    
-    def get_remaining_time(self) -> float:
-        """残り時間を秒で取得"""
-        return max(0.0, self.remaining_time)
-    
-    def get_progress_ratio(self) -> float:
-        """進行率を0.0-1.0で取得"""
-        return (self.time_limit - self.remaining_time) / self.time_limit
-    
-    def is_warning_time(self) -> bool:
-        """警告時間（30秒以下）かどうか"""
-        return self.remaining_time <= 30 and self.remaining_time > 0
-    
-    def is_finished(self) -> bool:
-        """時間切れかどうか"""
-        return self.state == TimerState.FINISHED
-    
-    def is_running(self) -> bool:
-        """実行中かどうか"""
-        return self.state == TimerState.RUNNING
-    
-    def set_hint_callback(self, callback: Callable[[str, int], None]):
-        """ヒントコールバック設定"""
-        self.on_hint_callback = callback
-    
     def set_time_warning_callback(self, callback: Callable[[], None]):
         """時間警告コールバック設定"""
         self.on_time_warning_callback = callback
     
     def set_time_up_callback(self, callback: Callable[[], None]):
-        """時間切れコールバック設定"""
+        """タイムアップコールバック設定"""
         self.on_time_up_callback = callback
     
-    def calculate_time_bonus(self) -> int:
-        """タイムボーナス計算"""
-        return int(self.remaining_time * 10)  # 残り秒数 × 10
+    def is_running(self) -> bool:
+        """タイマーが動作中かチェック"""
+        return self.state == TimerState.RUNNING
+    
+    def is_finished(self) -> bool:
+        """タイマーが終了したかチェック"""
+        return self.state == TimerState.FINISHED
+    
+    def get_remaining_time(self) -> float:
+        """残り時間を取得"""
+        return self.remaining_time
+    
+    def get_remaining_minutes(self) -> int:
+        """残り時間（分）を取得"""
+        return int(self.remaining_time // 60)
+    
+    def get_remaining_seconds(self) -> int:
+        """残り時間（秒）を取得"""
+        return int(self.remaining_time % 60)
+    
+    def get_time_string(self) -> str:
+        """残り時間を文字列形式で取得 (MM:SS)"""
+        minutes = self.get_remaining_minutes()
+        seconds = self.get_remaining_seconds()
+        return f"{minutes:02d}:{seconds:02d}"
+    
+    def is_warning_time(self) -> bool:
+        """警告時間（残り30秒以下）かどうかチェック"""
+        return self.remaining_time <= 30 and self.remaining_time > 0

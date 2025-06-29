@@ -102,7 +102,6 @@ class GameScene(Scene):
         
         # タイマーシステム初期化（3分）
         self.timer_system = TimerSystem(180.0)
-        self.timer_system.set_hint_callback(self._on_timer_hint)
         self.timer_system.set_time_warning_callback(self._on_time_warning)
         self.timer_system.set_time_up_callback(self._on_time_up)
         
@@ -605,14 +604,6 @@ class GameScene(Scene):
         help_text = help_font.render("P: 再開, ESC: メニューに戻る", True, (200, 200, 200))
         help_rect = help_text.get_rect(center=(surface.get_width()//2, surface.get_height()//2 + 60))
         surface.blit(help_text, help_rect)
-    
-    def _on_timer_hint(self, hint_message: str, minute: int):
-        """タイマーヒントコールバック"""
-        self.game_ui.add_notification(f"ヒント: {hint_message}", NotificationType.INFO)
-        
-        # ヒント効果音再生
-        if self.audio_system:
-            self.audio_system.play_sfx("hint")  # 1回のみ再生
     
     def _on_time_warning(self):
         """時間警告コールバック"""

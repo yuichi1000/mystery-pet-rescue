@@ -101,3 +101,5 @@ tmp/
 debug/
 profiling/
 screenshots/
+examples/
+tools/

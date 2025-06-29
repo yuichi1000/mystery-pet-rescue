@@ -222,7 +222,7 @@ class GameScene(Scene):
         return pets
     
     def _find_random_walkable_position(self, existing_positions: List[Tuple[float, float]] = None, max_attempts: int = 500) -> Optional[Tuple[float, float]]:
-        """通過可能なランダム位置を見つける（建物から適度に離れた場所）"""
+        """建物間の中央に配置する位置を見つける"""
         import random
         
         if existing_positions is None:
@@ -237,29 +237,28 @@ class GameScene(Scene):
             map_width = 1600  # 25 * 64
             map_height = 1280  # 20 * 64
         
-        # マージンを設定（端から離す）
-        margin = 120  # 適度なマージン
         min_pet_distance = 200  # ペット同士の最小距離
         
         print(f"🔍 ペット配置場所を探索中... (マップサイズ: {map_width}x{map_height})")
         
-        # 安全な配置エリアを事前に定義
-        safe_areas = self._get_safe_placement_areas(map_width, map_height)
+        # 建物間のスペースを特定して配置
+        building_gaps = self._find_building_gaps(map_width, map_height)
         
         for attempt in range(max_attempts):
-            # 安全エリアからランダムに選択（前半）
-            if safe_areas and attempt < max_attempts // 3:  # 前1/3は安全エリアから選択
-                area = random.choice(safe_areas)
-                x = random.uniform(area['x'], area['x'] + area['width'])
-                y = random.uniform(area['y'], area['y'] + area['height'])
-            # 中間は建物チェックを緩くして選択
-            elif attempt < max_attempts * 2 // 3:
+            # 建物間のギャップから選択（優先）
+            if building_gaps and attempt < max_attempts * 2 // 3:
+                gap = random.choice(building_gaps)
+                # ギャップの中央付近に配置
+                x = gap['center_x'] + random.uniform(-gap['width']/4, gap['width']/4)
+                y = gap['center_y'] + random.uniform(-gap['height']/4, gap['height']/4)
+                # 境界チェック
+                x = max(64, min(map_width - 64, x))
+                y = max(64, min(map_height - 64, y))
+            else:
+                # フォールバック: 従来のランダム配置
+                margin = 120
                 x = random.uniform(margin, map_width - margin)
                 y = random.uniform(margin, map_height - margin)
-            else:
-                # 後半は建物チェックをさらに緩くして選択
-                x = random.uniform(margin // 2, map_width - margin // 2)
-                y = random.uniform(margin // 2, map_height - margin // 2)
             
             # 通過可能かチェック
             if not self.map_system.is_walkable(x, y):
@@ -358,6 +357,61 @@ class GameScene(Scene):
         
         print(f"  ⚠️ フォールバック配置も失敗: {max_attempts}回試行")
         return None
+    
+    def _find_building_gaps(self, map_width: int, map_height: int) -> List[dict]:
+        """建物間のギャップ（空きスペース）を特定する"""
+        gaps = []
+        
+        # グリッドサイズ（建物間のスペースを検出するため）
+        grid_size = 128  # 2タイル分
+        
+        print(f"🏠 建物間ギャップを検索中... (グリッドサイズ: {grid_size})")
+        
+        for y in range(128, map_height - 128, grid_size):
+            for x in range(128, map_width - 128, grid_size):
+                # グリッドの中心点
+                center_x = x + grid_size // 2
+                center_y = y + grid_size // 2
+                
+                # このエリアが建物間のギャップかチェック
+                if self._is_building_gap(x, y, grid_size, map_width, map_height):
+                    gaps.append({
+                        'center_x': center_x,
+                        'center_y': center_y,
+                        'width': grid_size,
+                        'height': grid_size,
+                        'x': x,
+                        'y': y
+                    })
+        
+        print(f"  ✅ {len(gaps)}個の建物間ギャップを発見")
+        return gaps
+    
+    def _is_building_gap(self, x: int, y: int, size: int, map_width: int, map_height: int) -> bool:
+        """指定エリアが建物間のギャップ（空きスペース）かどうかチェック"""
+        # エリア内の複数ポイントをチェック
+        test_points = [
+            (x + size//4, y + size//4),      # 左上
+            (x + 3*size//4, y + size//4),    # 右上
+            (x + size//4, y + 3*size//4),    # 左下
+            (x + 3*size//4, y + 3*size//4),  # 右下
+            (x + size//2, y + size//2),      # 中央
+        ]
+        
+        walkable_count = 0
+        for test_x, test_y in test_points:
+            # 境界チェック
+            if (test_x < 0 or test_x >= map_width or 
+                test_y < 0 or test_y >= map_height):
+                continue
+                
+            # 通過可能で建物に重複していないかチェック
+            if (self.map_system.is_walkable(test_x, test_y) and
+                not self._is_position_blocked_by_building(test_x, test_y)):
+                walkable_count += 1
+        
+        # 5点中4点以上が通過可能ならギャップとみなす
+        return walkable_count >= 4
     
     def _get_safe_placement_areas(self, map_width: int, map_height: int) -> List[dict]:
         """建物から離れた安全な配置エリアを定義"""

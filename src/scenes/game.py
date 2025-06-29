@@ -196,10 +196,14 @@ class GameScene(Scene):
         
         for pet_def in pet_definitions:
             position = self._find_random_walkable_position(placed_positions)
+            if not position:
+                # フォールバック: より緩い条件で再試行
+                print(f"  🔄 {pet_def['name']} のフォールバック配置を試行...")
+                position = self._find_fallback_position(placed_positions)
+            
             if position:
                 x, y = position
                 placed_positions.append((x, y))  # 配置済み位置を記録
-                x, y = position
                 pet_data = PetData(
                     pet_id=pet_def["id"],
                     name=pet_def["name"],
@@ -263,20 +267,11 @@ class GameScene(Scene):
                     print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 通過不可")
                 continue
             
-            # 建物との衝突もチェック（後半は緩い条件）
-            if attempt < max_attempts * 2 // 3:
-                if self._is_position_blocked_by_building(x, y):
-                    if attempt % 100 == 0:
-                        print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 建物と重複")
-                    continue
-            else:
-                # 後半は直接的な重複のみチェック
-                tile_x = int(x // self.map_system.tile_size)
-                tile_y = int(y // self.map_system.tile_size)
-                if (hasattr(self.map_system, 'building_system') and 
-                    hasattr(self.map_system.building_system, 'is_position_blocked_by_building') and
-                    self.map_system.building_system.is_position_blocked_by_building(tile_x, tile_y)):
-                    continue
+            # 建物との衝突チェック（常に実行）
+            if self._is_position_blocked_by_building(x, y):
+                if attempt % 100 == 0:
+                    print(f"  試行 {attempt}: ({x:.1f}, {y:.1f}) - 建物と重複")
+                continue
             
             # プレイヤーの初期位置から離れているかチェック
             player_x, player_y = self.player.x, self.player.y
@@ -305,6 +300,63 @@ class GameScene(Scene):
             return (x, y)
         
         print(f"⚠️ {max_attempts}回試行しても適切な位置が見つかりませんでした")
+        return None
+    
+    def _find_fallback_position(self, existing_positions: List[Tuple[float, float]] = None, max_attempts: int = 200) -> Optional[Tuple[float, float]]:
+        """フォールバック配置：建物は絶対避けるが、距離制約を緩くした配置"""
+        import random
+        
+        if existing_positions is None:
+            existing_positions = []
+        
+        # マップサイズを取得
+        if self.map_system.current_map:
+            map_width = self.map_system.current_map.width * self.map_system.tile_size
+            map_height = self.map_system.current_map.height * self.map_system.tile_size
+        else:
+            map_width = 1600
+            map_height = 1280
+        
+        # 緩い制約
+        margin = 64  # 最小マージン
+        min_pet_distance = 50  # ペット間距離を大幅に緩和
+        min_player_distance = 50  # プレイヤー距離も緩和
+        
+        print(f"  📍 フォールバック配置: 距離制約を緩和して再試行")
+        
+        for attempt in range(max_attempts):
+            x = random.uniform(margin, map_width - margin)
+            y = random.uniform(margin, map_height - margin)
+            
+            # 通過可能性チェック（必須）
+            if not self.map_system.is_walkable(x, y):
+                continue
+            
+            # 建物チェック（必須 - 絶対に避ける）
+            if self._is_position_blocked_by_building(x, y):
+                continue
+            
+            # プレイヤー距離チェック（緩い）
+            player_x, player_y = self.player.x, self.player.y
+            distance_to_player = ((x - player_x) ** 2 + (y - player_y) ** 2) ** 0.5
+            if distance_to_player <= min_player_distance:
+                continue
+            
+            # 他のペット距離チェック（緩い）
+            too_close = False
+            for existing_x, existing_y in existing_positions:
+                distance = ((x - existing_x) ** 2 + (y - existing_y) ** 2) ** 0.5
+                if distance < min_pet_distance:
+                    too_close = True
+                    break
+            
+            if too_close:
+                continue
+            
+            print(f"  ✅ フォールバック配置成功: ({x:.1f}, {y:.1f}) - 試行回数: {attempt + 1}")
+            return (x, y)
+        
+        print(f"  ⚠️ フォールバック配置も失敗: {max_attempts}回試行")
         return None
     
     def _get_safe_placement_areas(self, map_width: int, map_height: int) -> List[dict]:

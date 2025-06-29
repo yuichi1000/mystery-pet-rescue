@@ -99,7 +99,18 @@ class GameScene(Scene):
         
         # UI初期化
         self.game_ui = GameUI(self.screen)
-        self.game_ui.set_map_system(self.map_system)
+        
+        # UI画像の読み込み
+        self.game_ui._load_ui_images()
+        
+        # UIレイアウト設定
+        try:
+            self.game_ui._setup_ui_layout()
+            print("✅ UIレイアウト設定完了")
+        except Exception as e:
+            print(f"❌ UIレイアウト設定エラー: {e}")
+            import traceback
+            traceback.print_exc()
         
         # 音響システム初期化
         self.audio_system = get_audio_system()

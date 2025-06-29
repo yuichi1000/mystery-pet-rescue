@@ -36,7 +36,6 @@ class LanguageManager:
                 # ゲーム内UI
                 "pets_found": "Pets Found",
                 "time_remaining": "Time Remaining",
-                "minimap": "Minimap",
                 "current_objective": "Current Objective",
                 "game_paused": "Game Paused",
                 "game_resumed": "Game Resumed",
@@ -85,7 +84,6 @@ class LanguageManager:
                 "controls_run": "Shift: Run",
                 "controls_interact": "E: Interact",
                 "controls_pause": "ESC: Pause",
-                "controls_minimap": "M: Toggle Minimap",
                 
                 # 通知メッセージ
                 "time_warning": "Time is running out!",
@@ -118,7 +116,6 @@ class LanguageManager:
                 # ゲーム内UI
                 "pets_found": "救出したペット",
                 "time_remaining": "残り時間",
-                "minimap": "ミニマップ",
                 "current_objective": "現在の目標",
                 "game_paused": "ゲーム一時停止",
                 "game_resumed": "ゲーム再開",
@@ -167,7 +164,6 @@ class LanguageManager:
                 "controls_run": "Shift: 走る",
                 "controls_interact": "E: 相互作用",
                 "controls_pause": "ESC: 一時停止",
-                "controls_minimap": "M: ミニマップ切り替え",
                 
                 # 通知メッセージ
                 "time_warning": "残り時間が少なくなりました！",

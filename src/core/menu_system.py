@@ -105,7 +105,6 @@ class MenuSystem:
             "master_volume": 0.8,
             "music_volume": 0.7,
             "sfx_volume": 0.8,
-            "fullscreen": False,
             "key_bindings": {
                 "up": pygame.K_UP,
                 "down": pygame.K_DOWN,
@@ -541,10 +540,8 @@ class MenuSystem:
         """画面設定"""
         print("🖥️ 画面設定")
         # 画面設定の詳細表示
-        fullscreen = self.settings.get('fullscreen', False)
         resolution = self.settings.get('resolution', '1280x720')
         vsync = self.settings.get('vsync', True)
-        print(f"  フルスクリーン: {'ON' if fullscreen else 'OFF'}")
         print(f"  解像度: {resolution}")
         print(f"  垂直同期: {'ON' if vsync else 'OFF'}")
         return None

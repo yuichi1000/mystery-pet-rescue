@@ -1,6 +1,6 @@
 """
 ゲーム内UIシステム
-ヘルスバー、スタミナバー、ミニマップ、通知システムなど（エラーハンドリング強化版）
+ヘルスバー、スタミナバー、通知システムなど（エラーハンドリング強化版）
 """
 
 import pygame
@@ -72,17 +72,6 @@ class GameUI:
         self.language_manager = get_language_manager()
         print("🔧 フォント・言語管理初期化完了")
         
-        # マップシステム参照（ミニマップ用）
-        self.map_system = None
-    
-    def set_map_system(self, map_system):
-        """マップシステムを設定（ミニマップ用）"""
-        self.map_system = map_system
-        self.asset_manager = get_asset_manager()
-        
-        # UI画像の読み込み
-        self._load_ui_images()
-        
         # 通知システム
         self.notifications: List[Notification] = []
         self.max_notifications = 5
@@ -112,14 +101,8 @@ class GameUI:
         }
         print("🎨 色設定完了")
         
-        # UIレイアウト設定
-        try:
-            self._setup_ui_layout()
-            print("✅ UIレイアウト設定完了")
-        except Exception as e:
-            print(f"❌ UIレイアウト設定エラー: {e}")
-            import traceback
-            traceback.print_exc()
+        # アセットマネージャー取得
+        self.asset_manager = get_asset_manager()
         
         print("🎮 ゲーム内UI初期化完了")
     
@@ -151,12 +134,6 @@ class GameUI:
         """UIレイアウトを設定"""
         print("🔧 UIレイアウト設定開始")
         
-        # ミニマップサイズを先に計算（4分の1に縮小）
-        self.minimap_size = int(50 * self.ui_scale)  # 200 → 50に変更
-        self.minimap_zoom = 0.1
-        # 半透明対応のためPER_PIXELフラグを追加
-        self.minimap_surface = pygame.Surface((self.minimap_size, self.minimap_size), pygame.SRCALPHA)
-        
         # クイックスロットの位置
         slot_size = int(50 * self.ui_scale)
         slot_spacing = int(60 * self.ui_scale)
@@ -171,14 +148,6 @@ class GameUI:
                 slot_size
             )
             self.quick_slot_rects.append(rect)
-        
-        # ミニマップの位置
-        self.minimap_rect = pygame.Rect(
-            self.screen_width - self.minimap_size - int(20 * self.ui_scale),
-            int(20 * self.ui_scale),
-            self.minimap_size,
-            self.minimap_size
-        )
         
         # 目標表示の位置
         self.objective_rect = pygame.Rect(
@@ -219,9 +188,6 @@ class GameUI:
         """UIを描画"""
         # クイックスロット
         self._draw_quick_slots()
-        
-        # ミニマップ
-        self._draw_minimap(world_objects or [], player_pos, self.map_system)
         
         # 現在の目標
         self._draw_objective()
@@ -305,100 +271,6 @@ class GameUI:
         
         pygame.draw.circle(self.screen, color, (center_x, center_y), radius)
         pygame.draw.circle(self.screen, (255, 255, 255), (center_x, center_y), radius, 2)
-    
-    def _draw_minimap(self, world_objects: List[Any], player_pos: Tuple[float, float], map_system=None):
-        """ミニマップを描画（半透明・小型版）"""
-        # ミニマップ背景（半透明）
-        self.minimap_surface.fill((50, 50, 50, 180))  # アルファ値180で半透明
-        
-        # 実際のマップサイズを取得
-        if map_system and map_system.map_surface:
-            world_width, world_height = map_system.map_surface.get_size()
-        else:
-            # フォールバック: デフォルト値
-            world_width = 2000
-            world_height = 2000
-        
-        # プレイヤー位置をミニマップ座標に変換
-        map_player_x = int((player_pos[0] / world_width) * self.minimap_size)
-        map_player_y = int((player_pos[1] / world_height) * self.minimap_size)
-        
-        # プレイヤーを中心とした表示範囲（小さくなったので調整）
-        view_range = int(self.minimap_size * 0.4)  # 0.3 → 0.4に拡大
-        
-        # 地形の簡易表示（グリッドサイズを調整）
-        grid_size = max(5, int(self.minimap_size / 10))  # 小さいマップに合わせて調整
-        for x in range(0, self.minimap_size, grid_size):
-            for y in range(0, self.minimap_size, grid_size):
-                if (x + y) % (grid_size * 2) == 0:
-                    pygame.draw.rect(self.minimap_surface, (80, 120, 80, 120), 
-                                   (x, y, grid_size, grid_size))
-        
-        # オブジェクト（ペット）を描画（サイズを大きく、色を鮮明に）
-        for obj in world_objects:
-            if hasattr(obj, 'get_position'):
-                obj_pos = obj.get_position()
-                map_obj_x = int((obj_pos[0] / world_width) * self.minimap_size)
-                map_obj_y = int((obj_pos[1] / world_height) * self.minimap_size)
-                
-                # オブジェクトタイプに応じた色（より鮮明に）
-                if hasattr(obj, 'data') and hasattr(obj.data, 'pet_type'):
-                    # ペットタイプ別の色分け
-                    pet_type = obj.data.pet_type.value
-                    if pet_type == 'dog':
-                        color = (255, 165, 0, 255)  # オレンジ（犬）
-                    elif pet_type == 'cat':
-                        color = (255, 105, 180, 255)  # ピンク（猫）
-                    elif pet_type == 'rabbit':
-                        color = (255, 255, 255, 255)  # 白（うさぎ）
-                    elif pet_type == 'bird':
-                        color = (0, 255, 255, 255)  # シアン（鳥）
-                    else:
-                        color = (100, 255, 100, 255)  # 緑（その他）
-                else:
-                    color = (100, 100, 255, 255)  # 青（その他）
-                
-                # ペットを大きめの円で描画（視認性向上）
-                pygame.draw.circle(self.minimap_surface, color, (map_obj_x, map_obj_y), 3)
-                # 外枠を追加して更に見やすく
-                pygame.draw.circle(self.minimap_surface, (255, 255, 255, 200), (map_obj_x, map_obj_y), 3, 1)
-        
-        # プレイヤー位置（大きく、鮮明に）
-        pygame.draw.circle(self.minimap_surface, (255, 255, 0, 255), 
-                         (map_player_x, map_player_y), 4)
-        # プレイヤーの外枠
-        pygame.draw.circle(self.minimap_surface, (255, 255, 255, 255), 
-                         (map_player_x, map_player_y), 4, 1)
-        
-        # 視野範囲（薄く表示）
-        pygame.draw.circle(self.minimap_surface, (255, 255, 255, 100), 
-                         (map_player_x, map_player_y), view_range, 1)
-        
-        # ミニマップをメイン画面に描画（半透明対応）
-        self.screen.blit(self.minimap_surface, self.minimap_rect)
-        # 境界線
-        pygame.draw.rect(self.screen, self.colors['ui_border'], self.minimap_rect, 2)
-        
-        # ミニマップタイトル（小さいフォント）
-        minimap_title = get_text("minimap")
-        title_surface = self.font_manager.render_text(
-            minimap_title, "default", int(10 * self.ui_scale), self.colors['text']  # 12 → 10に縮小
-        )
-        title_x = self.minimap_rect.centerx - title_surface.get_width() // 2
-        title_y = self.minimap_rect.bottom + 3  # 5 → 3に縮小
-        self.screen.blit(title_surface, (title_x, title_y))
-        
-        # デバッグ情報（小さく）
-        debug_text = f"{world_width}x{world_height}"
-        debug_surface = self.font_manager.render_text(
-            debug_text, "default", int(8 * self.ui_scale), (150, 150, 150)  # 10 → 8に縮小
-        )
-        debug_x = self.minimap_rect.left
-        debug_y = self.minimap_rect.bottom + 15  # 25 → 15に縮小
-        self.screen.blit(debug_surface, (debug_x, debug_y))
-        debug_x = self.minimap_rect.left
-        debug_y = self.minimap_rect.bottom + 15  # 25 → 15に縮小
-        self.screen.blit(debug_surface, (debug_x, debug_y))
     
     def _draw_objective(self):
         """現在の目標を描画"""
